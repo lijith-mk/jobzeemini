@@ -1,5 +1,5 @@
 services:
-  # Backend API Service (Frontend hosted on Vercel)
+  # Backend API Service
   - type: web
     name: jobzee-backend
     runtime: node
@@ -19,7 +19,10 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
-        sync: false
+        fromService:
+          type: web
+          name: jobzee-frontend
+          property: url
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: CLOUDINARY_CLOUD_NAME
@@ -42,3 +45,25 @@ services:
         value: "Jobzee Platform"
       - key: APP_NAME
         value: JobZee
+
+  # Frontend Static Site
+  - type: web
+    name: jobzee-frontend
+    runtime: static
+    region: oregon
+    plan: free
+    rootDir: jobzee-frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
+    envVars:
+      - key: REACT_APP_API_URL
+        fromService:
+          type: web
+          name: jobzee-backend
+          property: url
+      - key: REACT_APP_GOOGLE_CLIENT_ID
+        sync: false
+      - key: REACT_APP_MAPBOX_TOKEN
+        sync: false
+      - key: NODE_ENV
+        value: production

@@ -22,10 +22,8 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    // Allow localhost, configured frontend, Render and Vercel domains
-    if (allowedOrigins.indexOf(origin) !== -1 || 
-        origin.includes('onrender.com') || 
-        origin.includes('vercel.app')) {
+    // Allow localhost, configured frontend URL, and Render domains
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.includes('onrender.com')) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
