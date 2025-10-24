@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+import API_BASE_URL from '../config/api';
 const MyPurchases = () => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
@@ -26,7 +27,7 @@ const MyPurchases = () => {
       setLoading(true);
       const token = getToken();
       if (!token) { toast.error('Please sign in to view purchases'); navigate('/login'); return; }
-      const res = await fetch(`http://localhost:5000/api/orders?page=${p}&limit=10`, {
+      const res = await fetch(`${API_BASE_URL}/api/orders?page=${p}&limit=10`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();

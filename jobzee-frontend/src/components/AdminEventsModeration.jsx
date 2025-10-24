@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
+import API_BASE_URL from '../config/api';
 const AdminEventsModeration = () => {
   const [events, setEvents] = useState([]);
   const [statusFilter, setStatusFilter] = useState('pending');
@@ -11,7 +12,7 @@ const AdminEventsModeration = () => {
   const fetchEvents = async (status = 'pending') => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/events?status=${encodeURIComponent(status)}`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/events?status=${encodeURIComponent(status)}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -28,7 +29,7 @@ const AdminEventsModeration = () => {
 
   const approve = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/events/${id}/approve`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/events/${id}/approve`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -42,7 +43,7 @@ const AdminEventsModeration = () => {
   const reject = async (id) => {
     const reason = prompt('Reason for rejection?') || 'Not specified';
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/events/${id}/reject`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/events/${id}/reject`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason })
@@ -145,7 +146,7 @@ const AdminEventsModeration = () => {
         organizerPhone: String(editForm.organizerPhone || '').trim(),
         seatsLimit: editForm.seatsLimit === '' ? null : Number(editForm.seatsLimit)
       };
-      const res = await fetch(`http://localhost:5000/api/admin/events/${showEditFor}`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/events/${showEditFor}`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -167,7 +168,7 @@ const AdminEventsModeration = () => {
     setShowRegsFor(evtId);
     setRegsLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/events/${evtId}/registrations`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/events/${evtId}/registrations`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -228,7 +229,7 @@ const AdminEventsModeration = () => {
                 <button onClick={() => openEdit(evt)} className="bg-indigo-600 text-white px-3 py-2 rounded">Edit</button>
                 <button onClick={async () => {
                   if (!confirm('Delete this event?')) return;
-                  const res = await fetch(`http://localhost:5000/api/admin/events/${evt._id}`, {
+                  const res = await fetch(`${API_BASE_URL}/api/admin/events/${evt._id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                   });
@@ -271,13 +272,13 @@ const AdminEventsModeration = () => {
                   </div>
                     <div className="space-x-2">
                       <button onClick={async () => {
-                        const res = await fetch(`http://localhost:5000/api/admin/events/${showRegsFor}/registrations/${r._id}/status`, {
+                        const res = await fetch(`${API_BASE_URL}/api/admin/events/${showRegsFor}/registrations/${r._id}/status`, {
                           method: 'PATCH', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'attended' })
                         });
                         if (res.ok) { toast.success('Marked attended'); openRegs(showRegsFor); }
                       }} className="text-xs bg-green-600 text-white px-2 py-1 rounded">Attended</button>
                       <button onClick={async () => {
-                        const res = await fetch(`http://localhost:5000/api/admin/events/${showRegsFor}/registrations/${r._id}/status`, {
+                        const res = await fetch(`${API_BASE_URL}/api/admin/events/${showRegsFor}/registrations/${r._id}/status`, {
                           method: 'PATCH', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'no_show' })
                         });
                         if (res.ok) { toast.success('Marked no-show'); openRegs(showRegsFor); }
@@ -285,7 +286,7 @@ const AdminEventsModeration = () => {
                       {r.ticketType === 'paid' && r.paymentStatus !== 'refunded' && (
                         <button onClick={async () => {
                           if (!confirm('Refund this registration?')) return;
-                          const res = await fetch(`http://localhost:5000/api/admin/events/${showRegsFor}/registrations/${r._id}/refund`, {
+                          const res = await fetch(`${API_BASE_URL}/api/admin/events/${showRegsFor}/registrations/${r._id}/refund`, {
                             method: 'POST', headers: { 'Authorization': `Bearer ${token}` }
                           });
                           if (res.ok) { toast.success('Refunded'); openRegs(showRegsFor); }

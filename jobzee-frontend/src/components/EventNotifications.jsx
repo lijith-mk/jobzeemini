@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
+import API_BASE_URL from '../config/api';
 const EventNotifications = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,7 +14,7 @@ const EventNotifications = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('employerToken');
-      const res = await fetch(`http://localhost:5000/api/employers/notifications?filter=${filter}`, {
+      const res = await fetch(`${API_BASE_URL}/api/employers/notifications?filter=${filter}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -31,7 +32,7 @@ const EventNotifications = () => {
   const markAsRead = async (notificationId) => {
     try {
       const token = localStorage.getItem('employerToken');
-      const res = await fetch(`http://localhost:5000/api/employers/notifications/${notificationId}/read`, {
+      const res = await fetch(`${API_BASE_URL}/api/employers/notifications/${notificationId}/read`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -53,7 +54,7 @@ const EventNotifications = () => {
   const markAllAsRead = async () => {
     try {
       const token = localStorage.getItem('employerToken');
-      const res = await fetch('http://localhost:5000/api/employers/notifications/mark-all-read', {
+      const res = await fetch(`${API_BASE_URL}/api/employers/notifications/mark-all-read`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -71,7 +72,7 @@ const EventNotifications = () => {
   const deleteNotification = async (notificationId) => {
     try {
       const token = localStorage.getItem('employerToken');
-      const res = await fetch(`http://localhost:5000/api/employers/notifications/${notificationId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/employers/notifications/${notificationId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { BrowserMultiFormatReader } from '@zxing/library';
 
+import API_BASE_URL from '../config/api';
 const QRScanner = () => {
   const navigate = useNavigate();
   const [qrData, setQrData] = useState('');
@@ -18,7 +19,7 @@ const QRScanner = () => {
   const validateQRData = async (qrDataToValidate) => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/tickets/validate', {
+      const res = await fetch(`${API_BASE_URL}/api/tickets/validate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ qrData: qrDataToValidate.trim() })

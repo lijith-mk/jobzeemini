@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { toast } from 'react-toastify';
 
+import API_BASE_URL from '../config/api';
 // Cart Context
 const CartContext = createContext();
 
@@ -72,7 +73,7 @@ const cartReducer = (state, action) => {
 };
 
 // API Base URL
-const API_BASE_URL = process.env.REACT_APP_API_URL ? `${process.env.REACT_APP_API_URL}/api` : 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL ? `${process.env.REACT_APP_API_URL}/api` : ${API_BASE_URL}/api`;
 
 // Utility function to get auth headers
 const getAuthHeaders = () => {

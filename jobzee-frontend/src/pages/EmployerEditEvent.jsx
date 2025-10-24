@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import API_BASE_URL from '../config/api';
 const EmployerEditEvent = () => {
   const navigate = useNavigate();
   const { eventId } = useParams();
@@ -19,7 +20,7 @@ const EmployerEditEvent = () => {
     if (!token) { navigate('/employer/login'); return; }
     (async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/employers/events/${eventId}`, {
+        const res = await fetch(`${API_BASE_URL}/api/employers/events/${eventId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
@@ -64,7 +65,7 @@ const EmployerEditEvent = () => {
     const body = new FormData();
     body.append('photo', file);
     try {
-      const res = await fetch('http://localhost:5000/api/upload/employer/event-banner', {
+      const res = await fetch(`${API_BASE_URL}/api/upload/employer/event-banner`, {
         method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body
       });
       const data = await res.json();
@@ -94,7 +95,7 @@ const EmployerEditEvent = () => {
       images: form.images ? form.images.split(',').map(s => s.trim()).filter(Boolean) : [],
       restrictedToRoles: form.visibility === 'restricted' ? [form.restrictedToRoles] : []
     };
-    const res = await fetch(`http://localhost:5000/api/employers/events/${eventId}`, {
+    const res = await fetch(`${API_BASE_URL}/api/employers/events/${eventId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(payload)

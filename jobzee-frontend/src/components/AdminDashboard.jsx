@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import AdminSidebar from './AdminSidebar';
 import AdminEventsModeration from './AdminEventsModeration';
 
+import API_BASE_URL from '../config/api';
 const AdminDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -240,7 +241,7 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/admin/dashboard', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/dashboard`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -263,7 +264,7 @@ const AdminDashboard = () => {
   const fetchUsers = async (page = 1, search = '', status = '') => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/users?page=${page}&search=${search}&status=${status}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/users?page=${page}&search=${search}&status=${status}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -333,7 +334,7 @@ const AdminDashboard = () => {
     }
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch('http://localhost:5000/api/admin/users', {
+      const res = await fetch(`${API_BASE_URL}/api/admin/users`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(createForm)
@@ -369,7 +370,7 @@ const AdminDashboard = () => {
   const saveEditUser = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch(`http://localhost:5000/api/admin/users/${selectedUser._id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/users/${selectedUser._id}`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(editForm)
@@ -393,7 +394,7 @@ const AdminDashboard = () => {
     if (!window.confirm(`Delete user ${user.name}?`)) return;
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch(`http://localhost:5000/api/admin/users/${user._id}?hard=true`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/users/${user._id}?hard=true`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -413,7 +414,7 @@ const AdminDashboard = () => {
   const fetchEmployers = async (page = 1, search = '', status = '') => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/employers?page=${page}&search=${search}&status=${status}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/employers?page=${page}&search=${search}&status=${status}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -436,7 +437,7 @@ const AdminDashboard = () => {
   const updateEmployerVerification = async (employerId, payload) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/employers/${employerId}/verification`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/employers/${employerId}/verification`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -461,7 +462,7 @@ const AdminDashboard = () => {
   const fetchJobs = async (page = 1, search = '', status = '') => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/jobs?page=${page}&search=${search}&status=${status}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/jobs?page=${page}&search=${search}&status=${status}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -484,7 +485,7 @@ const AdminDashboard = () => {
   const openCreateJobModal = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch(`http://localhost:5000/api/admin/employers?page=1&limit=1000`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/employers?page=1&limit=1000`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -520,7 +521,7 @@ const AdminDashboard = () => {
         benefits: String(createJobForm.benefitsCSV || '').split(',').map(s=>s.trim()).filter(Boolean),
         skills: String(createJobForm.skillsCSV || '').split(',').map(s=>s.trim()).filter(Boolean)
       };
-      const res = await fetch('http://localhost:5000/api/admin/jobs', {
+      const res = await fetch(`${API_BASE_URL}/api/admin/jobs`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -548,7 +549,7 @@ const AdminDashboard = () => {
     if (!window.confirm(`Delete job "${job.title}"? This will remove applications and saved jobs.`)) return;
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch(`http://localhost:5000/api/admin/jobs/${job._id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/jobs/${job._id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -715,7 +716,7 @@ const AdminDashboard = () => {
         }
       };
 
-      const res = await fetch(`http://localhost:5000/api/admin/jobs/${selectedJob._id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/jobs/${selectedJob._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -742,7 +743,7 @@ const AdminDashboard = () => {
   const updateUserStatus = async (userId, isActive, reason = '') => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/users/${userId}/status`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/status`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -767,7 +768,7 @@ const AdminDashboard = () => {
   const updateEmployerStatus = async (employerId, isApproved, reason = '') => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/employers/${employerId}/status`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/employers/${employerId}/status`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -797,7 +798,7 @@ const AdminDashboard = () => {
   const updateEmployerActiveStatus = async (employerId, isActive, reason = '') => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/employers/${employerId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/employers/${employerId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -865,7 +866,7 @@ const AdminDashboard = () => {
   const updateJobStatus = async (jobId, status, adminNotes = '') => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/jobs/${jobId}/status`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/jobs/${jobId}/status`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -891,7 +892,7 @@ const AdminDashboard = () => {
   const fetchInternships = async (page = 1, search = '', status = '') => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/internships?page=${page}&search=${search}&status=${status}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/internships?page=${page}&search=${search}&status=${status}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -914,7 +915,7 @@ const AdminDashboard = () => {
   const openCreateInternshipModal = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch(`http://localhost:5000/api/admin/employers?page=1&limit=1000`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/employers?page=1&limit=1000`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -950,7 +951,7 @@ const AdminDashboard = () => {
         requirements: String(createInternshipForm.requirementsCSV || '').split(',').map(s=>s.trim()).filter(Boolean),
         skills: String(createInternshipForm.skillsCSV || '').split(',').map(s=>s.trim()).filter(Boolean)
       };
-      const res = await fetch('http://localhost:5000/api/admin/internships', {
+      const res = await fetch(`${API_BASE_URL}/api/admin/internships`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -985,7 +986,7 @@ const AdminDashboard = () => {
     if (!window.confirm(`Delete internship "${internship.title}"? This will remove applications.`)) return;
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch(`http://localhost:5000/api/admin/internships/${internship._id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/internships/${internship._id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -1084,7 +1085,7 @@ const AdminDashboard = () => {
         }
       };
 
-      const res = await fetch(`http://localhost:5000/api/admin/internships/${selectedInternship._id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/internships/${selectedInternship._id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1118,7 +1119,7 @@ const AdminDashboard = () => {
   const updateInternshipStatus = async (internshipId, status, adminNotes = '') => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/internships/${internshipId}/status`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/internships/${internshipId}/status`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1175,7 +1176,7 @@ const AdminDashboard = () => {
   const fetchQueries = async (page = 1, search = '', status = '') => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/queries?page=${page}&search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/queries?page=${page}&search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -1198,7 +1199,7 @@ const AdminDashboard = () => {
   const updateQueryStatus = async (id, status) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch(`http://localhost:5000/api/admin/queries/${id}/status`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/queries/${id}/status`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ status })
@@ -1222,7 +1223,7 @@ const AdminDashboard = () => {
       const params = new URLSearchParams();
       if (orderStatsStartDate) params.set('startDate', orderStatsStartDate);
       if (orderStatsEndDate) params.set('endDate', orderStatsEndDate);
-      const res = await fetch(`http://localhost:5000/api/orders/admin/stats?${params.toString()}`, {
+      const res = await fetch(`${API_BASE_URL}/api/orders/admin/stats?${params.toString()}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -1375,7 +1376,7 @@ const AdminDashboard = () => {
         ...(status && { status }),
         ...(category && { category })
       });
-      const res = await fetch(`http://localhost:5000/api/products/admin/all?${params}`, {
+      const res = await fetch(`${API_BASE_URL}/api/products/admin/all?${params}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -1427,7 +1428,7 @@ const AdminDashboard = () => {
         isFeatured: Boolean(productForm.isFeatured),
         images: productForm.imageUrl ? [{ url: productForm.imageUrl, alt: productForm.imageAlt || productForm.name, isPrimary: true }] : []
       };
-      const res = await fetch('http://localhost:5000/api/products', {
+      const res = await fetch(`${API_BASE_URL}/api/products`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -1496,7 +1497,7 @@ const AdminDashboard = () => {
         isFeatured: Boolean(productForm.isFeatured),
         images: productForm.imageUrl ? [{ url: productForm.imageUrl, alt: productForm.imageAlt || productForm.name, isPrimary: true }] : []
       };
-      const res = await fetch(`http://localhost:5000/api/products/${selectedProduct._id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/products/${selectedProduct._id}`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -1521,7 +1522,7 @@ const AdminDashboard = () => {
       const token = localStorage.getItem('adminToken');
       const form = new FormData();
       form.append('photo', file);
-      const res = await fetch('http://localhost:5000/api/upload/admin/product-image', {
+      const res = await fetch(`${API_BASE_URL}/api/upload/admin/product-image`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: form
@@ -1545,7 +1546,7 @@ const AdminDashboard = () => {
     if (!window.confirm(`Delete product "${p.name}"?`)) return;
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch(`http://localhost:5000/api/products/${p._id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/products/${p._id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -1575,7 +1576,7 @@ const AdminDashboard = () => {
         ...(endDate && { endDate })
       });
       
-      const res = await fetch(`http://localhost:5000/api/orders/admin/products/${productId}/purchases?${params}`, {
+      const res = await fetch(`${API_BASE_URL}/api/orders/admin/products/${productId}/purchases?${params}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -1627,7 +1628,7 @@ const AdminDashboard = () => {
         ...(category && { category })
       });
       
-      const response = await fetch(`http://localhost:5000/api/admin/shop-payments?${params}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/shop-payments?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -1655,7 +1656,7 @@ const AdminDashboard = () => {
         ...(endDate && { endDate })
       });
       
-      const response = await fetch(`http://localhost:5000/api/admin/shop-analytics?${params}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/shop-analytics?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -1676,7 +1677,7 @@ const AdminDashboard = () => {
   const fetchShopPaymentDetails = async (paymentId) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/shop-payments/${paymentId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/shop-payments/${paymentId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -1738,7 +1739,7 @@ const AdminDashboard = () => {
         ...(endDate && { endDate })
       });
       
-      const response = await fetch(`http://localhost:5000/api/admin/payments?${params}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/payments?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -1761,7 +1762,7 @@ const AdminDashboard = () => {
   const fetchPaymentStats = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/admin/payments/stats', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/payments/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -1782,7 +1783,7 @@ const AdminDashboard = () => {
   const fetchPaymentDetails = async (paymentId) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/payments/${paymentId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/payments/${paymentId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -1840,7 +1841,7 @@ const AdminDashboard = () => {
         ...(category && { category })
       });
       
-      const response = await fetch(`http://localhost:5000/api/admin/plans?${params}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/plans?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -1863,7 +1864,7 @@ const AdminDashboard = () => {
   const fetchPlanById = async (planId) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/plans/${planId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/plans/${planId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -1886,7 +1887,7 @@ const AdminDashboard = () => {
   const createPlan = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('http://localhost:5000/api/admin/plans', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/plans`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1937,7 +1938,7 @@ const AdminDashboard = () => {
   const updatePlan = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/plans/${selectedPlan.planId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/plans/${selectedPlan.planId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1967,7 +1968,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/plans/${planId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/plans/${planId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -1990,7 +1991,7 @@ const AdminDashboard = () => {
   const togglePlanStatus = async (planId, isActive) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`http://localhost:5000/api/admin/plans/${planId}/status`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/plans/${planId}/status`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -2123,7 +2124,7 @@ const AdminDashboard = () => {
     if (!selectedQuery) return;
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch(`http://localhost:5000/api/admin/queries/${selectedQuery._id}/notes`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/queries/${selectedQuery._id}/notes`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ adminNotes: notesDraft })
@@ -2146,7 +2147,7 @@ const AdminDashboard = () => {
     if (!window.confirm('Delete this query? This cannot be undone.')) return;
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch(`http://localhost:5000/api/admin/queries/${q._id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/admin/queries/${q._id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -3366,7 +3367,7 @@ const AdminDashboard = () => {
                   if (Object.keys(errs).length>0) return;
                   try {
                     const token = localStorage.getItem('adminToken');
-                    const res = await fetch('http://localhost:5000/api/admin/employers', {
+                    const res = await fetch(`${API_BASE_URL}/api/admin/employers`, {
                       method: 'POST',
                       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                       body: JSON.stringify(createEmployerForm)
@@ -3535,7 +3536,7 @@ const AdminDashboard = () => {
                             if (!window.confirm(`Delete employer ${emp.companyName}?`)) return;
                             try {
                               const token = localStorage.getItem('adminToken');
-                              const res = await fetch(`http://localhost:5000/api/admin/employers/${emp._id}`, {
+                              const res = await fetch(`${API_BASE_URL}/api/admin/employers/${emp._id}`, {
                                 method: 'DELETE',
                                 headers: { 'Authorization': `Bearer ${token}` }
                               });
@@ -3615,7 +3616,7 @@ const AdminDashboard = () => {
                 <button onClick={async ()=>{
                   try {
                     const token = localStorage.getItem('adminToken');
-                    const res = await fetch(`http://localhost:5000/api/admin/employers/${selectedEmployer._id}`, {
+                    const res = await fetch(`${API_BASE_URL}/api/admin/employers/${selectedEmployer._id}`, {
                       method: 'PUT',
                       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                       body: JSON.stringify(editEmployerForm)

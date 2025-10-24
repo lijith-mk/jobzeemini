@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import API_BASE_URL from '../config/api';
 const EmployerViewEvent = () => {
   const { eventId } = useParams();
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const EmployerViewEvent = () => {
     if (!token) { navigate('/employer/login'); return; }
     (async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/employers/events/${eventId}`, {
+        const res = await fetch(`${API_BASE_URL}/api/employers/events/${eventId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();

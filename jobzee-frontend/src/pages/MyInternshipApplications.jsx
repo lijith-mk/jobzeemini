@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaBuilding, FaMapMarkerAlt, FaClock, FaRupeeSign, FaCalendarAlt, FaEye, FaTimes, FaArrowLeft, FaCheckCircle, FaExclamationTriangle, FaUserClock, FaThumbsUp, FaThumbsDown, FaHistory } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
+import API_BASE_URL from '../config/api';
 const MyInternshipApplications = () => {
   const navigate = useNavigate();
   const [applications, setApplications] = useState([]);
@@ -44,7 +45,7 @@ const MyInternshipApplications = () => {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/internship-applications/user/my-applications?status=${statusFilter}`,
+        `${API_BASE_URL}/api/internship-applications/user/my-applications?status=${statusFilter}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -75,7 +76,7 @@ const MyInternshipApplications = () => {
     try {
       const token = localStorage.getItem('userToken') || localStorage.getItem('token');
       const response = await fetch(
-        `http://localhost:5000/api/internship-applications/${applicationId}/withdraw`,
+        `${API_BASE_URL}/api/internship-applications/${applicationId}/withdraw`,
         {
           method: 'DELETE',
           headers: {

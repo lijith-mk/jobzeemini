@@ -1,7 +1,8 @@
+import API_BASE_URL from '../config/api';
 /**
  * Enhanced service for handling dashboard assets with MongoDB and Cloudinary
  */
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_URL = `${API_BASE_URL}/api`;
 
 // Cache for dashboard assets
 let assetsCache = null;
@@ -19,7 +20,7 @@ export const getDashboardAssets = async () => {
       return assetsCache;
     }
 
-    const response = await fetch(`${API_BASE_URL}/dashboard/assets`);
+    const response = await fetch(`${API_URL}/dashboard/assets`);
     if (!response.ok) {
       throw new Error('Failed to fetch dashboard assets');
     }
@@ -181,7 +182,7 @@ export const handleImageError = (event, fallbackGradient) => {
  */
 export const initializeDashboardAssets = async (token) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/dashboard/initialize`, {
+    const response = await fetch(`${API_URL}/dashboard/initialize`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -229,7 +230,7 @@ export const uploadDashboardAsset = async (file, metadata, token) => {
       formData.append('metadata', JSON.stringify(metadata.metadata));
     }
     
-    const response = await fetch(`${API_BASE_URL}/dashboard/upload`, {
+    const response = await fetch(`${API_URL}/dashboard/upload`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -271,7 +272,7 @@ export const uploadDashboardAssets = async (token) => {
  */
 export const deleteDashboardAsset = async (assetId, token) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/dashboard/assets/${assetId}`, {
+    const response = await fetch(`${API_URL}/dashboard/assets/${assetId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -338,7 +339,7 @@ export const clearAssetsCache = () => {
  */
 export const getAssetsByCategory = async (category) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/dashboard/assets/category/${category}`);
+    const response = await fetch(`${API_URL}/dashboard/assets/category/${category}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch assets for category: ${category}`);
     }

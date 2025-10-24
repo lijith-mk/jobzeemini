@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
+import API_BASE_URL from '../config/api';
 const ScheduleInterviewModal = ({ isOpen, onClose, onSuccess, applicationId, defaultTimezone }) => {
   const [form, setForm] = useState({
     round: '',
@@ -25,7 +26,7 @@ const ScheduleInterviewModal = ({ isOpen, onClose, onSuccess, applicationId, def
     const loadJobs = async () => {
       try {
         const token = localStorage.getItem('employerToken');
-        const res = await fetch('http://localhost:5000/api/employers/jobs', {
+        const res = await fetch(`${API_BASE_URL}/api/employers/jobs`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
@@ -42,7 +43,7 @@ const ScheduleInterviewModal = ({ isOpen, onClose, onSuccess, applicationId, def
       if (!selectedJobId) return;
       try {
         const token = localStorage.getItem('employerToken');
-        const res = await fetch(`http://localhost:5000/api/applications/job/${selectedJobId}`, {
+        const res = await fetch(`${API_BASE_URL}/api/applications/job/${selectedJobId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
@@ -128,7 +129,7 @@ const ScheduleInterviewModal = ({ isOpen, onClose, onSuccess, applicationId, def
     setSubmitting(true);
     try {
       const token = localStorage.getItem('employerToken');
-      const res = await fetch('http://localhost:5000/api/interviews', {
+      const res = await fetch(`${API_BASE_URL}/api/interviews`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({

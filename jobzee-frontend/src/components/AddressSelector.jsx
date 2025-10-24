@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import AddressForm from './AddressForm';
 
+import API_BASE_URL from '../config/api';
 const AddressSelector = ({ 
   onAddressSelect, 
   addressType = 'shipping',
@@ -23,7 +24,7 @@ const AddressSelector = ({
       const token = localStorage.getItem('token') || localStorage.getItem('employerToken');
       if (!token) return;
 
-      const response = await fetch('http://localhost:5000/api/addresses', {
+      const response = await fetch(`${API_BASE_URL}/api/addresses`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -46,8 +47,8 @@ const AddressSelector = ({
       const token = localStorage.getItem('token') || localStorage.getItem('employerToken');
       const isEdit = !!editingAddress;
       const url = isEdit 
-        ? `http://localhost:5000/api/addresses/${editingAddress._id}`
-        : 'http://localhost:5000/api/addresses';
+        ? `${API_BASE_URL}/api/addresses/${editingAddress._id}`
+        : `${API_BASE_URL}/api/addresses`;
       
       const method = isEdit ? 'PUT' : 'POST';
       
@@ -90,7 +91,7 @@ const AddressSelector = ({
     
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('employerToken');
-      const response = await fetch(`http://localhost:5000/api/addresses/${addressId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/addresses/${addressId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

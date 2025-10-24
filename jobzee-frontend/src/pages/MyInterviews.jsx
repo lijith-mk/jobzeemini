@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+import API_BASE_URL from '../config/api';
 const MyInterviews = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -23,7 +24,7 @@ const MyInterviews = () => {
   const loadInterviews = async (token) => {
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:5000/api/interviews/my', {
+      const res = await fetch(`${API_BASE_URL}/api/interviews/my`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) {
@@ -46,7 +47,7 @@ const MyInterviews = () => {
         navigate('/login');
         return;
       }
-      const res = await fetch(`http://localhost:5000/api/interviews/${id}/respond`, {
+      const res = await fetch(`${API_BASE_URL}/api/interviews/${id}/respond`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

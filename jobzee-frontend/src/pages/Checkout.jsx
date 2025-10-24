@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { useCart } from '../contexts/CartContext';
 import AddressSelector from '../components/AddressSelector';
 
+import API_BASE_URL from '../config/api';
 const Checkout = () => {
   const navigate = useNavigate();
   const { 
@@ -122,7 +123,7 @@ const Checkout = () => {
       };
 
       // Create order from cart
-      const response = await fetch('http://localhost:5000/api/orders/checkout-cart', {
+      const response = await fetch(`${API_BASE_URL}/api/orders/checkout-cart`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -168,7 +169,7 @@ const Checkout = () => {
           handler: async (razorpayResponse) => {
             try {
               // Verify payment
-              const verifyResponse = await fetch('http://localhost:5000/api/orders/verify-payment', {
+              const verifyResponse = await fetch(`${API_BASE_URL}/api/orders/verify-payment`, {
                 method: 'POST',
                 headers: {
                   'Authorization': `Bearer ${token}`,

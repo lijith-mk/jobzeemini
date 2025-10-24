@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+import API_BASE_URL from '../config/api';
 const EmployerBilling = () => {
   const navigate = useNavigate();
   const [payments, setPayments] = useState([]);
@@ -38,7 +39,7 @@ const EmployerBilling = () => {
   const loadPayments = async (token, page = 1) => {
     try {
       const query = buildQuery({ page, limit: 10, status: payStatus, startDate: payStart, endDate: payEnd });
-      const res = await fetch(`http://localhost:5000/api/payments/history?${query}`, {
+      const res = await fetch(`${API_BASE_URL}/api/payments/history?${query}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -59,7 +60,7 @@ const EmployerBilling = () => {
   const loadInvoices = async (token, page = 1) => {
     try {
       const query = buildQuery({ page, limit: 10, startDate: invStart, endDate: invEnd });
-      const res = await fetch(`http://localhost:5000/api/invoices?${query}`, {
+      const res = await fetch(`${API_BASE_URL}/api/invoices?${query}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
+import API_BASE_URL from '../config/api';
 const ResetPassword = () => {
   const navigate = useNavigate();
   const { token } = useParams();
@@ -51,7 +52,7 @@ const ResetPassword = () => {
       }
 
       try {
-        const res = await fetch(`http://localhost:5000/api/auth/verify-reset-token/${token}`, {
+        const res = await fetch(`${API_BASE_URL}/api/auth/verify-reset-token/${token}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -86,7 +87,7 @@ const ResetPassword = () => {
     if (Object.keys(validationErrors).length === 0) {
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:5000/api/auth/reset-password/${token}`, {
+        const res = await fetch(`${API_BASE_URL}/api/auth/reset-password/${token}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+import API_BASE_URL from '../config/api';
 const EmployerInternships = () => {
   const navigate = useNavigate();
   const [internships, setInternships] = useState([]);
@@ -22,7 +23,7 @@ const EmployerInternships = () => {
   const fetchInternships = async () => {
     try {
       const token = localStorage.getItem('employerToken');
-      const response = await fetch('http://localhost:5000/api/internships/employer', {
+      const response = await fetch(`${API_BASE_URL}/api/internships/employer`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -49,7 +50,7 @@ const EmployerInternships = () => {
 
     try {
       const token = localStorage.getItem('employerToken');
-      const response = await fetch(`http://localhost:5000/api/internships/${internshipId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/internships/${internshipId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -72,7 +73,7 @@ const EmployerInternships = () => {
   const handleStatusUpdate = async (internshipId, newStatus) => {
     try {
       const token = localStorage.getItem('employerToken');
-      const response = await fetch(`http://localhost:5000/api/internships/${internshipId}/status`, {
+      const response = await fetch(`${API_BASE_URL}/api/internships/${internshipId}/status`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,

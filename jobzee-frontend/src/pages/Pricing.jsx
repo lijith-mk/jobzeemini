@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import sessionManager from '../utils/sessionManager';
 
+import API_BASE_URL from '../config/api';
 const Pricing = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userType, setUserType] = useState(null);
@@ -34,7 +35,7 @@ const Pricing = () => {
   useEffect(() => {
     const fetchPricingPlans = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/pricing/public');
+        const response = await fetch(`${API_BASE_URL}/api/pricing/public`);
         const data = await response.json();
         
         if (data.success) {
@@ -214,7 +215,7 @@ const Pricing = () => {
       }
 
       // Create order
-      const orderRes = await fetch('http://localhost:5000/api/payments/create-order', {
+      const orderRes = await fetch(`${API_BASE_URL}/api/payments/create-order`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -239,7 +240,7 @@ const Pricing = () => {
         order_id: order.id,
         handler: async function (response) {
           try {
-            const verifyRes = await fetch('http://localhost:5000/api/payments/verify', {
+            const verifyRes = await fetch(`${API_BASE_URL}/api/payments/verify`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

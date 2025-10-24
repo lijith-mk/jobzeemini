@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+import API_BASE_URL from '../config/api';
 const MyApplications = () => {
   const navigate = useNavigate();
   const [applications, setApplications] = useState([]);
@@ -24,7 +25,7 @@ const MyApplications = () => {
   const loadApplications = async (token) => {
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:5000/api/applications/my-applications`, {
+      const res = await fetch(`${API_BASE_URL}/api/applications/my-applications`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

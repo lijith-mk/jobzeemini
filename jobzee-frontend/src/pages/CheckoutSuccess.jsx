@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+import API_BASE_URL from '../config/api';
 const CheckoutSuccess = () => {
   const params = new URLSearchParams(useLocation().search);
   const name = params.get('name') || 'Customer';
@@ -26,7 +27,7 @@ const CheckoutSuccess = () => {
       const token = localStorage.getItem('token') || localStorage.getItem('employerToken');
       if (!token) return;
       
-      const response = await fetch('http://localhost:5000/api/orders?limit=1', {
+      const response = await fetch(`${API_BASE_URL}/api/orders?limit=1`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       

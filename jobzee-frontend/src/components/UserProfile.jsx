@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { validateEmail, validatePhone, FormValidator } from '../utils/validationUtils';
 
+import API_BASE_URL from '../config/api';
 const UserProfile = () => {
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -86,7 +87,7 @@ const UserProfile = () => {
       try {
         const token = localStorage.getItem('token');
         if (token) {
-          await fetch('http://localhost:5000/api/auth/logout', {
+          await fetch(`${API_BASE_URL}/api/auth/logout`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -208,7 +209,7 @@ const UserProfile = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/auth/profile', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -293,7 +294,7 @@ const UserProfile = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/upload/user/profile-photo', {
+      const response = await fetch(`${API_BASE_URL}/api/upload/user/profile-photo`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -371,7 +372,7 @@ const UserProfile = () => {
       formData.append('resume', file);
 
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/upload/user/resume', {
+      const response = await fetch(`${API_BASE_URL}/api/upload/user/resume`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -409,7 +410,7 @@ const UserProfile = () => {
     setSaving(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/auth/profile', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

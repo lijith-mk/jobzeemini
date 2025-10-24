@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+import API_BASE_URL from '../config/api';
 const ShopPayments = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,7 +12,7 @@ const ShopPayments = () => {
       try {
         const token = getToken();
         if (!token) return;
-        const res = await fetch('http://localhost:5000/api/shop-payments', {
+        const res = await fetch(`${API_BASE_URL}/api/shop-payments`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();

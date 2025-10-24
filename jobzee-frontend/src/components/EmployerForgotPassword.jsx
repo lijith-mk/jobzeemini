@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
+import API_BASE_URL from '../config/api';
 const EmployerForgotPassword = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({ companyEmail: "" });
@@ -41,7 +42,7 @@ const EmployerForgotPassword = () => {
     if (Object.keys(validationErrors).length === 0) {
       setLoading(true);
       try {
-        const res = await fetch("http://localhost:5000/api/employers/forgot-password", {
+        const res = await fetch(`${API_BASE_URL}/api/employers/forgot-password`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),

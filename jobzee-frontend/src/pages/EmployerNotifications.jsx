@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+import API_BASE_URL from '../config/api';
 const EmployerNotifications = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +16,7 @@ const EmployerNotifications = () => {
   const load = async (token, p) => {
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:5000/api/employers/notifications?page=${p}&limit=10`, {
+      const res = await fetch(`${API_BASE_URL}/api/employers/notifications?page=${p}&limit=10`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {

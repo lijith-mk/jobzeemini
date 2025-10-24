@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 import { useNavigate, useParams } from 'react-router-dom';
 import UserEventSidebar from '../components/UserEventSidebar';
 
+import API_BASE_URL from '../config/api';
 const UserEventDetails = () => {
   const { eventId } = useParams();
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ const UserEventDetails = () => {
   const loadEventDetails = async () => {
     setLoading(true);
       try {
-        const res = await fetch(`http://localhost:5000/api/events/${eventId}`);
+        const res = await fetch(`${API_BASE_URL}/api/events/${eventId}`);
         const data = await res.json();
         if (data?.success) setEvent(data.event);
     } catch (error) {
@@ -47,7 +48,7 @@ const UserEventDetails = () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
-      const res = await fetch(`http://localhost:5000/api/events/${eventId}/registration`, {
+      const res = await fetch(`${API_BASE_URL}/api/events/${eventId}/registration`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -75,7 +76,7 @@ const UserEventDetails = () => {
     }
     setRegistering(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/events/${eventId}/register`, {
+      const res = await fetch(`${API_BASE_URL}/api/events/${eventId}/register`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({})
@@ -111,7 +112,7 @@ const UserEventDetails = () => {
         order_id: data.order.id,
         handler: async function (response) {
           try {
-            const verifyRes = await fetch(`http://localhost:5000/api/events/${eventId}/verify`, {
+            const verifyRes = await fetch(`${API_BASE_URL}/api/events/${eventId}/verify`, {
               method: 'POST',
               headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
               body: JSON.stringify({

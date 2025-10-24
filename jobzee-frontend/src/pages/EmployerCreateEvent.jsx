@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import API_BASE_URL from '../config/api';
 const EmployerCreateEvent = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -36,7 +37,7 @@ const EmployerCreateEvent = () => {
     (async () => {
       try {
         if (!token) return;
-        const res = await fetch('http://localhost:5000/api/employers/profile', {
+        const res = await fetch(`${API_BASE_URL}/api/employers/profile`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
@@ -216,7 +217,7 @@ const EmployerCreateEvent = () => {
     const body = new FormData();
     body.append('photo', file);
     try {
-      const res = await fetch('http://localhost:5000/api/upload/employer/event-banner', {
+      const res = await fetch(`${API_BASE_URL}/api/upload/employer/event-banner`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body
@@ -255,7 +256,7 @@ const EmployerCreateEvent = () => {
       images: form.images ? form.images.split(',').map(s => s.trim()).filter(Boolean) : [],
       restrictedToRoles: form.visibility === 'restricted' ? [form.restrictedToRoles] : []
     };
-    const res = await fetch('http://localhost:5000/api/employers/events', {
+    const res = await fetch(`${API_BASE_URL}/api/employers/events`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

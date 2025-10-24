@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
+import API_BASE_URL from '../config/api';
 const Onboarding = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
@@ -47,7 +48,7 @@ const Onboarding = () => {
       const user = JSON.parse(userData);
       setUser(user);
       
-      const res = await fetch(`http://localhost:5000/api/auth/profile`, {
+      const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -218,7 +219,7 @@ const Onboarding = () => {
       const token = localStorage.getItem("token");
 
       // Only mark user as onboarded without overwriting existing data
-      const res = await fetch(`http://localhost:5000/api/auth/onboarding/${user._id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/auth/onboarding/${user._id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -258,7 +259,7 @@ const Onboarding = () => {
       
       const token = localStorage.getItem("token");
 
-      const res = await fetch(`http://localhost:5000/api/auth/onboarding/${user._id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/auth/onboarding/${user._id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
+import API_BASE_URL from '../config/api';
 const EmployerDashboard = () => {
   const navigate = useNavigate();
   const [employer, setEmployer] = useState(null);
@@ -58,7 +59,7 @@ const EmployerDashboard = () => {
 
   const fetchDashboardStats = async (token) => {
     try {
-      const res = await fetch("http://localhost:5000/api/employers/dashboard/stats", {
+      const res = await fetch(`${API_BASE_URL}/api/employers/dashboard/stats`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -90,7 +91,7 @@ const EmployerDashboard = () => {
 
   const fetchJobCount = async (token) => {
     try {
-      const res = await fetch("http://localhost:5000/api/employers/jobs", {
+      const res = await fetch(`${API_BASE_URL}/api/employers/jobs`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -107,7 +108,7 @@ const EmployerDashboard = () => {
 
   const fetchRecentJobs = async (token) => {
     try {
-      const res = await fetch("http://localhost:5000/api/employers/jobs?limit=3", {
+      const res = await fetch(`${API_BASE_URL}/api/employers/jobs?limit=3`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -124,7 +125,7 @@ const EmployerDashboard = () => {
 
   const fetchNotifications = async (token) => {
     try {
-      const res = await fetch("http://localhost:5000/api/employers/notifications/latest", {
+      const res = await fetch(`${API_BASE_URL}/api/employers/notifications/latest`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -144,7 +145,7 @@ const EmployerDashboard = () => {
       const token = localStorage.getItem('employerToken');
       if (!token) return;
 
-      const res = await fetch(`http://localhost:5000/api/employers/notifications/${notificationId}/read`, {
+      const res = await fetch(`${API_BASE_URL}/api/employers/notifications/${notificationId}/read`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });

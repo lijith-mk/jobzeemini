@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import UserEventSidebar from '../components/UserEventSidebar';
 
+import API_BASE_URL from '../config/api';
 const UserPayments = () => {
   const navigate = useNavigate();
   const [payments, setPayments] = useState([]);
@@ -46,7 +47,7 @@ const UserPayments = () => {
         params.append('status', statusFilter);
       }
 
-      const res = await fetch(`http://localhost:5000/api/events/user/payments?${params}`, {
+      const res = await fetch(`${API_BASE_URL}/api/events/user/payments?${params}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       

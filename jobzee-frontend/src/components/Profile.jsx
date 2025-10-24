@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { validateEmail, validatePhone, FormValidator, createFieldValidator } from "../utils/validationUtils";
 
+import API_BASE_URL from '../config/api';
 const Profile = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -42,7 +43,7 @@ const Profile = () => {
       const userData = JSON.parse(localStorage.getItem("user"));
       const token = localStorage.getItem("token");
       
-      const res = await fetch(`http://localhost:5000/api/auth/profile`, {
+      const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -86,7 +87,7 @@ const Profile = () => {
       const userData = JSON.parse(localStorage.getItem("user"));
       const token = localStorage.getItem("token");
 
-      const res = await fetch(`http://localhost:5000/api/auth/profile`, {
+      const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

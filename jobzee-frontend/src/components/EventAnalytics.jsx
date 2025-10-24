@@ -13,6 +13,7 @@ import {
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
 
+import API_BASE_URL from '../config/api';
 // Register Chart.js components
 ChartJS.register(
   CategoryScale,
@@ -39,7 +40,7 @@ const EventAnalytics = ({ events, stats }) => {
     setLoading(true);
     try {
       const token = localStorage.getItem('employerToken');
-      const res = await fetch(`http://localhost:5000/api/employers/events/analytics?period=${selectedPeriod}`, {
+      const res = await fetch(`${API_BASE_URL}/api/employers/events/analytics?period=${selectedPeriod}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       

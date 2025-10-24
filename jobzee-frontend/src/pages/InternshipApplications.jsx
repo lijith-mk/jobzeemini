@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGraduationCap, FaFileAlt, FaExternalLinkAlt, FaArrowLeft, FaClock, FaCheckCircle, FaTimes, FaEye } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
+import API_BASE_URL from '../config/api';
 const InternshipApplications = () => {
   const { internshipId } = useParams();
   const navigate = useNavigate();
@@ -41,7 +42,7 @@ const InternshipApplications = () => {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/internships/${internshipId}/applications?status=${statusFilter}&page=${currentPage}&limit=10`,
+        `${API_BASE_URL}/api/internships/${internshipId}/applications?status=${statusFilter}&page=${currentPage}&limit=10`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -75,7 +76,7 @@ const InternshipApplications = () => {
     try {
       const token = localStorage.getItem('employerToken');
       const response = await fetch(
-        `http://localhost:5000/api/internship-applications/${applicationId}/status`,
+        `${API_BASE_URL}/api/internship-applications/${applicationId}/status`,
         {
           method: 'PATCH',
           headers: {

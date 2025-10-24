@@ -4,6 +4,7 @@ import EmployerQRScanner from './EmployerQRScanner';
 import EventAnalytics from '../components/EventAnalytics';
 import EventNotifications from '../components/EventNotifications';
 
+import API_BASE_URL from '../config/api';
 const EmployerEvents = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,7 +17,7 @@ const EmployerEvents = () => {
       navigate('/employer/login');
       return;
     }
-    fetch('http://localhost:5000/api/employers/events', {
+    fetch(`${API_BASE_URL}/api/employers/events`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(async res => {
@@ -33,7 +34,7 @@ const EmployerEvents = () => {
       .finally(() => setLoading(false));
 
     // Stats
-    fetch('http://localhost:5000/api/employers/events-stats', {
+    fetch(`${API_BASE_URL}/api/employers/events-stats`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(async res => {
@@ -60,7 +61,7 @@ const EmployerEvents = () => {
     setRegsLoading(true);
     try {
       const token = localStorage.getItem('employerToken');
-      const res = await fetch(`http://localhost:5000/api/employers/events/${evtId}/registrations`, {
+      const res = await fetch(`${API_BASE_URL}/api/employers/events/${evtId}/registrations`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -249,7 +250,7 @@ const EmployerEvents = () => {
               if (!confirm('Delete this event?')) return;
               try {
                 const token = localStorage.getItem('employerToken');
-                const res = await fetch(`http://localhost:5000/api/employers/events/${evt._id}`, {
+                const res = await fetch(`${API_BASE_URL}/api/employers/events/${evt._id}`, {
                   method: 'DELETE',
                   headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -335,7 +336,7 @@ const EmployerEvents = () => {
               if (!confirm('Delete this event?')) return;
               try {
                 const token = localStorage.getItem('employerToken');
-                const res = await fetch(`http://localhost:5000/api/employers/events/${evt._id}`, {
+                const res = await fetch(`${API_BASE_URL}/api/employers/events/${evt._id}`, {
                   method: 'DELETE',
                   headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -399,7 +400,7 @@ const EmployerEvents = () => {
                 setRegsLoading(true);
                 try {
                   const token = localStorage.getItem('employerToken');
-                  const res = await fetch(`http://localhost:5000/api/employers/events/${id}/registrations`, { headers: { 'Authorization': `Bearer ${token}` } });
+                  const res = await fetch(`${API_BASE_URL}/api/employers/events/${id}/registrations`, { headers: { 'Authorization': `Bearer ${token}` } });
                   const data = await res.json();
                   if (data?.success) setRegs(data.registrations || []);
                 } finally { setRegsLoading(false); }

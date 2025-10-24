@@ -3,6 +3,7 @@ import { FaSearch, FaFilter, FaMapMarkerAlt, FaRupeeSign } from 'react-icons/fa'
 import InternshipCard from '../components/InternshipCard';
 import { toast } from 'react-toastify';
 
+import API_BASE_URL from '../config/api';
 const Internships = () => {
   const [internships, setInternships] = useState([]);
   const [filteredInternships, setFilteredInternships] = useState([]);
@@ -41,7 +42,7 @@ const Internships = () => {
   const fetchInternships = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/internships');
+      const response = await fetch(`${API_BASE_URL}/api/internships`);
       const data = await response.json();
       
       if (response.ok && (data.success || Array.isArray(data.internships))) {

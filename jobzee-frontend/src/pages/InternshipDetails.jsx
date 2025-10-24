@@ -4,6 +4,7 @@ import { FaMapMarkerAlt, FaClock, FaRupeeSign, FaCalendarAlt, FaGraduationCap, F
 import { toast } from 'react-toastify';
 import sessionManager from '../utils/sessionManager';
 
+import API_BASE_URL from '../config/api';
 const InternshipDetails = () => {
   const { id, internshipId } = useParams();
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ const InternshipDetails = () => {
     try {
       setLoading(true);
       const currentId = id || internshipId;
-      const response = await fetch(`http://localhost:5000/api/internships/${currentId}`);
+      const response = await fetch(`${API_BASE_URL}/api/internships/${currentId}`);
       const data = await response.json();
       
       if (response.ok && (data.success || data.internship)) {
@@ -56,7 +57,7 @@ const InternshipDetails = () => {
     try {
       setApplying(true);
       const currentId = id || internshipId;
-      const response = await fetch(`http://localhost:5000/api/internships/${currentId}/apply`, {
+      const response = await fetch(`${API_BASE_URL}/api/internships/${currentId}/apply`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+import API_BASE_URL from '../config/api';
 const EmployerMyJobs = () => {
   const navigate = useNavigate();
   const [employer, setEmployer] = useState(null);
@@ -28,7 +29,7 @@ const EmployerMyJobs = () => {
   const fetchJobs = async (token) => {
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:5000/api/employers/jobs', {
+      const res = await fetch(`${API_BASE_URL}/api/employers/jobs`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -53,7 +54,7 @@ const EmployerMyJobs = () => {
 
     try {
       const token = localStorage.getItem('employerToken');
-      const res = await fetch(`http://localhost:5000/api/employers/jobs/${jobToDelete._id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/employers/jobs/${jobToDelete._id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

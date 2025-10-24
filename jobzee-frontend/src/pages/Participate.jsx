@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import UserEventSidebar from '../components/UserEventSidebar';
 
+import API_BASE_URL from '../config/api';
 const Participate = () => {
   const navigate = useNavigate();
   const [events, setEvents] = useState([]);
@@ -27,7 +28,7 @@ const Participate = () => {
   const loadEvents = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/events?date=upcoming&sort=recent');
+      const res = await fetch(`${API_BASE_URL}/api/events?date=upcoming&sort=recent`);
       const data = await res.json();
       setEvents(data?.events || []);
     } catch (error) {

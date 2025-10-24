@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import GoogleSignIn from './GoogleSignIn';
 
+import API_BASE_URL from '../config/api';
 const Login = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
@@ -89,7 +90,7 @@ const Login = () => {
       try {
         console.log('Starting login process...');
         
-        const res = await makeRequestWithRetry("http://localhost:5000/api/auth/login", {
+        const res = await makeRequestWithRetry(`${API_BASE_URL}/api/auth/login`, {
           method: "POST",
           headers: { 
             "Content-Type": "application/json",

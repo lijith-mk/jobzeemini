@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+import API_BASE_URL from '../config/api';
 const OrderDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -19,7 +20,7 @@ const OrderDetails = () => {
       setLoading(true);
       const token = getToken();
       if (!token) { toast.error('Please sign in to view order'); navigate('/login'); return; }
-      const res = await fetch(`http://localhost:5000/api/orders/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const res = await fetch(`${API_BASE_URL}/api/orders/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
       const data = await res.json();
       if (res.ok && data.success) setOrder(data.order);
       else toast.error(data.message || 'Failed to fetch order');

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
+import API_BASE_URL from '../config/api';
 const EmployerLogin = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({ companyEmail: "", password: "" });
@@ -49,7 +50,7 @@ const EmployerLogin = () => {
     if (Object.keys(validationErrors).length === 0) {
       setLoading(true);
       try {
-        const res = await fetch("http://localhost:5000/api/employers/login", {
+        const res = await fetch(`${API_BASE_URL}/api/employers/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),

@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { useCart } from '../contexts/CartContext';
 import AddToCartButton from '../components/AddToCartButton';
 
+import API_BASE_URL from '../config/api';
 const Shop = () => {
   const [products, setProducts] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -33,7 +34,7 @@ const Shop = () => {
 
   const fetchFeaturedProducts = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/products/featured?limit=6');
+      const response = await fetch(`${API_BASE_URL}/api/products/featured?limit=6`);
       const data = await response.json();
       if (data.success) {
         setFeaturedProducts(data.products);
@@ -45,7 +46,7 @@ const Shop = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/products/categories');
+      const response = await fetch(`${API_BASE_URL}/api/products/categories`);
       const data = await response.json();
       if (data.success) {
         setCategories(data.categories);
@@ -64,7 +65,7 @@ const Shop = () => {
         ...filters
       });
       
-      const response = await fetch(`http://localhost:5000/api/products?${params}`);
+      const response = await fetch(`${API_BASE_URL}/api/products?${params}`);
       const data = await response.json();
       
       if (data.success) {

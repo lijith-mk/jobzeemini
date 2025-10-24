@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { validateEmail, validateName } from '../utils/validationUtils';
 import mapboxgl from 'mapbox-gl';
+import API_BASE_URL from '../config/api';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 const Contact = () => {
@@ -113,7 +114,7 @@ const Contact = () => {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:5000/api/contact', {
+      const res = await fetch(`${API_BASE_URL}/api/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+import API_BASE_URL from '../config/api';
 const EmployerEditJob = () => {
   const navigate = useNavigate();
   const { jobId } = useParams();
@@ -39,7 +40,7 @@ const EmployerEditJob = () => {
 
   const fetchJob = async (token) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/employers/jobs/${jobId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/employers/jobs/${jobId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) {
@@ -181,7 +182,7 @@ const EmployerEditJob = () => {
 
     try {
       setSaving(true);
-      const res = await fetch(`http://localhost:5000/api/employers/jobs/${jobId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/employers/jobs/${jobId}`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

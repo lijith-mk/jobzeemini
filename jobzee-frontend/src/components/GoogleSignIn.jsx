@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+import API_BASE_URL from '../config/api';
 const GoogleSignIn = ({ onSuccess, onError, disabled = false }) => {
   const navigate = useNavigate();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
@@ -80,7 +81,7 @@ const GoogleSignIn = ({ onSuccess, onError, disabled = false }) => {
       }
 
       // Send credential to backend for verification
-      const res = await fetch('http://localhost:5000/api/auth/google', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/google`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

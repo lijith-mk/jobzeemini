@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom`;
 import { toast } from 'react-toastify';
 
+import API_BASE_URL from '../config/api';
 const SavedJobs = () => {
   const navigate = useNavigate();
   const [savedJobs, setSavedJobs] = useState([]);
@@ -24,7 +25,7 @@ const SavedJobs = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/saved-jobs/my-jobs', {
+      const response = await fetch(`${API_BASE_URL}/api/saved-jobs/my-jobs`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -56,7 +57,7 @@ const SavedJobs = () => {
     // Check application status for each job
     for (const job of jobsList) {
       try {
-        const response = await fetch(`http://localhost:5000/api/jobs/${job._id}/application-status`, {
+        const response = await fetch(`${API_BASE_URL}/api/jobs/${job._id}/application-status`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -86,7 +87,7 @@ const SavedJobs = () => {
     setApplyingJobs(prev => new Set([...prev, jobId]));
 
     try {
-      const response = await fetch(`http://localhost:5000/api/jobs/${jobId}/quick-apply`, {
+      const response = await fetch(`${API_BASE_URL}/api/jobs/${jobId}/quick-apply`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -128,7 +129,7 @@ const SavedJobs = () => {
     setRemovingJobs(prev => new Set([...prev, jobId]));
 
     try {
-      const response = await fetch(`http://localhost:5000/api/saved-jobs/${jobId}/save`, {
+      const response = await fetch(`${API_BASE_URL}/api/saved-jobs/${jobId}/save`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -179,7 +180,7 @@ const SavedJobs = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8">
+    <div className=`min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">

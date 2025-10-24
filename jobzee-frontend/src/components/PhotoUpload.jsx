@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 
+import API_BASE_URL from '../config/api';
 const PhotoUpload = ({ 
   currentPhoto = null, 
   onPhotoUpload = () => {}, 
@@ -83,7 +84,7 @@ const PhotoUpload = ({
         ? '/api/upload/employer/company-logo'
         : '/api/upload/user/profile-photo';
 
-      const response = await fetch(`http://localhost:5000${endpoint}`, {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -142,7 +143,7 @@ const PhotoUpload = ({
         ? '/api/upload/employer/profile-photo'
         : '/api/upload/user/profile-photo';
 
-      const response = await fetch(`http://localhost:5000${endpoint}`, {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

@@ -5,6 +5,7 @@ import AddressSelector from '../components/AddressSelector';
 import { useCart } from '../contexts/CartContext';
 import AddToCartButton from '../components/AddToCartButton';
 
+import API_BASE_URL from '../config/api';
 const ProductDetails = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
@@ -16,7 +17,7 @@ const ProductDetails = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/products/${id}`);
+        const res = await fetch(`${API_BASE_URL}/api/products/${id}`);
         const data = await res.json();
         if (data.success) {
           setProduct(data.product);
@@ -91,7 +92,7 @@ const ProductDetails = () => {
         country: billingAddress.country,
         landmark: billingAddress.landmark
       };
-      const res = await fetch('http://localhost:5000/api/orders/checkout-single', {
+      const res = await fetch(`${API_BASE_URL}/api/orders/checkout-single`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -117,7 +118,7 @@ const ProductDetails = () => {
         prefill: { name: getUserName(), email: profile.email || '' },
         handler: async (response) => {
           try {
-            const verifyRes = await fetch('http://localhost:5000/api/orders/verify-payment', {
+            const verifyRes = await fetch(`${API_BASE_URL}/api/orders/verify-payment`, {
               method: 'POST',
               headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
               body: JSON.stringify({

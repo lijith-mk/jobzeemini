@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import UserEventSidebar from '../components/UserEventSidebar';
 
+import API_BASE_URL from '../config/api';
 const MyTickets = () => {
   const navigate = useNavigate();
   const [tickets, setTickets] = useState([]);
@@ -46,7 +47,7 @@ const MyTickets = () => {
       params.set('page', filters.page);
       params.set('limit', filters.limit);
 
-      const res = await fetch(`http://localhost:5000/api/tickets/user/my-tickets?${params.toString()}`, {
+      const res = await fetch(`${API_BASE_URL}/api/tickets/user/my-tickets?${params.toString()}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();

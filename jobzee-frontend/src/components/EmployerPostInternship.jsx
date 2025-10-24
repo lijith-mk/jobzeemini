@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+import API_BASE_URL from '../config/api';
 const EmployerPostInternship = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -260,7 +261,7 @@ const EmployerPostInternship = () => {
         }
       }
       
-      const response = await fetch('http://localhost:5000/api/internships', {
+      const response = await fetch(`${API_BASE_URL}/api/internships`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

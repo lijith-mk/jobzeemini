@@ -4,6 +4,7 @@ import JobDetailsModal from './JobDetailsModal';
 
 import { toast } from 'react-toastify';
 
+import API_BASE_URL from '../config/api';
 const JobSearch = () => {
   const locationHook = useLocation();
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const JobSearch = () => {
   const [location, setLocation] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [skills, setSkills] = useState([]);
-  const [skillsInput, setSkillsInput] = useState("");
+  const [skillsInput, setSkillsInput] = useState("`);
   const [animate, setAnimate] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -71,7 +72,7 @@ const JobSearch = () => {
     // Fallback to user preferences
     const token = localStorage.getItem('token');
     if (token) {
-      fetch('http://localhost:5000/api/auth/profile', {
+      fetch(`${API_BASE_URL}/api/auth/profile`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
         .then(res => res.ok ? res.json() : null)
@@ -144,7 +145,7 @@ const JobSearch = () => {
     };
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/profile', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -185,7 +186,7 @@ const JobSearch = () => {
       if (filters.location) params.set('location', filters.location);
       if (filters.category) params.set('category', filters.category);
       if (filters.skills && filters.skills.length) params.set('skills', filters.skills.join(','));
-      const response = await fetch(`http://localhost:5000/api/jobs?${params.toString()}`);
+      const response = await fetch(`${API_BASE_URL}/api/jobs?${params.toString()}`);
       const data = await response.json();
       
       if (data.success) {
@@ -214,7 +215,7 @@ const JobSearch = () => {
     for (const job of jobsList) {
       try {
         // Check application status
-        const appResponse = await fetch(`http://localhost:5000/api/jobs/${job._id}/application-status`, {
+        const appResponse = await fetch(`${API_BASE_URL}/api/jobs/${job._id}/application-status`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -228,7 +229,7 @@ const JobSearch = () => {
         }
 
         // Check saved status
-        const savedResponse = await fetch(`http://localhost:5000/api/saved-jobs/${job._id}/saved-status`, {
+        const savedResponse = await fetch(`${API_BASE_URL}/api/saved-jobs/${job._id}/saved-status`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -259,7 +260,7 @@ const JobSearch = () => {
     setApplyingJobs(prev => new Set([...prev, jobId]));
 
     try {
-      const response = await fetch(`http://localhost:5000/api/jobs/${jobId}/quick-apply`, {
+      const response = await fetch(`${API_BASE_URL}/api/jobs/${jobId}/quick-apply`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -302,7 +303,7 @@ const JobSearch = () => {
     setSavingJobs(prev => new Set([...prev, jobId]));
 
     try {
-      const url = `http://localhost:5000/api/saved-jobs/${jobId}/save`;
+      const url = `${API_BASE_URL}/api/saved-jobs/${jobId}/save`;
       const method = isCurrentlySaved ? 'DELETE' : 'POST';
       
       const response = await fetch(url, {
@@ -347,7 +348,7 @@ const JobSearch = () => {
       const token = localStorage.getItem('token');
       const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
-      const res = await fetch(`http://localhost:5000/api/jobs/${jobId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/jobs/${jobId}`, {
         headers
       });
 
@@ -358,7 +359,7 @@ const JobSearch = () => {
         // If user is logged in, check if they've applied to this job
         if (token) {
           try {
-            const appRes = await fetch(`http://localhost:5000/api/jobs/${jobId}/application-status`, {
+            const appRes = await fetch(`${API_BASE_URL}/api/jobs/${jobId}/application-status`, {
               headers: { 'Authorization': `Bearer ${token}` }
             });
             
@@ -396,7 +397,7 @@ const JobSearch = () => {
   };
 
   const categories = [
-    { id: "tech", name: "Technology", icon: "💻", color: "from-blue-500 to-blue-600" },
+    { id: `tech", name: "Technology", icon: "💻", color: "from-blue-500 to-blue-600" },
     { id: "design", name: "Design", icon: "🎨", color: "from-purple-500 to-purple-600" },
     { id: "marketing", name: "Marketing", icon: "📈", color: "from-green-500 to-green-600" },
     { id: "sales", name: "Sales", icon: "💰", color: "from-yellow-500 to-yellow-600" },

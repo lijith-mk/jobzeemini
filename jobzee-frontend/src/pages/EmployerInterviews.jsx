@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import ScheduleInterviewModal from '../components/ScheduleInterviewModal';
 
+import API_BASE_URL from '../config/api';
 const EmployerInterviews = () => {
   const [interviews, setInterviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,7 +13,7 @@ const EmployerInterviews = () => {
     const load = async () => {
       try {
         const token = localStorage.getItem('employerToken');
-        const res = await fetch('http://localhost:5000/api/interviews', {
+        const res = await fetch(`${API_BASE_URL}/api/interviews`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('Failed to fetch interviews');
@@ -33,7 +34,7 @@ const EmployerInterviews = () => {
   const refresh = async () => {
     try {
       const token = localStorage.getItem('employerToken');
-      const res = await fetch('http://localhost:5000/api/interviews', {
+      const res = await fetch(`${API_BASE_URL}/api/interviews`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Failed to fetch interviews');

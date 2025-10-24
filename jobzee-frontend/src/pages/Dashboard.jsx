@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { getDashboardAssets, getDashboardBackgrounds, handleImageErrorEnhanced } from '../services/dashboardAssets';
 import JobDetailsModal from '../components/JobDetailsModal';
 
+import API_BASE_URL from '../config/api';
 const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -142,7 +143,7 @@ const Dashboard = () => {
       setUpcomingLoading(true);
       const token = localStorage.getItem('token');
       if (!token) return;
-      const res = await fetch('http://localhost:5000/api/interviews/my?limit=100', {
+      const res = await fetch(`${API_BASE_URL}/api/interviews/my?limit=100`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -232,7 +233,7 @@ const Dashboard = () => {
       const token = localStorage.getItem("token");
       if (!token) return;
       
-      const res = await fetch(`http://localhost:5000/api/auth/profile`, {
+      const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -272,7 +273,7 @@ const Dashboard = () => {
       const token = localStorage.getItem("token");
       if (!token) return;
       
-      const res = await fetch(`http://localhost:5000/api/applications/my-applications`, {
+      const res = await fetch(`${API_BASE_URL}/api/applications/my-applications`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -316,7 +317,7 @@ const Dashboard = () => {
       const token = localStorage.getItem("token");
       if (!token) return;
       
-      const res = await fetch(`http://localhost:5000/api/saved-jobs/my-jobs?limit=1`, {
+      const res = await fetch(`${API_BASE_URL}/api/saved-jobs/my-jobs?limit=1`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -341,13 +342,13 @@ const Dashboard = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const res = await fetch('http://localhost:5000/api/interviews/my?limit=1', {
+      const res = await fetch(`${API_BASE_URL}/api/interviews/my?limit=1`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
         // We only get the list; compute total via a secondary request or header in future.
         // For now, fetch with a larger limit and count locally (data sets are typically small).
-        const resAll = await fetch('http://localhost:5000/api/interviews/my?limit=500', {
+        const resAll = await fetch(`${API_BASE_URL}/api/interviews/my?limit=500`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (resAll.ok) {
@@ -365,7 +366,7 @@ const Dashboard = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const res = await fetch('http://localhost:5000/api/user/notifications/latest', {
+      const res = await fetch(`${API_BASE_URL}/api/user/notifications/latest`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -384,7 +385,7 @@ const Dashboard = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const res = await fetch(`http://localhost:5000/api/user/notifications/${notificationId}/read`, {
+      const res = await fetch(`${API_BASE_URL}/api/user/notifications/${notificationId}/read`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -431,7 +432,7 @@ const Dashboard = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const res = await fetch(`http://localhost:5000/api/jobs/${jobId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/jobs/${jobId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 

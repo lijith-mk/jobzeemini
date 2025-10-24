@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+import API_BASE_URL from '../config/api';
 const EmployerPostJob = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -43,7 +44,7 @@ const EmployerPostJob = () => {
 
   const fetchEmployerData = async (token) => {
     try {
-      const res = await fetch('http://localhost:5000/api/employers/dashboard/stats', {
+      const res = await fetch(`${API_BASE_URL}/api/employers/dashboard/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -253,7 +254,7 @@ const EmployerPostJob = () => {
 
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:5000/api/employers/jobs', {
+      const res = await fetch(`${API_BASE_URL}/api/employers/jobs`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

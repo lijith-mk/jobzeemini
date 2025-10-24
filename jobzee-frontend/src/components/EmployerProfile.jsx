@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import mapboxgl from 'mapbox-gl';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
+import API_BASE_URL from '../config/api';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
@@ -76,7 +77,7 @@ const EmployerProfile = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/employers/profile', {
+      const response = await fetch(`${API_BASE_URL}/api/employers/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -235,7 +236,7 @@ const EmployerProfile = () => {
 
     try {
       const token = localStorage.getItem('employerToken');
-      const response = await fetch('http://localhost:5000/api/upload/employer/company-logo', {
+      const response = await fetch(`${API_BASE_URL}/api/upload/employer/company-logo`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -328,7 +329,7 @@ const EmployerProfile = () => {
       console.log('🔄 Sending profile update:', updateData);
       console.log('🔑 Token:', token ? 'Present' : 'Missing');
       
-      const response = await fetch('http://localhost:5000/api/employers/profile', {
+      const response = await fetch(`${API_BASE_URL}/api/employers/profile`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

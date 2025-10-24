@@ -3,6 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import ScheduleInterviewModal from '../components/ScheduleInterviewModal';
 
+import API_BASE_URL from '../config/api';
 const JobApplications = () => {
   const navigate = useNavigate();
   const { jobId } = useParams();
@@ -44,7 +45,7 @@ const JobApplications = () => {
       setLoading(true);
       
       // Fetch job details
-      const jobRes = await fetch(`http://localhost:5000/api/employers/jobs/${jobId}`, {
+      const jobRes = await fetch(`${API_BASE_URL}/api/employers/jobs/${jobId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -56,7 +57,7 @@ const JobApplications = () => {
       }
 
       // Fetch applications for this job
-      const applicationsRes = await fetch(`http://localhost:5000/api/applications/job/${jobId}`, {
+      const applicationsRes = await fetch(`${API_BASE_URL}/api/applications/job/${jobId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -80,7 +81,7 @@ const JobApplications = () => {
   const handleApplicationStatusUpdate = async (applicationId, newStatus) => {
     try {
       const token = localStorage.getItem('employerToken');
-      const res = await fetch(`http://localhost:5000/api/applications/${applicationId}/status`, {
+      const res = await fetch(`${API_BASE_URL}/api/applications/${applicationId}/status`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -150,7 +151,7 @@ const JobApplications = () => {
           : []
       };
 
-      const res = await fetch(`http://localhost:5000/api/interviews/${activeApplicationId}/schedule`, {
+      const res = await fetch(`${API_BASE_URL}/api/interviews/${activeApplicationId}/schedule`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
