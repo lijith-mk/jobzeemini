@@ -5,8 +5,9 @@ services:
     runtime: node
     region: oregon
     plan: free
-    buildCommand: cd jobzee-backend && npm install
-    startCommand: cd jobzee-backend && npm start
+    rootDir: jobzee-backend
+    buildCommand: npm install
+    startCommand: npm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
@@ -51,8 +52,9 @@ services:
     runtime: node
     region: oregon
     plan: free
-    buildCommand: cd jobzee-frontend && npm install && npm run build
-    staticPublishPath: ./jobzee-frontend/build
+    rootDir: jobzee-frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./build
     envVars:
       - key: REACT_APP_API_URL
         fromService:
