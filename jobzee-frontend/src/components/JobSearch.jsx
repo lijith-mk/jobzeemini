@@ -397,7 +397,7 @@ const JobSearch = () => {
   };
 
   const categories = [
-    { id: `tech", name: "Technology", icon: "💻", color: "from-blue-500 to-blue-600" },
+    { id: "tech", name: "Technology", icon: "💻", color: "from-blue-500 to-blue-600" },
     { id: "design", name: "Design", icon: "🎨", color: "from-purple-500 to-purple-600" },
     { id: "marketing", name: "Marketing", icon: "📈", color: "from-green-500 to-green-600" },
     { id: "sales", name: "Sales", icon: "💰", color: "from-yellow-500 to-yellow-600" },

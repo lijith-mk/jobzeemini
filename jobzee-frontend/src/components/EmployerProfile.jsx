@@ -140,6 +140,11 @@ const EmployerProfile = () => {
       return;
     }
 
+    // Define resize handler at the top of useEffect so it's in scope for cleanup
+    const handleResize = () => {
+      try { if (mapRef.current) mapRef.current.resize(); } catch (_) {}
+    };
+
     try {
       mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN;
 
@@ -154,11 +159,6 @@ const EmployerProfile = () => {
         center: formData.latitude && formData.longitude ? initialCenter : [0, 20],
         zoom: formData.latitude && formData.longitude ? 10 : 1.5
       });
-
-      // Define resize handler
-      const handleResize = () => {
-        try { if (mapRef.current) mapRef.current.resize(); } catch (_) {}
-      };
       
       // Force render when map loads and when container size changes
       mapRef.current.on('load', () => {
