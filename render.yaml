@@ -49,16 +49,12 @@ services:
   # Frontend Static Site
   - type: web
     name: jobzee-frontend
-    runtime: static
+    runtime: node
     region: oregon
     plan: free
     rootDir: jobzee-frontend
     buildCommand: npm install && npm run build
-    staticPublishPath: build
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
+    startCommand: npx serve -s build -l 3000
     envVars:
       - key: REACT_APP_API_URL
         fromService:
