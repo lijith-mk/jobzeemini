@@ -72,8 +72,8 @@ const cartReducer = (state, action) => {
   }
 };
 
-// API Base URL
-const API_BASE_URL = process.env.REACT_APP_API_URL ? `${process.env.REACT_APP_API_URL}/api` : ${API_BASE_URL}/api`;
+// API Base URL - using imported value with /api suffix
+const API_URL = `${API_URL}/api`;
 
 // Utility function to get auth headers
 const getAuthHeaders = () => {
@@ -127,7 +127,7 @@ export const CartProvider = ({ children }) => {
         return;
       }
 
-      const response = await fetch(`${API_BASE_URL}/cart`, {
+      const response = await fetch(`${API_URL}/cart`, {
         headers
       });
 
@@ -173,7 +173,7 @@ export const CartProvider = ({ children }) => {
       const headers = getAuthHeaders();
       if (!headers.Authorization) return;
 
-      const response = await fetch(`${API_BASE_URL}/cart/summary`, {
+      const response = await fetch(`${API_URL}/cart/summary`, {
         headers
       });
 
@@ -200,7 +200,7 @@ export const CartProvider = ({ children }) => {
         return false;
       }
 
-      const response = await fetch(`${API_BASE_URL}/cart/add`, {
+      const response = await fetch(`${API_URL}/cart/add`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ productId, quantity })
@@ -237,7 +237,7 @@ export const CartProvider = ({ children }) => {
       const headers = getAuthHeaders();
       if (!headers.Authorization) return false;
 
-      const response = await fetch(`${API_BASE_URL}/cart/update/${productId}`, {
+      const response = await fetch(`${API_URL}/cart/update/${productId}`, {
         method: 'PUT',
         headers,
         body: JSON.stringify({ quantity })
@@ -270,7 +270,7 @@ export const CartProvider = ({ children }) => {
       const headers = getAuthHeaders();
       if (!headers.Authorization) return false;
 
-      const response = await fetch(`${API_BASE_URL}/cart/remove/${productId}`, {
+      const response = await fetch(`${API_URL}/cart/remove/${productId}`, {
         method: 'DELETE',
         headers
       });
@@ -303,7 +303,7 @@ export const CartProvider = ({ children }) => {
       const headers = getAuthHeaders();
       if (!headers.Authorization) return false;
 
-      const response = await fetch(`${API_BASE_URL}/cart/clear`, {
+      const response = await fetch(`${API_URL}/cart/clear`, {
         method: 'DELETE',
         headers
       });
@@ -331,7 +331,7 @@ export const CartProvider = ({ children }) => {
       const headers = getAuthHeaders();
       if (!headers.Authorization) return false;
 
-      const response = await fetch(`${API_BASE_URL}/cart/coupon`, {
+      const response = await fetch(`${API_URL}/cart/coupon`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ code, discount, type })
@@ -365,7 +365,7 @@ export const CartProvider = ({ children }) => {
       const headers = getAuthHeaders();
       if (!headers.Authorization) return false;
 
-      const response = await fetch(`${API_BASE_URL}/cart/coupon/${code}`, {
+      const response = await fetch(`${API_URL}/cart/coupon/${code}`, {
         method: 'DELETE',
         headers
       });

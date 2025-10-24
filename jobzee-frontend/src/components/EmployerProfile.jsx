@@ -155,13 +155,15 @@ const EmployerProfile = () => {
         zoom: formData.latitude && formData.longitude ? 10 : 1.5
       });
 
+      // Define resize handler
+      const handleResize = () => {
+        try { if (mapRef.current) mapRef.current.resize(); } catch (_) {}
+      };
+      
       // Force render when map loads and when container size changes
       mapRef.current.on('load', () => {
         try { mapRef.current.resize(); } catch (_) {}
       });
-      const handleResize = () => {
-        try { mapRef.current && mapRef.current.resize(); } catch (_) {}
-      };
       window.addEventListener('resize', handleResize);
 
       const marker = new mapboxgl.Marker({ draggable: true });

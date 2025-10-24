@@ -56,15 +56,6 @@ const EmployerEvents = () => {
   const [prevRevenue, setPrevRevenue] = useState(null);
   const [revenueChanged, setRevenueChanged] = useState(false);
 
-  const openRegs = async (evtId) => {
-    setShowRegsFor(evtId);
-    setRegsLoading(true);
-    try {
-      const token = localStorage.getItem('employerToken');
-      const res = await fetch(`${API_BASE_URL}/api/employers/events/${evtId}/registrations`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
   // Watch revenue change for sparkle/pulse
   useEffect(() => {
     const current = Number(stats.totalRevenue || 0);
@@ -76,6 +67,15 @@ const EmployerEvents = () => {
       return () => clearTimeout(t);
     }
   }, [stats.totalRevenue, prevRevenue]);
+
+  const openRegs = async (evtId) => {
+    setShowRegsFor(evtId);
+    setRegsLoading(true);
+    try {
+      const token = localStorage.getItem('employerToken');
+      const res = await fetch(`${API_BASE_URL}/api/employers/events/${evtId}/registrations`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await res.json();
       if (data?.success) setRegs(data.registrations || []);
     } finally { setRegsLoading(false); }
@@ -247,6 +247,7 @@ const EmployerEvents = () => {
             const isFree = String(evt.type).toLowerCase() === 'free' || Number(evt.price) === 0;
             const goEdit = () => navigate(`/employer/events/${evt._id}/edit`);
             const delEvent = async () => {
+              // eslint-disable-next-line no-restricted-globals
               if (!confirm('Delete this event?')) return;
               try {
                 const token = localStorage.getItem('employerToken');
@@ -333,6 +334,7 @@ const EmployerEvents = () => {
             const isFree = String(evt.type).toLowerCase() === 'free' || Number(evt.price) === 0;
             const goEdit = () => navigate(`/employer/events/${evt._id}/edit`);
             const delEvent = async () => {
+              // eslint-disable-next-line no-restricted-globals
               if (!confirm('Delete this event?')) return;
               try {
                 const token = localStorage.getItem('employerToken');

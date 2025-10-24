@@ -13,7 +13,7 @@ const JobSearch = () => {
   const [location, setLocation] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [skills, setSkills] = useState([]);
-  const [skillsInput, setSkillsInput] = useState("`);
+  const [skillsInput, setSkillsInput] = useState("");
   const [animate, setAnimate] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);

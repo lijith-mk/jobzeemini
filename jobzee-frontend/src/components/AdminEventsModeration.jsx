@@ -228,6 +228,7 @@ const AdminEventsModeration = () => {
                 <button onClick={() => openRegs(evt._id)} className="bg-teal-600 text-white px-3 py-2 rounded">Registrations</button>
                 <button onClick={() => openEdit(evt)} className="bg-indigo-600 text-white px-3 py-2 rounded">Edit</button>
                 <button onClick={async () => {
+                  // eslint-disable-next-line no-restricted-globals
                   if (!confirm('Delete this event?')) return;
                   const res = await fetch(`${API_BASE_URL}/api/admin/events/${evt._id}`, {
                     method: 'DELETE',
@@ -285,6 +286,7 @@ const AdminEventsModeration = () => {
                       }} className="text-xs bg-yellow-600 text-white px-2 py-1 rounded">No-show</button>
                       {r.ticketType === 'paid' && r.paymentStatus !== 'refunded' && (
                         <button onClick={async () => {
+                          // eslint-disable-next-line no-restricted-globals
                           if (!confirm('Refund this registration?')) return;
                           const res = await fetch(`${API_BASE_URL}/api/admin/events/${showRegsFor}/registrations/${r._id}/refund`, {
                             method: 'POST', headers: { 'Authorization': `Bearer ${token}` }
