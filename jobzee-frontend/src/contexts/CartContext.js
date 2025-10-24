@@ -73,7 +73,7 @@ const cartReducer = (state, action) => {
 };
 
 // API Base URL - using imported value with /api suffix
-const API_URL = `${API_URL}/api`;
+const API_URL = `${API_BASE_URL}/api`;
 
 // Utility function to get auth headers
 const getAuthHeaders = () => {
