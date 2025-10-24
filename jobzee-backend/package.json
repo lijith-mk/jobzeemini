@@ -33,6 +33,7 @@
     "multer": "^2.0.2",
     "nodemailer": "^7.0.5",
     "pdfkit": "^0.17.2",
+    "qrcode": "^1.5.3",
     "razorpay": "^2.9.6",
     "stream-buffers": "^3.0.3"
   },
