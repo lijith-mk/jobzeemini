@@ -1131,6 +1131,65 @@ router.delete('/internships/:id', adminAuth, checkPermission('jobManagement'), a
   }
 });
 
+// Get internship applications (admin)
+router.get('/internships/:id/applications', adminAuth, checkPermission('jobManagement'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { page = 1, limit = 10, status } = req.query;
+
+    const query = {
+      internship: id,
+      isDeleted: false
+    };
+
+    if (status) {
+      query.status = status;
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const [applications, total] = await Promise.all([
+      InternshipApplication.find(query)
+        .populate('user', 'name email phone profilePhoto location skills')
+        .populate('internship', 'title companyName location duration')
+        .sort({ appliedAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit)),
+      InternshipApplication.countDocuments(query)
+    ]);
+
+    // Get status statistics
+    const stats = await InternshipApplication.aggregate([
+      { $match: { internship: mongoose.Types.ObjectId(id), isDeleted: false } },
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const statusCounts = {};
+    stats.forEach(s => {
+      statusCounts[s._id] = s.count;
+    });
+
+    res.json({
+      applications,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / parseInt(limit))
+      },
+      stats: statusCounts
+    });
+  } catch (error) {
+    console.error('Get internship applications error:', error);
+    res.status(500).json({ message: 'Failed to fetch applications' });
+  }
+});
+
 // Update internship status (approve/reject/activate)
 router.patch('/internships/:id/status', adminAuth, checkPermission('jobManagement'), async (req, res) => {
   try {

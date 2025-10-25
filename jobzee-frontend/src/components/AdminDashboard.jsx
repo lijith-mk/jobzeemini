@@ -224,6 +224,15 @@ const AdminDashboard = () => {
   });
   const [createInternshipFormErrors, setCreateInternshipFormErrors] = useState({});
   
+  // Internship applications state
+  const [showInternshipApplications, setShowInternshipApplications] = useState(false);
+  const [internshipApplications, setInternshipApplications] = useState([]);
+  const [applicationStats, setApplicationStats] = useState({});
+  const [applicationPage, setApplicationPage] = useState(1);
+  const [applicationTotalPages, setApplicationTotalPages] = useState(1);
+  const [applicationStatusFilter, setApplicationStatusFilter] = useState('');
+  const [selectedInternshipForApps, setSelectedInternshipForApps] = useState(null);
+  
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const admin = JSON.parse(localStorage.getItem('admin') || '{}');
@@ -1116,7 +1125,40 @@ const AdminDashboard = () => {
     }
   };
 
-  const updateInternshipStatus = async (internshipId, status, adminNotes = '') => {
+  const fetchInternshipApplications = async (internshipId, page = 1, status = '') => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const statusParam = status ? `&status=${status}` : '';
+      const res = await fetch(
+        `${API_BASE_URL}/api/admin/internships/${internshipId}/applications?page=${page}&limit=10${statusParam}`,
+        {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }
+      );
+      
+      if (res.ok) {
+        const data = await res.json();
+        setInternshipApplications(data.applications);
+        setApplicationStats(data.stats);
+        setApplicationPage(data.pagination.page);
+        setApplicationTotalPages(data.pagination.totalPages);
+      } else {
+        toast.error('Failed to fetch applications');
+      }
+    } catch (e) {
+      console.error('Fetch applications error:', e);
+      toast.error('Network error');
+    }
+  };
+
+  const openInternshipApplications = (internship) => {
+    setSelectedInternshipForApps(internship);
+    setApplicationStatusFilter('');
+    setShowInternshipApplications(true);
+    fetchInternshipApplications(internship._id, 1, '');
+  };
+
+  const updateInternshipStatus = async (id, status) => {
     try {
       const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_BASE_URL}/api/admin/internships/${internshipId}/status`, {
@@ -3924,6 +3966,7 @@ const AdminDashboard = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applications</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posted</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -3938,6 +3981,14 @@ const AdminDashboard = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{internship.company}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{internship.location}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{internship.duration}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <button 
+                          onClick={() => openInternshipApplications(internship)} 
+                          className="text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          {internship.applicationsCount || 0} applicants
+                        </button>
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 text-xs rounded-full ${
                           internship.status === 'active' ? 'bg-green-100 text-green-800' :
@@ -4141,6 +4192,177 @@ const AdminDashboard = () => {
                   Save & Update
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Internship Applications Modal */}
+        {showInternshipApplications && selectedInternshipForApps && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl p-6 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold">Applications for {selectedInternshipForApps.title}</h3>
+                  <p className="text-sm text-gray-600">{selectedInternshipForApps.companyName}</p>
+                </div>
+                <button onClick={() => setShowInternshipApplications(false)} className="text-gray-500 hover:text-gray-700 text-2xl">✕</button>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-6">
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <div className="text-xs text-gray-500">Total</div>
+                  <div className="text-lg font-semibold">{Object.values(applicationStats).reduce((a, b) => a + b, 0)}</div>
+                </div>
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <div className="text-xs text-gray-500">Applied</div>
+                  <div className="text-lg font-semibold text-blue-600">{applicationStats.applied || 0}</div>
+                </div>
+                <div className="bg-yellow-50 p-3 rounded-lg">
+                  <div className="text-xs text-gray-500">Reviewed</div>
+                  <div className="text-lg font-semibold text-yellow-600">{applicationStats.reviewed || 0}</div>
+                </div>
+                <div className="bg-purple-50 p-3 rounded-lg">
+                  <div className="text-xs text-gray-500">Shortlisted</div>
+                  <div className="text-lg font-semibold text-purple-600">{applicationStats.shortlisted || 0}</div>
+                </div>
+                <div className="bg-indigo-50 p-3 rounded-lg">
+                  <div className="text-xs text-gray-500">Interview</div>
+                  <div className="text-lg font-semibold text-indigo-600">{applicationStats.interview || 0}</div>
+                </div>
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <div className="text-xs text-gray-500">Selected</div>
+                  <div className="text-lg font-semibold text-green-600">{applicationStats.selected || 0}</div>
+                </div>
+                <div className="bg-red-50 p-3 rounded-lg">
+                  <div className="text-xs text-gray-500">Rejected</div>
+                  <div className="text-lg font-semibold text-red-600">{applicationStats.rejected || 0}</div>
+                </div>
+              </div>
+
+              {/* Filters */}
+              <div className="mb-4">
+                <select
+                  value={applicationStatusFilter}
+                  onChange={(e) => {
+                    setApplicationStatusFilter(e.target.value);
+                    fetchInternshipApplications(selectedInternshipForApps._id, 1, e.target.value);
+                  }}
+                  className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">All Status</option>
+                  <option value="applied">Applied</option>
+                  <option value="reviewed">Reviewed</option>
+                  <option value="shortlisted">Shortlisted</option>
+                  <option value="interview">Interview</option>
+                  <option value="selected">Selected</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="withdrawn">Withdrawn</option>
+                </select>
+              </div>
+
+              {/* Applications Table */}
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Candidate</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Skills</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Applied</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {internshipApplications.length === 0 ? (
+                      <tr>
+                        <td colSpan="5" className="px-4 py-8 text-center text-gray-500">
+                          No applications found
+                        </td>
+                      </tr>
+                    ) : (
+                      internshipApplications.map((app) => (
+                        <tr key={app._id} className="hover:bg-gray-50">
+                          <td className="px-4 py-4">
+                            <div className="flex items-center">
+                              <div className="h-10 w-10 flex-shrink-0">
+                                {app.user?.profilePhoto ? (
+                                  <img className="h-10 w-10 rounded-full" src={app.user.profilePhoto} alt="" />
+                                ) : (
+                                  <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-semibold">
+                                    {app.user?.name?.charAt(0).toUpperCase()}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="ml-4">
+                                <div className="font-medium text-gray-900">{app.user?.name || 'N/A'}</div>
+                                <div className="text-sm text-gray-500">{app.user?.location || 'Location not provided'}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="text-sm text-gray-900">{app.user?.email || 'N/A'}</div>
+                            <div className="text-sm text-gray-500">{app.user?.phone || 'N/A'}</div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex flex-wrap gap-1">
+                              {app.user?.skills?.slice(0, 3).map((skill, idx) => (
+                                <span key={idx} className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
+                                  {skill}
+                                </span>
+                              ))}
+                              {app.user?.skills?.length > 3 && (
+                                <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
+                                  +{app.user.skills.length - 3}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className={`px-2 py-1 text-xs rounded-full ${
+                              app.status === 'applied' ? 'bg-blue-100 text-blue-800' :
+                              app.status === 'reviewed' ? 'bg-yellow-100 text-yellow-800' :
+                              app.status === 'shortlisted' ? 'bg-purple-100 text-purple-800' :
+                              app.status === 'interview' ? 'bg-indigo-100 text-indigo-800' :
+                              app.status === 'selected' ? 'bg-green-100 text-green-800' :
+                              app.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {app.status}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 text-sm text-gray-500">
+                            {new Date(app.appliedAt).toLocaleDateString()}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              {applicationTotalPages > 1 && (
+                <div className="flex items-center justify-between mt-4">
+                  <div className="text-sm text-gray-600">Page {applicationPage} of {applicationTotalPages}</div>
+                  <div className="space-x-2">
+                    <button
+                      disabled={applicationPage <= 1}
+                      onClick={() => fetchInternshipApplications(selectedInternshipForApps._id, applicationPage - 1, applicationStatusFilter)}
+                      className="px-3 py-1 rounded border disabled:opacity-50"
+                    >
+                      Prev
+                    </button>
+                    <button
+                      disabled={applicationPage >= applicationTotalPages}
+                      onClick={() => fetchInternshipApplications(selectedInternshipForApps._id, applicationPage + 1, applicationStatusFilter)}
+                      className="px-3 py-1 rounded border disabled:opacity-50"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
