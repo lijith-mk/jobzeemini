@@ -11,11 +11,16 @@ const InternshipDetails = () => {
   const [internship, setInternship] = useState(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false);
+  const [checkingApplication, setCheckingApplication] = useState(false);
   const userType = sessionManager.getUserType();
   const isEmployer = userType === 'employer';
 
   useEffect(() => {
     fetchInternshipDetails();
+    if (!isEmployer) {
+      checkApplicationStatus();
+    }
   }, [id, internshipId]);
 
   const fetchInternshipDetails = async () => {
@@ -37,6 +42,30 @@ const InternshipDetails = () => {
       navigate('/internships');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkApplicationStatus = async () => {
+    const token = localStorage.getItem('userToken') || localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      setCheckingApplication(true);
+      const currentId = id || internshipId;
+      const response = await fetch(`${API_BASE_URL}/api/internships/${currentId}/application-status`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setHasApplied(data.hasApplied || false);
+      }
+    } catch (error) {
+      console.error('Error checking application status:', error);
+    } finally {
+      setCheckingApplication(false);
     }
   };
 
@@ -283,6 +312,22 @@ const InternshipDetails = () => {
                             className="w-full py-3 bg-gray-300 text-gray-500 rounded-md font-semibold cursor-not-allowed"
                           >
                             Not Available
+                          </button>
+                        </div>
+                      ) : hasApplied ? (
+                        <div>
+                          <p className="text-green-600 font-medium mb-3">You have already applied</p>
+                          <button 
+                            disabled 
+                            className="w-full py-3 bg-green-100 text-green-700 rounded-md font-semibold cursor-not-allowed"
+                          >
+                            Already Applied
+                          </button>
+                          <button
+                            onClick={() => navigate('/my-internship-applications')}
+                            className="w-full mt-3 py-2 border border-blue-600 text-blue-600 rounded-md font-medium hover:bg-blue-50 transition-colors"
+                          >
+                            View My Applications
                           </button>
                         </div>
                       ) : (

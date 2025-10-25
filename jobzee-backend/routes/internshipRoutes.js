@@ -196,6 +196,29 @@ router.get('/employer', employerAuth, getEmployerInternships);
 // GET /api/internships/:id - Get specific internship details
 router.get('/:id', getInternshipById);
 
+// GET /api/internships/:id/application-status - Check if user has applied
+router.get('/:id/application-status', auth, async (req, res) => {
+  try {
+    const InternshipApplication = require('../models/InternshipApplication');
+    const application = await InternshipApplication.findOne({
+      internship: req.params.id,
+      user: req.user.id,
+      isDeleted: false
+    });
+    
+    res.json({
+      hasApplied: !!application,
+      application: application ? {
+        status: application.status,
+        appliedAt: application.appliedAt
+      } : null
+    });
+  } catch (error) {
+    console.error('Check application status error:', error);
+    res.status(500).json({ message: 'Failed to check application status' });
+  }
+});
+
 // POST /api/internships/:id/apply - Apply for internship (user only)
 router.post('/:internshipId/apply', auth, applyForInternship);
 
