@@ -632,7 +632,7 @@ const UserProfile = () => {
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Profile Sidebar */}
         <div className={`lg:col-span-1 transform transition-all duration-700 delay-200 ${animate ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}>
-          <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 sticky top-8 ring-1 ring-black/5">
+          <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 lg:sticky lg:top-24 ring-1 ring-black/5 max-h-[calc(100vh-8rem)] overflow-y-auto profile-sidebar-scroll">
             {/* Profile Picture */}
             <div className="text-center mb-8">
               <div className="relative inline-block">
