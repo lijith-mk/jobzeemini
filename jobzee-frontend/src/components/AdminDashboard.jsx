@@ -1161,13 +1161,13 @@ const AdminDashboard = () => {
   const updateInternshipStatus = async (id, status) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${API_BASE_URL}/api/admin/internships/${internshipId}/status`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/internships/${id}/status`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ status, adminNotes })
+        body: JSON.stringify({ status })
       });
 
       if (response.ok) {
