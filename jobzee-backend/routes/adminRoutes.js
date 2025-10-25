@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const { adminAuth, checkPermission } = require('../middleware/adminAuth');
 const { adminLimiter, authLimiter } = require('../middleware/rateLimiter');
 const Admin = require('../models/Admin');
@@ -1160,7 +1161,7 @@ router.get('/internships/:id/applications', adminAuth, checkPermission('jobManag
 
     // Get status statistics
     const stats = await InternshipApplication.aggregate([
-      { $match: { internship: mongoose.Types.ObjectId(id), isDeleted: false } },
+      { $match: { internship: new mongoose.Types.ObjectId(id), isDeleted: false } },
       {
         $group: {
           _id: '$status',
