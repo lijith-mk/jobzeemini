@@ -53,7 +53,7 @@ const AdminDashboard = () => {
     salaryCurrency: 'USD',
     location: '',
     employmentType: 'full-time',
-    remote: 'onsite',
+    remote: 'on-site',
     category: '',
     experienceLevel: 'entry'
   });
@@ -67,7 +67,7 @@ const AdminDashboard = () => {
     salaryCurrency: 'USD',
     location: '',
     employmentType: 'full-time',
-    remote: 'onsite',
+    remote: 'on-site',
     experienceLevel: 'entry',
     status: 'approved',
     requirementsCSV: '',
@@ -203,7 +203,7 @@ const AdminDashboard = () => {
     stipendCurrency: 'INR',
     location: '',
     duration: '',
-    remote: 'onsite',
+    remote: 'on-site',
     experienceLevel: 'entry'
   });
   const [internshipFormErrors, setInternshipFormErrors] = useState({});
@@ -216,7 +216,7 @@ const AdminDashboard = () => {
     stipendCurrency: 'INR',
     location: '',
     duration: '',
-    remote: 'onsite',
+    remote: 'on-site',
     experienceLevel: 'entry',
     status: 'approved',
     requirementsCSV: '',
@@ -532,7 +532,7 @@ const AdminDashboard = () => {
         setShowCreateJob(false);
         setCreateJobForm({
           employerId: '', jobTitle: '', description: '', salaryMin: '', salaryMax: '', salaryCurrency: 'USD',
-          location: '', employmentType: 'full-time', remote: 'onsite', experienceLevel: 'entry', status: 'approved',
+          location: '', employmentType: 'full-time', remote: 'on-site', experienceLevel: 'entry', status: 'approved',
           requirementsCSV: '', benefitsCSV: '', skillsCSV: ''
         });
         fetchJobs(1, searchTerm, filterStatus);
@@ -576,7 +576,7 @@ const AdminDashboard = () => {
       salaryCurrency: job.salary?.currency || 'USD',
       location: job.location || '',
       employmentType: (job.jobType || 'full-time'),
-      remote: job.remote || 'onsite',
+      remote: job.remote || 'on-site',
       category: '',
       experienceLevel: job.experienceLevel || 'entry'
     });
@@ -962,7 +962,7 @@ const AdminDashboard = () => {
         setShowCreateInternship(false);
         setCreateInternshipForm({
           employerId: '', title: '', description: '', stipendMin: '', stipendMax: '', stipendCurrency: 'INR',
-          location: '', duration: '', remote: 'onsite', experienceLevel: 'entry', status: 'approved',
+          location: '', duration: '', remote: 'on-site', experienceLevel: 'entry', status: 'approved',
           requirementsCSV: '', skillsCSV: ''
         });
         fetchInternships(1, internshipSearch, internshipStatus);
@@ -1013,7 +1013,7 @@ const AdminDashboard = () => {
       stipendCurrency: internship.stipend?.currency || 'INR',
       location: internship.location || '',
       duration: internship.duration || '',
-      remote: internship.remote || 'onsite',
+      remote: internship.remote || 'on-site',
       experienceLevel: internship.experienceLevel || 'entry'
     });
     setInternshipFormErrors({});
@@ -4110,7 +4110,7 @@ const AdminDashboard = () => {
                     onChange={e => handleInternshipFormChange('remote', e.target.value)} 
                     className="w-full border rounded px-3 py-2"
                   >
-                    <option value="onsite">On-site</option>
+                    <option value="on-site">On-site</option>
                     <option value="hybrid">Hybrid</option>
                     <option value="remote">Remote</option>
                   </select>
@@ -4254,7 +4254,7 @@ const AdminDashboard = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Work Mode</label>
                   <select value={createInternshipForm.remote} onChange={e=>setCreateInternshipForm({...createInternshipForm, remote:e.target.value})} className="w-full border rounded px-3 py-2">
-                    <option value="onsite">On-site</option>
+                    <option value="on-site">On-site</option>
                     <option value="hybrid">Hybrid</option>
                     <option value="remote">Remote</option>
                   </select>
@@ -4564,7 +4564,7 @@ const AdminDashboard = () => {
                     onChange={e => handleJobFormChange('remote', e.target.value)} 
                     className="w-full border rounded px-3 py-2 border-gray-300 focus:border-blue-500"
                   >
-                    <option value="onsite">On-site</option>
+                    <option value="on-site">On-site</option>
                     <option value="hybrid">Hybrid</option>
                     <option value="remote">Remote</option>
                   </select>
@@ -4656,7 +4656,7 @@ const AdminDashboard = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Work Mode</label>
                   <select value={createJobForm.remote} onChange={e=>setCreateJobForm({...createJobForm, remote:e.target.value})} className="w-full border rounded px-3 py-2">
-                    <option value="onsite">On-site</option>
+                    <option value="on-site">On-site</option>
                     <option value="hybrid">Hybrid</option>
                     <option value="remote">Remote</option>
                   </select>
