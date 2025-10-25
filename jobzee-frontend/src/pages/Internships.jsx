@@ -147,23 +147,25 @@ const Internships = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-6 animate-pulse">
-              <FaStar className="mr-2 text-yellow-300" />
-              <span>{filteredInternships.length} Premium Opportunities Available</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">
+                Find Internships
+              </h1>
+              <p className="text-base text-blue-100">
+                Discover amazing opportunities to kickstart your career
+              </p>
             </div>
-            <h1 className="text-5xl md:text-6xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-100">
-              Find Your Dream Internship
-            </h1>
-            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Discover amazing internship opportunities from top companies and kickstart your career journey
-            </p>
+            <div className="hidden md:flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium">
+              <FaStar className="mr-2 text-yellow-300" />
+              <span>{filteredInternships.length} Available</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6">
         {/* Search and Filter Section */}
 
         {/* Search and Filter Section */}
