@@ -5,6 +5,7 @@ import API_BASE_URL from '../config/api';
 const RecommendedInternships = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('internships');
+  const [algorithm, setAlgorithm] = useState('knn'); // 'knn' or 'naive_bayes'
   const [internshipRecommendations, setInternshipRecommendations] = useState([]);
   const [jobRecommendations, setJobRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,7 +14,7 @@ const RecommendedInternships = () => {
   useEffect(() => {
     fetchInternshipRecommendations();
     fetchJobRecommendations();
-  }, []);
+  }, [algorithm]);
 
   const fetchInternshipRecommendations = async () => {
     try {
@@ -21,7 +22,11 @@ const RecommendedInternships = () => {
       
       if (!token) return;
 
-      const response = await fetch(`${API_BASE_URL}/api/recommendations/internships/personalized?limit=6`, {
+      const endpoint = algorithm === 'naive_bayes' 
+        ? `${API_BASE_URL}/api/recommendations/internships/personalized-nb?limit=6`
+        : `${API_BASE_URL}/api/recommendations/internships/personalized?limit=6`;
+
+      const response = await fetch(endpoint, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -47,7 +52,11 @@ const RecommendedInternships = () => {
         return;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/recommendations/jobs/personalized?limit=6`, {
+      const endpoint = algorithm === 'naive_bayes'
+        ? `${API_BASE_URL}/api/recommendations/jobs/personalized-nb?limit=6`
+        : `${API_BASE_URL}/api/recommendations/jobs/personalized?limit=6`;
+
+      const response = await fetch(endpoint, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -149,7 +158,7 @@ const RecommendedInternships = () => {
               <h3 className="text-xl font-bold text-gray-900">AI-Powered Recommendations</h3>
               <p className="text-sm text-gray-600">
                 {basedOn === 'application_history' 
-                  ? 'Personalized using KNN Algorithm based on your applications'
+                  ? `Personalized using ${algorithm === 'knn' ? 'KNN' : 'Naive Bayes'} Algorithm`
                   : 'Curated opportunities selected for you'
                 }
               </p>
@@ -164,27 +173,42 @@ const RecommendedInternships = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex space-x-2">
-          <button
-            onClick={() => setActiveTab('internships')}
-            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-              activeTab === 'internships'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'bg-white text-gray-600 hover:bg-gray-50'
-            }`}
-          >
-            Internships ({internshipRecommendations.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('jobs')}
-            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-              activeTab === 'jobs'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'bg-white text-gray-600 hover:bg-gray-50'
-            }`}
-          >
-            Jobs ({jobRecommendations.length})
-          </button>
+        <div className="flex items-center justify-between">
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setActiveTab('internships')}
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                activeTab === 'internships'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              Internships ({internshipRecommendations.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('jobs')}
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                activeTab === 'jobs'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              Jobs ({jobRecommendations.length})
+            </button>
+          </div>
+          
+          {/* Algorithm Selector */}
+          <div className="flex items-center space-x-2">
+            <span className="text-xs text-gray-500 font-medium">Algorithm:</span>
+            <select
+              value={algorithm}
+              onChange={(e) => setAlgorithm(e.target.value)}
+              className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700"
+            >
+              <option value="knn">KNN</option>
+              <option value="naive_bayes">Naive Bayes</option>
+            </select>
+          </div>
         </div>
       </div>
 

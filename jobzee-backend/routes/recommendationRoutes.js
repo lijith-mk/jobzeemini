@@ -6,6 +6,7 @@ const Internship = require('../models/Internship');
 const Application = require('../models/Application');
 const InternshipApplication = require('../models/InternshipApplication');
 const knnRecommendation = require('../services/knnRecommendation');
+const naiveBayesRecommendation = require('../services/naiveBayesRecommendation');
 
 /**
  * GET /api/recommendations/jobs/:id/similar
@@ -151,6 +152,158 @@ router.get('/internships/personalized', auth, async (req, res) => {
     });
   } catch (error) {
     console.error('Get personalized internship recommendations error:', error);
+    res.status(500).json({ message: 'Failed to get recommendations' });
+  }
+});
+
+/**
+ * GET /api/recommendations/jobs/personalized-nb
+ * Get personalized job recommendations using Naive Bayes algorithm
+ */
+router.get('/jobs/personalized-nb', auth, async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+
+    // Get user's job applications
+    const userApplications = await Application.find({ 
+      userId: req.user.id 
+    }).populate('job');
+
+    // Get all active jobs
+    const allJobs = await Job.find({ status: 'active' }).limit(200);
+
+    // Get personalized recommendations using Naive Bayes
+    const recommendations = await naiveBayesRecommendation.getPersonalizedRecommendations(
+      userApplications,
+      allJobs,
+      'job',
+      limit
+    );
+
+    res.json({
+      success: true,
+      recommendations,
+      algorithm: 'naive_bayes',
+      basedOn: userApplications.length > 0 ? 'application_history' : 'popular'
+    });
+  } catch (error) {
+    console.error('Get Naive Bayes job recommendations error:', error);
+    res.status(500).json({ message: 'Failed to get recommendations' });
+  }
+});
+
+/**
+ * GET /api/recommendations/internships/personalized-nb
+ * Get personalized internship recommendations using Naive Bayes algorithm
+ */
+router.get('/internships/personalized-nb', auth, async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+
+    // Get user's internship applications
+    const userApplications = await InternshipApplication.find({ 
+      user: req.user.id 
+    }).populate('internship');
+
+    // Get all active internships
+    const allInternships = await Internship.find({ status: 'active' }).limit(200);
+
+    // Get personalized recommendations using Naive Bayes
+    const recommendations = await naiveBayesRecommendation.getPersonalizedRecommendations(
+      userApplications,
+      allInternships,
+      'internship',
+      limit
+    );
+
+    res.json({
+      success: true,
+      recommendations,
+      algorithm: 'naive_bayes',
+      basedOn: userApplications.length > 0 ? 'application_history' : 'popular'
+    });
+  } catch (error) {
+    console.error('Get Naive Bayes internship recommendations error:', error);
+    res.status(500).json({ message: 'Failed to get recommendations' });
+  }
+});
+
+/**
+ * GET /api/recommendations/jobs/:id/similar-nb
+ * Get similar jobs using Naive Bayes feature similarity
+ */
+router.get('/jobs/:id/similar-nb', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const limit = parseInt(req.query.limit) || 5;
+
+    // Get the target job
+    const targetJob = await Job.findById(id);
+    if (!targetJob) {
+      return res.status(404).json({ message: 'Job not found' });
+    }
+
+    // Get all active jobs
+    const allJobs = await Job.find({ 
+      status: 'active',
+      _id: { $ne: id } 
+    }).limit(100);
+
+    // Get recommendations using Naive Bayes
+    const recommendations = await naiveBayesRecommendation.getSimilarItems(
+      targetJob,
+      allJobs,
+      'job',
+      limit
+    );
+
+    res.json({
+      success: true,
+      recommendations,
+      algorithm: 'naive_bayes'
+    });
+  } catch (error) {
+    console.error('Get similar jobs (Naive Bayes) error:', error);
+    res.status(500).json({ message: 'Failed to get recommendations' });
+  }
+});
+
+/**
+ * GET /api/recommendations/internships/:id/similar-nb
+ * Get similar internships using Naive Bayes feature similarity
+ */
+router.get('/internships/:id/similar-nb', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const limit = parseInt(req.query.limit) || 5;
+
+    // Get the target internship
+    const targetInternship = await Internship.findById(id);
+    if (!targetInternship) {
+      return res.status(404).json({ message: 'Internship not found' });
+    }
+
+    // Get all active internships
+    const allInternships = await Internship.find({ 
+      status: 'active',
+      _id: { $ne: id } 
+    }).limit(100);
+
+    // Get recommendations using Naive Bayes
+    const recommendations = await naiveBayesRecommendation.getSimilarItems(
+      targetInternship,
+      allInternships,
+      'internship',
+      limit
+    );
+
+    res.json({
+      success: true,
+      recommendations,
+      algorithm: 'naive_bayes'
+    });
+  } catch (error) {
+    console.error('Get similar internships (Naive Bayes) error:', error);
     res.status(500).json({ message: 'Failed to get recommendations' });
   }
 });
