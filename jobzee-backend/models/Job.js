@@ -47,6 +47,11 @@ const jobSchema = new mongoose.Schema({
   skills: [{
     type: String
   }],
+  category: {
+    type: String,
+    enum: ['technology', 'marketing', 'finance', 'hr', 'design', 'sales', 'operations', 'consulting', 'customer-service', 'other'],
+    default: 'other'
+  },
   remote: {
     type: String,
     enum: ['remote', 'hybrid', 'onsite'],
