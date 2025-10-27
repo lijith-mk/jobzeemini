@@ -77,6 +77,7 @@ const internshipRoutes = require('./routes/internshipRoutes');
 const internshipApplicationRoutes = require('./routes/internshipApplicationRoutes');
 const recommendationRoutes = require('./routes/recommendationRoutes');
 const predictionRoutes = require('./routes/predictionRoutes');
+const screeningRoutes = require('./routes/screeningRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/employers', employerRoutes);
@@ -104,6 +105,7 @@ app.use('/api/internships', internshipRoutes);
 app.use('/api/internship-applications', internshipApplicationRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/predictions', predictionRoutes);
+app.use('/api/screening', screeningRoutes);
 
 // Debug endpoint to test frontend connectivity
 app.get('/api/debug', (req, res) => {
