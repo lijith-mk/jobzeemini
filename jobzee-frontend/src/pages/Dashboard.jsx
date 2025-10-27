@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { getDashboardAssets, getDashboardBackgrounds, handleImageErrorEnhanced } from '../services/dashboardAssets';
 import JobDetailsModal from '../components/JobDetailsModal';
+import RecommendedInternships from '../components/RecommendedInternships';
 
 import API_BASE_URL from '../config/api';
 const Dashboard = () => {
@@ -1276,6 +1277,9 @@ const Dashboard = () => {
             </div>
           )}
         </div>
+
+        {/* Recommended Internships Section */}
+        <RecommendedInternships />
       </div>
 
       {/* Logout Confirmation Modal */}
