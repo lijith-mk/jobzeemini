@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FaMapMarkerAlt, FaClock, FaRupeeSign, FaCalendarAlt, FaGraduationCap, FaBuilding, FaEnvelope, FaPhone, FaExternalLinkAlt, FaArrowLeft } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import sessionManager from '../utils/sessionManager';
+import SuccessPrediction from '../components/SuccessPrediction';
 
 import API_BASE_URL from '../config/api';
 const InternshipDetails = () => {
@@ -315,6 +316,11 @@ const InternshipDetails = () => {
 
               {/* Sidebar */}
               <div className="space-y-6">
+                {/* Success Prediction (shown for logged-in users) */}
+                {!isEmployer && (
+                  <SuccessPrediction internshipId={internship._id} type="internship" />
+                )}
+
                 {/* Apply Button (hidden for employers) */}
                 {!isEmployer && (
                   <div className="bg-gray-50 rounded-lg p-6">

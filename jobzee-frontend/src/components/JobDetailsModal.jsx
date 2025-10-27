@@ -1,4 +1,5 @@
 import React from 'react';
+import SuccessPrediction from './SuccessPrediction';
 
 const JobDetailsModal = ({ job, isOpen, onClose }) => {
   if (!isOpen || !job) return null;
@@ -170,6 +171,9 @@ const JobDetailsModal = ({ job, isOpen, onClose }) => {
               </ul>
             </div>
           )}
+
+          {/* Success Prediction */}
+          <SuccessPrediction jobId={job._id} type="job" />
 
           {/* Additional Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
