@@ -5,6 +5,7 @@ const User = require('../models/User');
 const Job = require('../models/Job');
 const Internship = require('../models/Internship');
 const decisionTreePrediction = require('../services/decisionTreePrediction');
+const salaryPredictor = require('../services/neuralNetSalaryPredictor');
 
 /**
  * POST /api/predictions/job-success
@@ -143,6 +144,99 @@ router.get('/internship-success/:internshipId', auth, async (req, res) => {
   } catch (error) {
     console.error('Internship success prediction error:', error);
     res.status(500).json({ message: 'Failed to predict success' });
+  }
+});
+
+/**
+ * GET /api/predictions/salary/my-profile
+ * Predict salary for logged-in user's profile
+ */
+router.get('/salary/my-profile', auth, async (req, res) => {
+  try {
+    // Get user profile
+    const user = await User.findById(req.user.id).lean();
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Predict salary
+    const prediction = salaryPredictor.predict(user);
+    const marketComparison = salaryPredictor.getMarketComparison(
+      prediction.predicted.average,
+      user
+    );
+
+    res.json({
+      success: true,
+      salary: prediction,
+      marketComparison
+    });
+  } catch (error) {
+    console.error('Salary prediction error:', error);
+    res.status(500).json({ message: 'Failed to predict salary' });
+  }
+});
+
+/**
+ * POST /api/predictions/salary/for-job
+ * Predict recommended salary for a job posting
+ */
+router.post('/salary/for-job', auth, async (req, res) => {
+  try {
+    const jobData = req.body;
+
+    if (!jobData) {
+      return res.status(400).json({ message: 'Job data is required' });
+    }
+
+    // Predict salary
+    const prediction = salaryPredictor.predict(jobData);
+    const marketComparison = salaryPredictor.getMarketComparison(
+      prediction.predicted.average,
+      jobData
+    );
+
+    res.json({
+      success: true,
+      salary: prediction,
+      marketComparison,
+      recommendation: `We recommend offering ₹${(prediction.predicted.min / 100000).toFixed(1)}L - ₹${(prediction.predicted.max / 100000).toFixed(1)}L to attract quality candidates`
+    });
+  } catch (error) {
+    console.error('Job salary prediction error:', error);
+    res.status(500).json({ message: 'Failed to predict salary' });
+  }
+});
+
+/**
+ * GET /api/predictions/salary/for-job/:jobId
+ * Get salary prediction for an existing job
+ */
+router.get('/salary/for-job/:jobId', async (req, res) => {
+  try {
+    const { jobId } = req.params;
+
+    const job = await Job.findById(jobId).lean();
+    if (!job) {
+      return res.status(404).json({ message: 'Job not found' });
+    }
+
+    // Predict salary
+    const prediction = salaryPredictor.predict(job);
+    const marketComparison = salaryPredictor.getMarketComparison(
+      prediction.predicted.average,
+      job
+    );
+
+    res.json({
+      success: true,
+      salary: prediction,
+      marketComparison,
+      currentSalary: job.salary
+    });
+  } catch (error) {
+    console.error('Job salary prediction error:', error);
+    res.status(500).json({ message: 'Failed to predict salary' });
   }
 });
 
