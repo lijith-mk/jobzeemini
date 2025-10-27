@@ -52,6 +52,10 @@ export const API_ENDPOINTS = {
   INTERNSHIPS: `${API_BASE_URL}/api/internships`,
   // Internship Applications
   INTERNSHIP_APPLICATIONS: `${API_BASE_URL}/api/internship-applications`,
+  // AI Predictions
+  PREDICTIONS: `${API_BASE_URL}/api/predictions`,
+  // AI Screening
+  SCREENING: `${API_BASE_URL}/api/screening`,
 };
 
 export default API_BASE_URL;
