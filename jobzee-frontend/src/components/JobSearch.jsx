@@ -410,6 +410,15 @@ const JobSearch = () => {
 
   // After backend-side filtering, we generally receive matching jobs already
   // but keep a light client filter for immediate UI response while typing
+  const filteredJobs = jobs.filter(job => {
+    const matchesSearch = !searchTerm || job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         job.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesLocation = !location || (job.location || '').toLowerCase().includes(location.toLowerCase());
+    const matchesCategory = !selectedCategory || job.category === selectedCategory;
+    const matchesSkills = !skills.length || skills.every(s => (job.skills || []).some(js => js.toLowerCase() === s.toLowerCase()));
+    return matchesSearch && matchesLocation && matchesCategory && matchesSkills;
+  });
 
   // Sort the filtered jobs based on selected sort option
   const sortedJobs = useMemo(() => {
