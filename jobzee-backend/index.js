@@ -73,6 +73,7 @@ const addressRoutes = require('./routes/addressRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const internshipRoutes = require('./routes/internshipRoutes');
 const internshipApplicationRoutes = require('./routes/internshipApplicationRoutes');
+const recommendationRoutes = require('./routes/recommendationRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/employers', employerRoutes);
@@ -98,6 +99,7 @@ app.use('/api/addresses', addressRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/internships', internshipRoutes);
 app.use('/api/internship-applications', internshipApplicationRoutes);
+app.use('/api/recommendations', recommendationRoutes);
 
 // Debug endpoint to test frontend connectivity
 app.get('/api/debug', (req, res) => {
