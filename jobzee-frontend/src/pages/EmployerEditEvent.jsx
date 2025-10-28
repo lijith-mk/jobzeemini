@@ -235,12 +235,6 @@ const EmployerEditEvent = () => {
           </div>
         </div>
         
-        {/* Images URLs */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Image URLs (comma separated)</label>
-          <input name="images" value={form.images} onChange={handleChange} className="w-full border rounded px-3 py-2" placeholder="https://..., https://..." />
-          <p className="text-xs text-gray-500 mt-1">Add one or more image URLs to showcase in the event gallery.</p>
-        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Visibility</label>
