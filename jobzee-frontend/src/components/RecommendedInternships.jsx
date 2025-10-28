@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API_BASE_URL from '../config/api';
+import JobDetailsModal from './JobDetailsModal';
 
 const RecommendedInternships = () => {
   const navigate = useNavigate();
@@ -10,6 +11,8 @@ const RecommendedInternships = () => {
   const [jobRecommendations, setJobRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [basedOn, setBasedOn] = useState('popular');
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [showJobModal, setShowJobModal] = useState(false);
 
   useEffect(() => {
     fetchInternshipRecommendations();
@@ -88,6 +91,32 @@ const RecommendedInternships = () => {
       return `₹${salary.min.toLocaleString()} - ₹${salary.max.toLocaleString()}`;
     }
     return salary.min ? `₹${salary.min.toLocaleString()}+` : 'Not specified';
+  };
+
+  const handleJobClick = async (jobId) => {
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('userToken');
+      const response = await fetch(`${API_BASE_URL}/api/jobs/${jobId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedJob(data.job);
+        setShowJobModal(true);
+      } else {
+        console.error('Failed to fetch job details');
+      }
+    } catch (err) {
+      console.error('Error fetching job details:', err);
+    }
+  };
+
+  const closeJobModal = () => {
+    setShowJobModal(false);
+    setSelectedJob(null);
   };
 
   const recommendations = activeTab === 'internships' ? internshipRecommendations : jobRecommendations;
@@ -216,12 +245,19 @@ const RecommendedInternships = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {recommendations.map((item, index) => {
             const isInternship = activeTab === 'internships';
-            const detailsLink = isInternship ? `/internships/${item._id}` : `/job/${item._id}`;
+            
+            const handleClick = () => {
+              if (isInternship) {
+                navigate(`/internships/${item._id}`);
+              } else {
+                handleJobClick(item._id);
+              }
+            };
             
             return (
               <div
                 key={item._id}
-                onClick={() => navigate(detailsLink)}
+                onClick={handleClick}
                 className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-300 cursor-pointer group hover:border-blue-300"
               >
                 <div className="flex justify-between items-start mb-3">
@@ -314,6 +350,13 @@ const RecommendedInternships = () => {
           </button>
         </div>
       </div>
+
+      {/* Job Details Modal */}
+      <JobDetailsModal 
+        job={selectedJob}
+        isOpen={showJobModal}
+        onClose={closeJobModal}
+      />
     </div>
   );
 };
