@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import SalaryInsights from '../components/SalaryInsights';
 
 import API_BASE_URL from '../config/api';
 const EmployerMyJobs = () => {
@@ -405,6 +406,20 @@ const EmployerMyJobs = () => {
                       </div>
                     </div>
                   </div>
+                  
+                  {/* AI Salary Insights */}
+                  {job.status === 'active' && job.salary && (
+                    <div className="mt-4 px-6 pb-4">
+                      <SalaryInsights 
+                        jobId={job._id}
+                        jobTitle={job.title}
+                        currentSalary={{
+                          min: job.salary.min,
+                          max: job.salary.max
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

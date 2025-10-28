@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { validateEmail, validatePhone, FormValidator } from '../utils/validationUtils';
+import SalaryPrediction from './SalaryPrediction';
 
 import API_BASE_URL from '../config/api';
 const UserProfile = () => {
@@ -796,6 +797,9 @@ const UserProfile = () => {
                 <p className="text-xs text-gray-500 mt-2">Supported formats: PDF, DOC, DOCX (Max: 10MB)</p>
               </div>
             </div>
+
+            {/* AI Salary Prediction */}
+            {!isEditing && <SalaryPrediction />}
 
             {/* Action Buttons */}
             <div className="space-y-3">

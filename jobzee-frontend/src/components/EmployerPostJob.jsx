@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import SalaryRecommendation from './SalaryRecommendation';
 
 import API_BASE_URL from '../config/api';
 const EmployerPostJob = () => {
@@ -489,6 +490,26 @@ const EmployerPostJob = () => {
               )}
             </div>
           </div>
+
+          {/* AI Salary Recommendation */}
+          <SalaryRecommendation 
+            jobData={{
+              title: form.title,
+              skills: form.skills ? form.skills.split(',').map(s => s.trim()).filter(Boolean) : [],
+              location: form.location,
+              experienceRequired: form.experienceLevel,
+              education: 'Bachelor',
+              category: 'technology'
+            }}
+            onSalarySelect={(salaryData) => {
+              setForm({
+                ...form,
+                salaryMin: salaryData.min.toString(),
+                salaryMax: salaryData.max.toString()
+              });
+              toast.success('Salary range applied!');
+            }}
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
