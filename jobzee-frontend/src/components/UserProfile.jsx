@@ -731,6 +731,9 @@ const UserProfile = () => {
                 </div>
               </div>
             </div>
+            
+            {/* AI Salary Prediction */}
+            <SalaryPrediction />
           </div>
           
           {/* Scrollable Resume Upload Section */}
@@ -797,9 +800,6 @@ const UserProfile = () => {
                 <p className="text-xs text-gray-500 mt-2">Supported formats: PDF, DOC, DOCX (Max: 10MB)</p>
               </div>
             </div>
-
-            {/* AI Salary Prediction */}
-            {!isEditing && <SalaryPrediction />}
 
             {/* Action Buttons */}
             <div className="space-y-3">
@@ -1160,21 +1160,6 @@ const UserProfile = () => {
             </div>
             
             <div className="p-6 space-y-6">
-              {/* Experience Level */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Experience Level</label>
-                <select
-                  value={formData.experienceLevel || ''}
-                  onChange={(e) => handleInputChange('experienceLevel', e.target.value)}
-                  disabled={!isEditing}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:border-transparent focus:ring-4 focus:ring-indigo-200 transition-all duration-200 disabled:bg-gray-100 bg-white/70"
-                >
-                  <option value="">Select experience level</option>
-                  <option value="fresher">Fresher (0-1 years)</option>
-                  <option value="experienced">Experienced (1+ years)</option>
-                </select>
-              </div>
-
               {/* Expected Salary */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
