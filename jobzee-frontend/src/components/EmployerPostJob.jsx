@@ -21,7 +21,9 @@ const EmployerPostJob = () => {
     requirements: '',
     benefits: '',
     skills: '',
-    remote: 'onsite'
+    remote: 'onsite',
+    industry: '',
+    applicationDeadline: ''
   });
   const [formErrors, setFormErrors] = useState({});
   const [touchedFields, setTouchedFields] = useState({});
@@ -168,6 +170,23 @@ const EmployerPostJob = () => {
           errors.skills = 'Skills must be less than 500 characters';
         }
         break;
+        
+      case 'industry':
+        if (value && value.trim().length > 100) {
+          errors.industry = 'Industry must be less than 100 characters';
+        }
+        break;
+        
+      case 'applicationDeadline':
+        if (value) {
+          const deadline = new Date(value);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          if (deadline < today) {
+            errors.applicationDeadline = 'Deadline must be in the future';
+          }
+        }
+        break;
     }
     
     return errors;
@@ -250,7 +269,9 @@ const EmployerPostJob = () => {
       requirements: toArray(form.requirements),
       benefits: toArray(form.benefits),
       skills: toArray(form.skills),
-      remote: form.remote
+      remote: form.remote,
+      industry: form.industry.trim() || undefined,
+      applicationDeadline: form.applicationDeadline || undefined
     };
 
     try {
@@ -571,6 +592,49 @@ const EmployerPostJob = () => {
               <p className={`text-xs mt-1 ${form.skills.length > 450 ? 'text-red-500' : 'text-gray-500'}`}>
                 {form.skills.length}/500 characters
               </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Industry</label>
+              <input
+                type="text"
+                value={form.industry}
+                onChange={(e) => handleFieldChange('industry', e.target.value)}
+                onBlur={() => handleFieldBlur('industry')}
+                className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
+                  formErrors.industry && touchedFields.industry 
+                    ? 'border-red-500 focus:ring-red-500' 
+                    : 'border-gray-300 focus:ring-blue-500'
+                }`}
+                placeholder="e.g., Software Development, Healthcare"
+                maxLength="100"
+              />
+              {formErrors.industry && touchedFields.industry && (
+                <p className="text-red-500 text-xs mt-1">{formErrors.industry}</p>
+              )}
+              <p className={`text-xs mt-1 ${form.industry.length > 90 ? 'text-red-500' : 'text-gray-500'}`}>
+                {form.industry.length}/100 characters
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Application Deadline</label>
+              <input
+                type="date"
+                value={form.applicationDeadline}
+                onChange={(e) => handleFieldChange('applicationDeadline', e.target.value)}
+                onBlur={() => handleFieldBlur('applicationDeadline')}
+                className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
+                  formErrors.applicationDeadline && touchedFields.applicationDeadline 
+                    ? 'border-red-500 focus:ring-red-500' 
+                    : 'border-gray-300 focus:ring-blue-500'
+                }`}
+                min={new Date().toISOString().split('T')[0]}
+              />
+              {formErrors.applicationDeadline && touchedFields.applicationDeadline && (
+                <p className="text-red-500 text-xs mt-1">{formErrors.applicationDeadline}</p>
+              )}
             </div>
           </div>
 

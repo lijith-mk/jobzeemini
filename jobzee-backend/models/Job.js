@@ -52,6 +52,13 @@ const jobSchema = new mongoose.Schema({
     enum: ['technology', 'marketing', 'finance', 'hr', 'design', 'sales', 'operations', 'consulting', 'customer-service', 'other'],
     default: 'other'
   },
+  industry: {
+    type: String,
+    trim: true
+  },
+  applicationDeadline: {
+    type: Date
+  },
   remote: {
     type: String,
     enum: ['remote', 'hybrid', 'onsite'],

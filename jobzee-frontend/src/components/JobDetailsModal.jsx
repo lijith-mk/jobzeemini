@@ -191,7 +191,7 @@ const JobDetailsModal = ({ job, isOpen, onClose }) => {
             </div>
             <div>
               <h4 className="font-semibold text-gray-900 mb-2">Application Deadline</h4>
-              <p className="text-gray-700">{formatDate(job.deadline)}</p>
+              <p className="text-gray-700">{formatDate(job.applicationDeadline)}</p>
             </div>
           </div>
         </div>
