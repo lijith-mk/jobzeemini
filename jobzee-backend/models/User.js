@@ -37,6 +37,7 @@ const userSchema = new mongoose.Schema({
   isOnboarded: { type: Boolean, default: false },
   onboardingSkipped: { type: Boolean, default: false },
   experienceLevel: { type: String, enum: ['fresher', 'experienced', 'not-specified'], default: null },
+  experience: { type: String }, // User's experience level (for profile display)
   preferredFields: [{ type: String }],
   expectedSalary: {
     min: { type: Number },

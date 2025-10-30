@@ -7,11 +7,12 @@ class SVMCandidateScreening {
   constructor() {
     // SVM parameters
     this.weights = {
-      skills: 0.40,      // 40% - Most important
-      experience: 0.25,  // 25%
+      skills: 0.35,      // 35% - Most important
+      experience: 0.20,  // 20%
       education: 0.15,   // 15%
-      location: 0.10,    // 10%
-      history: 0.10      // 10% - Application history patterns
+      title: 0.15,       // 15% - Professional title match
+      location: 0.08,    // 8%
+      history: 0.07      // 7% - Application history patterns
     };
   }
 
@@ -39,14 +40,20 @@ class SVMCandidateScreening {
       type === 'job' ? job.education : job.eligibility?.education
     );
 
-    // 4. Location feature
+    // 4. Professional title feature
+    features.title = this.calculateTitleFeature(
+      candidate.title || '',
+      job.title || ''
+    );
+
+    // 5. Location feature
     features.location = this.calculateLocationFeature(
       candidate.location,
       job.location,
       type === 'job' ? job.remote : job.locationType
     );
 
-    // 5. Application history feature (behavioral)
+    // 6. Application history feature (behavioral)
     features.history = this.calculateHistoryFeature(candidate);
 
     return features;
@@ -219,6 +226,63 @@ class SVMCandidateScreening {
   }
 
   /**
+   * Calculate professional title match
+   */
+  calculateTitleFeature(userTitle, jobTitle) {
+    if (!jobTitle || !userTitle) return 0.7; // Neutral if not specified
+
+    const userTitleLower = userTitle.toLowerCase().trim();
+    const jobTitleLower = jobTitle.toLowerCase().trim();
+
+    // Exact match
+    if (userTitleLower === jobTitleLower) return 1.0;
+
+    // Extract keywords from both titles
+    const titleKeywords = [
+      'senior', 'junior', 'lead', 'principal', 'staff', 'chief',
+      'manager', 'director', 'engineer', 'developer', 'designer',
+      'architect', 'analyst', 'consultant', 'specialist', 'coordinator',
+      'intern', 'associate', 'assistant', 'head', 'vp', 'cto', 'ceo'
+    ];
+
+    // Check for seniority level match
+    const seniorityLevels = ['senior', 'lead', 'principal', 'chief', 'director', 'head', 'vp'];
+    const userIsSenior = seniorityLevels.some(level => userTitleLower.includes(level));
+    const jobIsSenior = seniorityLevels.some(level => jobTitleLower.includes(level));
+
+    // Calculate keyword overlap
+    const userKeywords = titleKeywords.filter(kw => userTitleLower.includes(kw));
+    const jobKeywords = titleKeywords.filter(kw => jobTitleLower.includes(kw));
+    const commonKeywords = userKeywords.filter(kw => jobKeywords.includes(kw));
+
+    // Scoring
+    let score = 0.5; // Base score
+
+    // Bonus for keyword matches
+    if (commonKeywords.length > 0) {
+      score += (commonKeywords.length / Math.max(jobKeywords.length, 1)) * 0.3;
+    }
+
+    // Bonus for seniority level match
+    if (userIsSenior === jobIsSenior) {
+      score += 0.2;
+    } else if (userIsSenior && !jobIsSenior) {
+      score -= 0.1; // Slight penalty for overqualification
+    }
+
+    // Check for role type similarity (developer, designer, etc.)
+    const roleTypes = ['developer', 'engineer', 'designer', 'analyst', 'manager', 'architect'];
+    const userRole = roleTypes.find(role => userTitleLower.includes(role));
+    const jobRole = roleTypes.find(role => jobTitleLower.includes(role));
+    
+    if (userRole && jobRole && userRole === jobRole) {
+      score += 0.2;
+    }
+
+    return Math.min(1.0, Math.max(0.0, score));
+  }
+
+  /**
    * Calculate location compatibility
    */
   calculateLocationFeature(userLocation, jobLocation, remoteType) {
@@ -272,13 +336,14 @@ class SVMCandidateScreening {
    */
   rbfKernel(featureVector, gamma = 2.0) {
     // Calculate distance from ideal candidate (all 1.0s)
-    const ideal = [1.0, 1.0, 1.0, 1.0, 1.0];
+    const ideal = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
     let squaredDistance = 0;
     
     const features = [
       featureVector.skills,
       featureVector.experience,
       featureVector.education,
+      featureVector.title,
       featureVector.location,
       featureVector.history
     ];
@@ -301,6 +366,7 @@ class SVMCandidateScreening {
     linearScore += features.skills * this.weights.skills;
     linearScore += features.experience * this.weights.experience;
     linearScore += features.education * this.weights.education;
+    linearScore += features.title * this.weights.title;
     linearScore += features.location * this.weights.location;
     linearScore += features.history * this.weights.history;
 
@@ -363,6 +429,9 @@ class SVMCandidateScreening {
     if (features.education >= 0.8) strengths.push('Educational qualifications met');
     else if (features.education < 0.6) gaps.push('Education requirements not fully met');
 
+    if (features.title >= 0.8) strengths.push('Professional title matches well');
+    else if (features.title < 0.6) gaps.push('Title mismatch with job requirements');
+
     if (features.location >= 0.8) strengths.push('Location compatible');
 
     return {
@@ -375,6 +444,7 @@ class SVMCandidateScreening {
         skills: Math.round(features.skills * 100),
         experience: Math.round(features.experience * 100),
         education: Math.round(features.education * 100),
+        title: Math.round(features.title * 100),
         location: Math.round(features.location * 100),
         history: Math.round(features.history * 100)
       },
