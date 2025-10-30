@@ -28,7 +28,7 @@ router.get('/job/:jobId/candidates', employerAuth, async (req, res) => {
     }
 
     // Get all applications for this job
-    const applications = await Application.find({ job: jobId })
+    const applications = await Application.find({ jobId: jobId })
       .populate('userId', 'name email skills experience education location bio profilePicture')
       .lean();
 
