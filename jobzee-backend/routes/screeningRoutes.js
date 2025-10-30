@@ -23,7 +23,7 @@ router.get('/job/:jobId/candidates', employerAuth, async (req, res) => {
       return res.status(404).json({ message: 'Job not found' });
     }
 
-    if (job.employerId.toString() !== req.employer.id) {
+    if (job.employerId.toString() !== req.employer.id.toString()) {
       return res.status(403).json({ message: 'Not authorized to access this job' });
     }
 
@@ -87,7 +87,7 @@ router.get('/internship/:internshipId/candidates', employerAuth, async (req, res
       return res.status(404).json({ message: 'Internship not found' });
     }
 
-    if (internship.employer.toString() !== req.employer.id) {
+    if (internship.employer.toString() !== req.employer.id.toString()) {
       return res.status(403).json({ message: 'Not authorized to access this internship' });
     }
 
