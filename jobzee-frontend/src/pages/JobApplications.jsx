@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import ScheduleInterviewModal from '../components/ScheduleInterviewModal';
+import SVMCandidateScreening from '../components/SVMCandidateScreening';
 
 import API_BASE_URL from '../config/api';
 const JobApplications = () => {
@@ -308,6 +309,13 @@ const JobApplications = () => {
             </div>
           </div>
         </div>
+
+        {/* AI Candidate Screening */}
+        {applications.length > 0 && (
+          <div className="mb-6">
+            <SVMCandidateScreening jobId={jobId} jobTitle={job.title} type="job" />
+          </div>
+        )}
 
         {/* Filters and Search */}
         <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 mb-6">

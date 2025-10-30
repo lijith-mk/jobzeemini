@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGraduationCap, FaFileAlt, FaExternalLinkAlt, FaArrowLeft, FaClock, FaCheckCircle, FaTimes, FaEye } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import SVMCandidateScreening from '../components/SVMCandidateScreening';
 
 import API_BASE_URL from '../config/api';
 const InternshipApplications = () => {
@@ -191,6 +192,13 @@ const InternshipApplications = () => {
             <div className="text-sm text-gray-600">Selected</div>
           </div>
         </div>
+
+        {/* AI Candidate Screening */}
+        {applications.length > 0 && internship && (
+          <div className="mb-8">
+            <SVMCandidateScreening jobId={internshipId} jobTitle={internship.title} type="internship" />
+          </div>
+        )}
 
         {/* Filter Bar */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
