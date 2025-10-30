@@ -378,6 +378,138 @@ class NeuralNetworkSalaryPredictor {
   }
 
   /**
+   * Backward propagation
+   */
+  backward(forward, target) {
+    const { input, z1, a1, z2, a2, z3, output } = forward;
+    
+    // Output layer gradients
+    const dz3 = output.map((o, i) => 2 * (o - target[i])); // MSE derivative
+    
+    // Hidden layer 2 gradients
+    const dz2 = [];
+    for (let i = 0; i < this.hidden2Size; i++) {
+      let sum = 0;
+      for (let j = 0; j < this.outputSize; j++) {
+        sum += dz3[j] * this.W3[i][j];
+      }
+      dz2.push(sum * this.reluDerivative(z2[i]));
+    }
+    
+    // Hidden layer 1 gradients
+    const dz1 = [];
+    for (let i = 0; i < this.hidden1Size; i++) {
+      let sum = 0;
+      for (let j = 0; j < this.hidden2Size; j++) {
+        sum += dz2[j] * this.W2[i][j];
+      }
+      dz1.push(sum * this.reluDerivative(z1[i]));
+    }
+    
+    // Update W3 and b3 with momentum
+    for (let i = 0; i < this.hidden2Size; i++) {
+      for (let j = 0; j < this.outputSize; j++) {
+        const gradient = dz3[j] * a2[i];
+        this.vW3[i][j] = this.momentum * this.vW3[i][j] + this.learningRate * gradient;
+        this.W3[i][j] -= this.vW3[i][j];
+      }
+    }
+    for (let j = 0; j < this.outputSize; j++) {
+      this.vb3[j] = this.momentum * this.vb3[j] + this.learningRate * dz3[j];
+      this.b3[j] -= this.vb3[j];
+    }
+    
+    // Update W2 and b2 with momentum
+    for (let i = 0; i < this.hidden1Size; i++) {
+      for (let j = 0; j < this.hidden2Size; j++) {
+        const gradient = dz2[j] * a1[i];
+        this.vW2[i][j] = this.momentum * this.vW2[i][j] + this.learningRate * gradient;
+        this.W2[i][j] -= this.vW2[i][j];
+      }
+    }
+    for (let j = 0; j < this.hidden2Size; j++) {
+      this.vb2[j] = this.momentum * this.vb2[j] + this.learningRate * dz2[j];
+      this.b2[j] -= this.vb2[j];
+    }
+    
+    // Update W1 and b1 with momentum
+    for (let i = 0; i < this.inputSize; i++) {
+      for (let j = 0; j < this.hidden1Size; j++) {
+        const gradient = dz1[j] * input[i];
+        this.vW1[i][j] = this.momentum * this.vW1[i][j] + this.learningRate * gradient;
+        this.W1[i][j] -= this.vW1[i][j];
+      }
+    }
+    for (let j = 0; j < this.hidden1Size; j++) {
+      this.vb1[j] = this.momentum * this.vb1[j] + this.learningRate * dz1[j];
+      this.b1[j] -= this.vb1[j];
+    }
+  }
+
+  /**
+   * Train the neural network with real salary data
+   */
+  train(trainingData, epochs = 100) {
+    console.log(`Training Neural Network with ${trainingData.length} samples for ${epochs} epochs...`);
+    
+    const learningHistory = [];
+    
+    for (let epoch = 0; epoch < epochs; epoch++) {
+      let totalLoss = 0;
+      
+      // Shuffle training data
+      const shuffled = [...trainingData].sort(() => Math.random() - 0.5);
+      
+      for (const sample of shuffled) {
+        // Extract features
+        const input = this.extractFeatures(sample);
+        
+        // Normalize salary (0-1 range)
+        const targetSalary = sample.salary;
+        const normalized = (targetSalary - 200000) / (5000000 - 200000);
+        const target = [Math.max(0, Math.min(1, normalized))];
+        
+        // Forward pass
+        const forward = this.forward(input);
+        const prediction = forward.output;
+        
+        // Calculate loss (MSE)
+        const loss = Math.pow(prediction[0] - target[0], 2);
+        totalLoss += loss;
+        
+        // Backward pass
+        this.backward(forward, target);
+      }
+      
+      const avgLoss = totalLoss / trainingData.length;
+      learningHistory.push(avgLoss);
+      
+      if (epoch % 10 === 0) {
+        console.log(`Epoch ${epoch}/${epochs}, Loss: ${avgLoss.toFixed(6)}`);
+      }
+    }
+    
+    this.isTrained = true;
+    console.log('Training completed!');
+    return learningHistory;
+  }
+
+  /**
+   * Load and train with real Indian salary data
+   */
+  trainWithRealData() {
+    try {
+      const trainingData = require('../data/salaryTrainingData');
+      console.log(`Loaded ${trainingData.length} real salary records from India`);
+      this.train(trainingData, 100);
+      console.log('Neural Network trained with real Indian salary data!');
+    } catch (error) {
+      console.error('Failed to load training data:', error.message);
+      console.log('Using pre-initialized weights');
+    }
+  }
+
+  /**
    * Get market comparison
    */
   getMarketComparison(predictedSalary, data) {

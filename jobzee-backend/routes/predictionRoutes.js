@@ -7,6 +7,10 @@ const Internship = require('../models/Internship');
 const decisionTreePrediction = require('../services/decisionTreePrediction');
 const salaryPredictor = require('../services/neuralNetSalaryPredictor');
 
+// Train the neural network with real Indian salary data on server start
+console.log('Initializing Neural Network with real Indian salary data...');
+salaryPredictor.trainWithRealData();
+
 /**
  * POST /api/predictions/job-success
  * Predict success probability for a specific job
@@ -237,6 +241,27 @@ router.get('/salary/for-job/:jobId', async (req, res) => {
   } catch (error) {
     console.error('Job salary prediction error:', error);
     res.status(500).json({ message: 'Failed to predict salary' });
+  }
+});
+
+/**
+ * POST /api/predictions/train-salary-model
+ * Manually retrain the salary prediction model (admin only)
+ */
+router.post('/train-salary-model', async (req, res) => {
+  try {
+    console.log('Manual training requested...');
+    const history = salaryPredictor.trainWithRealData();
+    
+    res.json({
+      success: true,
+      message: 'Neural Network retrained successfully with real Indian salary data',
+      trainingHistory: history,
+      modelStatus: 'trained'
+    });
+  } catch (error) {
+    console.error('Training error:', error);
+    res.status(500).json({ message: 'Failed to train model' });
   }
 });
 
