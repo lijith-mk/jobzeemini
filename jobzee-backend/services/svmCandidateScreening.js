@@ -226,7 +226,7 @@ class SVMCandidateScreening {
   }
 
   /**
-   * Calculate professional title match
+   * Calculate professional title match with semantic understanding
    */
   calculateTitleFeature(userTitle, jobTitle) {
     if (!jobTitle || !userTitle) return 0.7; // Neutral if not specified
@@ -237,49 +237,168 @@ class SVMCandidateScreening {
     // Exact match
     if (userTitleLower === jobTitleLower) return 1.0;
 
-    // Extract keywords from both titles
-    const titleKeywords = [
-      'senior', 'junior', 'lead', 'principal', 'staff', 'chief',
-      'manager', 'director', 'engineer', 'developer', 'designer',
-      'architect', 'analyst', 'consultant', 'specialist', 'coordinator',
-      'intern', 'associate', 'assistant', 'head', 'vp', 'cto', 'ceo'
+    // Define role synonyms (equivalent titles)
+    const roleSynonyms = {
+      'developer': ['developer', 'engineer', 'programmer', 'coder'],
+      'designer': ['designer', 'ui/ux', 'ux', 'ui', 'graphic designer', 'visual designer'],
+      'analyst': ['analyst', 'data analyst', 'business analyst', 'systems analyst'],
+      'manager': ['manager', 'lead', 'head', 'supervisor', 'coordinator'],
+      'architect': ['architect', 'principal engineer', 'technical lead'],
+      'scientist': ['scientist', 'researcher', 'data scientist'],
+      'consultant': ['consultant', 'advisor', 'specialist'],
+      'administrator': ['administrator', 'admin', 'system admin', 'sysadmin'],
+      'qa': ['qa', 'quality assurance', 'tester', 'test engineer'],
+      'devops': ['devops', 'infrastructure', 'site reliability', 'sre'],
+      'frontend': ['frontend', 'front-end', 'front end', 'ui developer'],
+      'backend': ['backend', 'back-end', 'back end', 'server-side'],
+      'fullstack': ['fullstack', 'full-stack', 'full stack']
+    };
+
+    // Extract role type from both titles
+    let userRoleType = null;
+    let jobRoleType = null;
+    
+    for (const [baseRole, synonyms] of Object.entries(roleSynonyms)) {
+      if (synonyms.some(syn => userTitleLower.includes(syn))) {
+        userRoleType = baseRole;
+      }
+      if (synonyms.some(syn => jobTitleLower.includes(syn))) {
+        jobRoleType = baseRole;
+      }
+    }
+
+    // Seniority levels
+    const seniorityLevels = {
+      'entry': ['junior', 'jr', 'associate', 'entry', 'trainee', 'intern'],
+      'mid': ['mid', 'intermediate', 'mid-level'],
+      'senior': ['senior', 'sr', 'expert'],
+      'lead': ['lead', 'principal', 'staff', 'chief', 'head', 'director', 'vp']
+    };
+
+    // Extract seniority from both titles
+    let userSeniority = 'mid'; // Default
+    let jobSeniority = 'mid';   // Default
+    
+    for (const [level, keywords] of Object.entries(seniorityLevels)) {
+      if (keywords.some(kw => userTitleLower.includes(kw))) {
+        userSeniority = level;
+      }
+      if (keywords.some(kw => jobTitleLower.includes(kw))) {
+        jobSeniority = level;
+      }
+    }
+
+    // Technology/Domain keywords (for similarity)
+    const techKeywords = [
+      'react', 'angular', 'vue', 'node', 'python', 'java', 'javascript',
+      'mobile', 'android', 'ios', 'web', 'cloud', 'aws', 'azure',
+      'ml', 'ai', 'blockchain', 'security', 'network'
     ];
 
-    // Check for seniority level match
-    const seniorityLevels = ['senior', 'lead', 'principal', 'chief', 'director', 'head', 'vp'];
-    const userIsSenior = seniorityLevels.some(level => userTitleLower.includes(level));
-    const jobIsSenior = seniorityLevels.some(level => jobTitleLower.includes(level));
+    const userTechKeywords = techKeywords.filter(tech => userTitleLower.includes(tech));
+    const jobTechKeywords = techKeywords.filter(tech => jobTitleLower.includes(tech));
+    const commonTechKeywords = userTechKeywords.filter(tech => jobTechKeywords.includes(tech));
 
-    // Calculate keyword overlap
-    const userKeywords = titleKeywords.filter(kw => userTitleLower.includes(kw));
-    const jobKeywords = titleKeywords.filter(kw => jobTitleLower.includes(kw));
-    const commonKeywords = userKeywords.filter(kw => jobKeywords.includes(kw));
+    // Scoring logic
+    let score = 0.4; // Base score
 
-    // Scoring
-    let score = 0.5; // Base score
-
-    // Bonus for keyword matches
-    if (commonKeywords.length > 0) {
-      score += (commonKeywords.length / Math.max(jobKeywords.length, 1)) * 0.3;
+    // 1. Role type match (40% of score)
+    if (userRoleType && jobRoleType) {
+      if (userRoleType === jobRoleType) {
+        score += 0.40; // Perfect role match
+      } else {
+        // Check if roles are related (developer/engineer are similar)
+        const relatedRoles = [
+          ['developer', 'engineer', 'architect'],
+          ['designer', 'frontend'],
+          ['analyst', 'scientist'],
+          ['devops', 'administrator'],
+          ['qa', 'developer']
+        ];
+        
+        const isRelated = relatedRoles.some(group => 
+          group.includes(userRoleType) && group.includes(jobRoleType)
+        );
+        
+        if (isRelated) {
+          score += 0.25; // Related roles
+        } else {
+          score += 0.05; // Different roles
+        }
+      }
+    } else {
+      score += 0.20; // Partial credit if role type unclear
     }
 
-    // Bonus for seniority level match
-    if (userIsSenior === jobIsSenior) {
-      score += 0.2;
-    } else if (userIsSenior && !jobIsSenior) {
-      score -= 0.1; // Slight penalty for overqualification
+    // 2. Seniority level match (30% of score)
+    const seniorityOrder = ['entry', 'mid', 'senior', 'lead'];
+    const userSeniorityIndex = seniorityOrder.indexOf(userSeniority);
+    const jobSeniorityIndex = seniorityOrder.indexOf(jobSeniority);
+    const seniorityDiff = Math.abs(userSeniorityIndex - jobSeniorityIndex);
+
+    if (seniorityDiff === 0) {
+      score += 0.30; // Perfect seniority match
+    } else if (seniorityDiff === 1) {
+      score += 0.20; // One level difference
+    } else if (seniorityDiff === 2) {
+      score += 0.10; // Two levels difference
+    } else {
+      score += 0.05; // More than 2 levels
     }
 
-    // Check for role type similarity (developer, designer, etc.)
-    const roleTypes = ['developer', 'engineer', 'designer', 'analyst', 'manager', 'architect'];
-    const userRole = roleTypes.find(role => userTitleLower.includes(role));
-    const jobRole = roleTypes.find(role => jobTitleLower.includes(role));
-    
-    if (userRole && jobRole && userRole === jobRole) {
-      score += 0.2;
+    // Penalty for over/under qualification
+    if (userSeniorityIndex > jobSeniorityIndex + 1) {
+      score -= 0.10; // Significantly overqualified
+    } else if (userSeniorityIndex < jobSeniorityIndex - 1) {
+      score -= 0.10; // Significantly underqualified
     }
+
+    // 3. Technology/Domain keywords match (20% of score)
+    if (jobTechKeywords.length > 0) {
+      const techMatchRatio = commonTechKeywords.length / jobTechKeywords.length;
+      score += techMatchRatio * 0.20;
+    } else {
+      score += 0.10; // Neutral if no tech keywords
+    }
+
+    // 4. Fuzzy string similarity (10% of score)
+    const similarity = this.calculateStringSimilarity(userTitleLower, jobTitleLower);
+    score += similarity * 0.10;
 
     return Math.min(1.0, Math.max(0.0, score));
+  }
+
+  /**
+   * Calculate string similarity using Levenshtein distance
+   */
+  calculateStringSimilarity(str1, str2) {
+    const len1 = str1.length;
+    const len2 = str2.length;
+    const matrix = [];
+
+    // Initialize matrix
+    for (let i = 0; i <= len1; i++) {
+      matrix[i] = [i];
+    }
+    for (let j = 0; j <= len2; j++) {
+      matrix[0][j] = j;
+    }
+
+    // Fill matrix
+    for (let i = 1; i <= len1; i++) {
+      for (let j = 1; j <= len2; j++) {
+        const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j] + 1,      // deletion
+          matrix[i][j - 1] + 1,      // insertion
+          matrix[i - 1][j - 1] + cost // substitution
+        );
+      }
+    }
+
+    const maxLen = Math.max(len1, len2);
+    const distance = matrix[len1][len2];
+    return 1 - (distance / maxLen);
   }
 
   /**
