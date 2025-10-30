@@ -203,10 +203,12 @@ const SVMCandidateScreening = ({ jobId, jobTitle, type = 'job' }) => {
 
                   {/* Feature Breakdown */}
                   {showDetails && candidate.aiScreening.features && (
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-3">
                       {Object.entries(candidate.aiScreening.features).map(([key, value]) => (
                         <div key={key} className="bg-gray-50 rounded-lg p-2">
-                          <div className="text-xs text-gray-600 capitalize mb-1">{key}</div>
+                          <div className="text-xs text-gray-600 capitalize mb-1">
+                            {key === 'title' ? 'Job Title' : key}
+                          </div>
                           <div className="flex items-center space-x-2">
                             <div className="flex-1 bg-gray-200 rounded-full h-1.5">
                               <div
@@ -304,7 +306,7 @@ const SVMCandidateScreening = ({ jobId, jobTitle, type = 'job' }) => {
           </svg>
           <p>
             This AI screening uses Support Vector Machine (SVM) to analyze candidate profiles against job requirements.
-            Scores are based on skills match (40%), experience (25%), education (15%), location (10%), and profile completeness (10%).
+            Scores are based on skills match (35%), experience (20%), education (15%), professional title (15%), location (8%), and profile completeness (7%).
           </p>
         </div>
       </div>
