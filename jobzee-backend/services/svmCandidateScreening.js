@@ -53,31 +53,44 @@ class SVMCandidateScreening {
   }
 
   /**
-   * Calculate skills match using cosine similarity approach
+   * Calculate skills match using enhanced cosine similarity approach
    */
   calculateSkillsFeature(userSkills, requiredSkills) {
     if (!requiredSkills || requiredSkills.length === 0) return 1.0;
     if (!userSkills || userSkills.length === 0) return 0.0;
 
-    const userSkillsLower = userSkills.map(s => s.toLowerCase());
-    const requiredSkillsLower = requiredSkills.map(s => s.toLowerCase());
+    const userSkillsLower = userSkills.map(s => s.toLowerCase().trim());
+    const requiredSkillsLower = requiredSkills.map(s => s.toLowerCase().trim());
 
-    // Calculate intersection (matched skills)
-    const matched = requiredSkillsLower.filter(skill => 
+    // Calculate exact matches
+    const exactMatches = requiredSkillsLower.filter(skill => 
       userSkillsLower.includes(skill)
     );
 
-    // Basic scoring
-    const basicScore = matched.length / requiredSkillsLower.length;
+    // Calculate partial matches (substring matching for related skills)
+    const partialMatches = requiredSkillsLower.filter(reqSkill => 
+      !exactMatches.includes(reqSkill) &&
+      userSkillsLower.some(userSkill => 
+        userSkill.includes(reqSkill) || reqSkill.includes(userSkill)
+      )
+    );
+
+    // Scoring with exact matches weighted more heavily
+    const exactScore = (exactMatches.length / requiredSkillsLower.length) * 1.0;
+    const partialScore = (partialMatches.length / requiredSkillsLower.length) * 0.5;
+    const basicScore = exactScore + partialScore;
 
     // Bonus for having more skills than required (shows initiative)
-    const extraSkillsBonus = Math.min(0.2, (userSkills.length - requiredSkills.length) * 0.02);
+    const extraSkillsBonus = Math.min(0.15, (userSkills.length - requiredSkills.length) * 0.015);
 
-    return Math.min(1.0, basicScore + Math.max(0, extraSkillsBonus));
+    // Penalty if missing critical skills
+    const missingPenalty = (requiredSkillsLower.length - exactMatches.length - partialMatches.length) * 0.05;
+
+    return Math.max(0.0, Math.min(1.0, basicScore + Math.max(0, extraSkillsBonus) - missingPenalty));
   }
 
   /**
-   * Calculate experience match
+   * Calculate experience match with enhanced granularity
    */
   calculateExperienceFeature(userExperience, requiredExperience) {
     if (!requiredExperience) return 1.0;
@@ -107,22 +120,38 @@ class SVMCandidateScreening {
     const userYears = expLevels[userExperience.toLowerCase()] || 0;
     const requiredYears = expLevels[requiredExperience.toLowerCase()] || 0;
 
-    // Overqualification penalty (slight)
-    if (userYears > requiredYears * 2) {
-      return 0.8; // Might be overqualified
-    }
-
-    // Perfect match or better
-    if (userYears >= requiredYears) {
+    // Perfect match bonus
+    if (userYears === requiredYears) {
       return 1.0;
     }
 
-    // Underqualified but close
-    const ratio = userYears / requiredYears;
-    if (ratio >= 0.7) return 0.85; // Close enough
-    if (ratio >= 0.5) return 0.6;  // Somewhat qualified
+    // Slightly more experienced (within 20% more) - ideal
+    if (userYears > requiredYears && userYears <= requiredYears * 1.2) {
+      return 0.98;
+    }
+
+    // More experienced but not overqualified
+    if (userYears > requiredYears && userYears <= requiredYears * 1.5) {
+      return 0.95;
+    }
+
+    // Overqualification penalty (progressive)
+    if (userYears > requiredYears * 2) {
+      return 0.75; // Significantly overqualified
+    }
+    if (userYears > requiredYears * 1.5) {
+      return 0.85; // Moderately overqualified
+    }
+
+    // Underqualified - graduated scoring
+    const ratio = userYears / (requiredYears || 1);
+    if (ratio >= 0.8) return 0.90; // Very close
+    if (ratio >= 0.7) return 0.80; // Close enough
+    if (ratio >= 0.6) return 0.65; // Somewhat qualified
+    if (ratio >= 0.5) return 0.50; // Borderline
+    if (ratio >= 0.3) return 0.35; // Significantly under
     
-    return Math.max(0.2, ratio); // Give some credit
+    return Math.max(0.15, ratio * 0.5); // Give minimal credit
   }
 
   /**
@@ -238,23 +267,54 @@ class SVMCandidateScreening {
   }
 
   /**
+   * RBF (Radial Basis Function) Kernel
+   * Provides non-linear transformation for better separation
+   */
+  rbfKernel(featureVector, gamma = 2.0) {
+    // Calculate distance from ideal candidate (all 1.0s)
+    const ideal = [1.0, 1.0, 1.0, 1.0, 1.0];
+    let squaredDistance = 0;
+    
+    const features = [
+      featureVector.skills,
+      featureVector.experience,
+      featureVector.education,
+      featureVector.location,
+      featureVector.history
+    ];
+    
+    for (let i = 0; i < features.length; i++) {
+      squaredDistance += Math.pow(features[i] - ideal[i], 2);
+    }
+    
+    return Math.exp(-gamma * squaredDistance);
+  }
+
+  /**
    * SVM Decision Function
-   * Applies weighted linear combination with kernel transformation
+   * Applies weighted linear combination with RBF kernel transformation
    */
   svmDecisionFunction(features) {
-    // Linear kernel (can be extended to RBF kernel)
-    let score = 0;
+    // Weighted linear combination
+    let linearScore = 0;
 
-    score += features.skills * this.weights.skills;
-    score += features.experience * this.weights.experience;
-    score += features.education * this.weights.education;
-    score += features.location * this.weights.location;
-    score += features.history * this.weights.history;
+    linearScore += features.skills * this.weights.skills;
+    linearScore += features.experience * this.weights.experience;
+    linearScore += features.education * this.weights.education;
+    linearScore += features.location * this.weights.location;
+    linearScore += features.history * this.weights.history;
 
-    // Apply sigmoid transformation for probability-like output
-    const sigmoid = (x) => 1 / (1 + Math.exp(-5 * (x - 0.5)));
+    // Apply RBF kernel for non-linear transformation
+    const rbfScore = this.rbfKernel(features, 1.5);
     
-    return sigmoid(score);
+    // Combine linear and RBF scores (70% linear, 30% RBF)
+    const combinedScore = (linearScore * 0.7) + (rbfScore * 0.3);
+    
+    // Apply sigmoid transformation for probability-like output
+    // Increased steepness for better discrimination
+    const sigmoid = (x) => 1 / (1 + Math.exp(-8 * (x - 0.5)));
+    
+    return sigmoid(combinedScore);
   }
 
   /**
