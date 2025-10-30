@@ -100,15 +100,17 @@ export const getSalaryForExistingJob = async (jobId) => {
 };
 
 /**
- * Format salary for display
+ * Format salary for display in Indian Rupees
  * @param {number} salary 
- * @returns {string} Formatted salary string
+ * @returns {string} Formatted salary string with ₹ symbol
  */
 export const formatSalary = (salary) => {
   if (!salary) return 'N/A';
-  return new Intl.NumberFormat('en-US', {
+  
+  // Format in Indian Rupee (INR) with ₹ symbol
+  return new Intl.NumberFormat('en-IN', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'INR',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   }).format(salary);
