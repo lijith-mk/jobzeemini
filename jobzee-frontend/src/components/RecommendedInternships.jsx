@@ -140,7 +140,7 @@ const RecommendedInternships = () => {
     return (
       <div className="bg-white rounded-2xl shadow-lg border-0 overflow-hidden">
         <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-6 border-b border-gray-100">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg">
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,9 +149,44 @@ const RecommendedInternships = () => {
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-900">AI-Powered Recommendations</h3>
-                <p className="text-sm text-gray-600">Personalized internships just for you</p>
+                <p className="text-sm text-gray-600">Choose algorithm and see personalized results</p>
               </div>
             </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-xs text-gray-500 font-medium">Algorithm:</span>
+              <select
+                value={algorithm}
+                onChange={(e) => setAlgorithm(e.target.value)}
+                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700"
+              >
+                <option value="knn">KNN</option>
+                <option value="naive_bayes">Naive Bayes</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Tabs (still visible when empty) */}
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setActiveTab('internships')}
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                activeTab === 'internships'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              Internships (0)
+            </button>
+            <button
+              onClick={() => setActiveTab('jobs')}
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                activeTab === 'jobs'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              Jobs (0)
+            </button>
           </div>
         </div>
         <div className="p-8 text-center">

@@ -16,6 +16,7 @@ const SalaryRecommendation = ({ jobData, onSalarySelect }) => {
     setLoading(true);
     setError(null);
     try {
+      console.log('Fetching salary recommendation with data:', jobData);
       const data = await getSalaryForNewJob({
         title: jobData.title,
         skills: jobData.skills,
@@ -25,13 +26,41 @@ const SalaryRecommendation = ({ jobData, onSalarySelect }) => {
         category: jobData.category || 'technology'
       });
 
-      if (data.success) {
-        setRecommendation(data.prediction);
+      console.log('Salary recommendation response:', data);
+
+      // Accept both new and legacy backend responses
+      if (data.success && (data.prediction || data.salary)) {
+        if (data.prediction) {
+          setRecommendation(data.prediction);
+        } else {
+          // Legacy response mapping: { success, salary, marketComparison }
+          const legacy = data.salary;
+          const mapped = {
+            predictedSalary: legacy?.predicted?.average,
+            range: {
+              min: legacy?.predicted?.min,
+              max: legacy?.predicted?.max,
+            },
+            marketComparison: {
+              averageForRole: data.marketComparison?.marketAverage || legacy?.predicted?.average,
+              top25Percent: Math.round((legacy?.predicted?.average || 0) * 1.25),
+            },
+            breakdown: Array.isArray(legacy?.breakdown)
+              ? legacy.breakdown
+              : [
+                  { factor: 'Base', impact: legacy?.breakdown?.base ? `₹${legacy.breakdown.base}` : 'N/A' },
+                  { factor: 'Variable', impact: legacy?.breakdown?.variable ? `₹${legacy.breakdown.variable}` : 'N/A' },
+                  { factor: 'Bonus', impact: legacy?.breakdown?.bonus ? `₹${legacy.breakdown.bonus}` : 'N/A' },
+                ],
+          };
+          setRecommendation(mapped);
+        }
       } else {
         setError(data.message || 'Failed to get salary recommendation');
       }
     } catch (err) {
-      setError(err.message);
+      console.error('Salary recommendation error:', err);
+      setError(err.message || 'Unable to fetch salary recommendation. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -56,6 +85,7 @@ const SalaryRecommendation = ({ jobData, onSalarySelect }) => {
         </div>
         {!recommendation && !loading && (
           <button
+            type="button"
             onClick={fetchRecommendation}
             disabled={loading}
             className="px-4 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
@@ -150,12 +180,14 @@ const SalaryRecommendation = ({ jobData, onSalarySelect }) => {
           {/* Action Buttons */}
           <div className="flex space-x-3">
             <button
+              type="button"
               onClick={applySalaryRange}
               className="flex-1 px-4 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 transition-colors"
             >
               Use This Range
             </button>
             <button
+              type="button"
               onClick={fetchRecommendation}
               className="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors"
             >

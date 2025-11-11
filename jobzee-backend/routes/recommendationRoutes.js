@@ -97,10 +97,13 @@ router.get('/jobs/personalized', auth, async (req, res) => {
     // Get user's job applications
     const userApplications = await Application.find({ 
       userId: req.user.id 
-    }).populate('job');
+    }).populate('jobId');
 
-    // Get all active jobs
-    const allJobs = await Job.find({ status: 'active' }).limit(200);
+    // Get all available jobs (active or approved, not expired)
+    const allJobs = await Job.find({ 
+      status: { $in: ['active', 'approved'] },
+      expiresAt: { $gt: new Date() }
+    }).limit(200);
 
     // Get personalized recommendations
     const recommendations = await knnRecommendation.getPersonalizedRecommendations(
@@ -167,10 +170,13 @@ router.get('/jobs/personalized-nb', auth, async (req, res) => {
     // Get user's job applications
     const userApplications = await Application.find({ 
       userId: req.user.id 
-    }).populate('job');
+    }).populate('jobId');
 
-    // Get all active jobs
-    const allJobs = await Job.find({ status: 'active' }).limit(200);
+    // Get all available jobs (active or approved, not expired)
+    const allJobs = await Job.find({ 
+      status: { $in: ['active', 'approved'] },
+      expiresAt: { $gt: new Date() }
+    }).limit(200);
 
     // Get personalized recommendations using Naive Bayes
     const recommendations = await naiveBayesRecommendation.getPersonalizedRecommendations(

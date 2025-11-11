@@ -69,36 +69,8 @@ const JobSearch = () => {
       return;
     }
 
-    // Fallback to user preferences
-    const token = localStorage.getItem('token');
-    if (token) {
-      fetch(`${API_BASE_URL}/api/auth/profile`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-        .then(res => res.ok ? res.json() : null)
-        .then(data => {
-          const prefUser = data?.user || {};
-          const prefs = prefUser.preferences || {};
-          const defaultFilters = {
-            search: '',
-            location: prefUser.location || '',
-            category: (prefUser.preferredJobTypes && prefUser.preferredJobTypes[0]) || prefs.jobType || '',
-            skills: Array.isArray(prefUser.skills) ? prefUser.skills.slice(0, 5) : []
-          };
-          apply(defaultFilters);
-          // Bootstrap defaults only once if user has none saved
-          if (!localStorage.getItem('jobFiltersDefault')) {
-            localStorage.setItem('jobFiltersDefault', JSON.stringify(defaultFilters));
-          }
-          syncUrl(defaultFilters);
-        })
-        .catch(() => {
-          fetchJobs({});
-        });
-    } else {
-      // No prefs and no stored/url filters → fetch all jobs
-      fetchJobs({});
-    }
+    // No stored or URL filters → by default show all jobs (do not auto-save user prefs)
+    fetchJobs({});
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

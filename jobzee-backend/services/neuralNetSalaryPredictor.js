@@ -269,7 +269,103 @@ class NeuralNetworkSalaryPredictor {
   /**
    * Predict salary for given profile/job
    */
-  predict(data) {
+  // Compute city tier
+  getCityTier(location = '') {
+    const loc = location.toLowerCase();
+    const tier1 = ['bangalore','bengaluru','mumbai','delhi','new delhi','hyderabad','pune','chennai','gurgaon','noida'];
+    const tier2 = ['ahmedabad','kolkata','kochi','cochin','trivandrum','thiruvananthapuram','coimbatore','indore','jaipur','lucknow','bhubaneshwar','bhubaneswar','surat','vadodara','visakhapatnam'];
+    if (tier1.some(c=>loc.includes(c))) return 'tier1';
+    if (tier2.some(c=>loc.includes(c))) return 'tier2';
+    if (loc.includes('remote')) return 'remote';
+    return 'tier3';
+  }
+
+  roleMultiplier(title = '') {
+    const t = title.toLowerCase();
+    const table = [
+      { keys:['data scientist','machine learning','ml'], m:1.30 },
+      { keys:['devops','site reliability','sre','kubernetes'], m:1.20 },
+      { keys:['backend','server','java','spring','node'], m:1.12 },
+      { keys:['full stack','full-stack'], m:1.12 },
+      { keys:['frontend','react','angular','vue'], m:1.00 },
+      { keys:['mobile','android','ios','flutter','react native'], m:1.10 },
+      { keys:['product manager'], m:1.40 },
+      { keys:['qa','test','testing','automation'], m:0.92 },
+      { keys:['hr','human resources'], m:0.75 },
+      { keys:['designer','ui','ux'], m:0.95 },
+      { keys:['sales'], m:0.90 }
+    ];
+    for (const row of table) if (row.keys.some(k=>t.includes(k))) return row.m;
+    return 1.0;
+  }
+
+  expMultiplier(exp = '') {
+    const e = exp.toLowerCase();
+    if (e.includes('fresher')) return 0.65;
+    if (e.includes('entry')) return 0.80; // ~0-2 yrs
+    if (e.includes('mid') || /1-?3|3-?6|2-?5/.test(e)) return 1.05; // ~3-6 yrs
+    if (e.includes('senior')) return 1.30; // ~6-10 yrs
+    if (e.includes('executive') || e.includes('lead')) return 1.60; // 10+ yrs
+    return 1.0;
+  }
+
+  tierMultiplier(tier) {
+    // More conservative city tier effects
+    return tier === 'tier1' ? 1.15 : tier === 'tier2' ? 1.05 : tier === 'remote' ? 1.07 : 1.0;
+  }
+
+  industryMultiplier(industry='') {
+    const i = industry.toLowerCase();
+    if (!i) return 1.0;
+    if (i.includes('bank') || i.includes('fin')) return 1.15;
+    if (i.includes('it') || i.includes('tech')) return 1.00;
+    if (i.includes('health')) return 0.98;
+    if (i.includes('retail')) return 0.92;
+    if (i.includes('consult')) return 1.05;
+    return 1.0;
+  }
+
+  jobTypeMultiplier(type='') {
+    const t = type.toLowerCase();
+    if (t.includes('contract')) return 1.20;
+    if (t.includes('intern')) return 0.35;
+    if (t.includes('part')) return 0.60;
+    if (t.includes('freelance')) return 1.10;
+    return 1.0; // full-time default
+  }
+
+  companySizeMultiplier(size='') {
+    switch((size||'').toLowerCase()){
+      case '1-10': return 0.95;
+      case '11-50': return 1.00;
+      case '51-200': return 1.05;
+      case '201-500': return 1.08;
+      case '501-1000': return 1.12;
+      default: return 1.15; // 1000+
+    }
+  }
+
+  skillsMultiplier(skills=[]) {
+    if (!Array.isArray(skills)) return 1.0;
+    const hot = ['react','node','python','aws','kubernetes','ml','ai','golang','kafka'];
+    const count = skills.map(s=>s.toLowerCase()).filter(s=>hot.includes(s)).length;
+    const boost = Math.min(0.05, count * 0.01); // +1% per hot skill, cap 5%
+    return 1.0 + boost;
+  }
+
+  // Conservative market bands by city tier and experience level (INR)
+  marketBand(tier, exp) {
+    const bands = {
+      tier1: { entry: [300000, 700000], mid: [800000, 1500000], senior: [1800000, 3500000], executive: [3000000, 6000000] },
+      tier2: { entry: [250000, 600000], mid: [700000, 1300000], senior: [1500000, 2800000], executive: [2500000, 5000000] },
+      tier3: { entry: [200000, 500000], mid: [600000, 1100000], senior: [1200000, 2200000], executive: [2000000, 4000000] },
+      remote: { entry: [250000, 600000], mid: [700000, 1300000], senior: [1500000, 2800000], executive: [2500000, 5000000] }
+    };
+    const te = bands[tier] || bands.tier2;
+    return te[exp] || te.entry;
+  }
+
+  predict(data, extras = {}) {
     const features = this.extractFeatures(data);
     const result = this.forward(features);
     
@@ -282,17 +378,46 @@ class NeuralNetworkSalaryPredictor {
     // Salary range: ₹2,00,000 to ₹50,00,000
     const minSalary = 200000;
     const maxSalary = 5000000;
-    const predictedSalary = minSalary + (sigmoidOutput * (maxSalary - minSalary));
-    
-    // Calculate confidence based on feature completeness
+    const networkEstimate = minSalary + (sigmoidOutput * (maxSalary - minSalary));
+
+    // Real-world adjustments
+    const tier = this.getCityTier(data.location || '');
+    const expLevel = (data.experienceLevel || data.experienceRequired || data.experience || 'entry').toLowerCase();
+    const adj =
+      this.roleMultiplier(data.title || '') *
+      this.expMultiplier(expLevel) *
+      this.tierMultiplier(tier) *
+      this.industryMultiplier(data.industry || data.category || extras.industry || '') *
+      this.jobTypeMultiplier(data.jobType || '') *
+      this.companySizeMultiplier(extras.companySize || '') *
+      this.skillsMultiplier(data.skills || []);
+
+    // Apply adjustments then clamp to market band for realism
+    let adjusted = Math.min(maxSalary, Math.max(minSalary, networkEstimate * adj));
+    const [bandMin, bandMax] = this.marketBand(tier, expLevel);
+    adjusted = Math.min(bandMax, Math.max(bandMin, adjusted));
+
+    // Confidence based on features present
     const featureCompleteness = features.filter(f => f !== 0).length / this.inputSize;
-    const confidence = Math.min(95, 50 + (featureCompleteness * 50));
+    const confidence = Math.min(95, 55 + (featureCompleteness * 40));
     
-    // Generate salary range (±15%)
-    const lowerBound = Math.round(predictedSalary * 0.85);
-    const upperBound = Math.round(predictedSalary * 1.15);
-    const average = Math.round(predictedSalary);
+    // Range tighter for low exp
+    const rangePct = expLevel.includes('entry') || expLevel.includes('fresher') ? 0.10 : 0.12;
+    const lowerBound = Math.round(adjusted * (1 - rangePct));
+    const upperBound = Math.round(adjusted * (1 + rangePct));
+    const average = Math.round(adjusted);
     
+    const breakdown = [
+      { factor: 'Role/Title', impact: `${Math.round((this.roleMultiplier(data.title||'')-1)*100)}%` },
+      { factor: 'Experience Level', impact: `${Math.round((this.expMultiplier(expLevel)-1)*100)}%` },
+      { factor: 'City Tier', impact: `${Math.round((this.tierMultiplier(tier)-1)*100)}%` },
+      { factor: 'Industry', impact: `${Math.round((this.industryMultiplier(data.industry||extras.industry||'')-1)*100)}%` },
+      { factor: 'Employment Type', impact: `${Math.round((this.jobTypeMultiplier(data.jobType||'')-1)*100)}%` },
+      { factor: 'Company Size', impact: `${Math.round((this.companySizeMultiplier(extras.companySize||'')-1)*100)}%` },
+      { factor: 'Hot Skills', impact: `${Math.round((this.skillsMultiplier(data.skills||[])-1)*100)}%` },
+      { factor: 'Real‑world band clamp', impact: `${Math.round((average - networkEstimate) / Math.max(1, networkEstimate) * 100)}% adjustment` }
+    ];
+
     return {
       predicted: {
         min: lowerBound,
@@ -302,8 +427,8 @@ class NeuralNetworkSalaryPredictor {
       },
       confidence: Math.round(confidence),
       marketInsights: this.generateMarketInsights(data, average),
-      breakdown: this.generateSalaryBreakdown(data, average),
-      algorithm: 'Neural Network (Backpropagation)'
+      breakdown,
+      algorithm: 'Neural Network + Real‑world factors + Market bands'
     };
   }
 
@@ -513,30 +638,29 @@ class NeuralNetworkSalaryPredictor {
    * Get market comparison
    */
   getMarketComparison(predictedSalary, data) {
-    // Simulate market data (in production, query database)
-    const category = data.category || 'technology';
-    const experience = data.experienceLevel || data.experience || 'entry';
-    
-    const marketAverages = {
-      'technology': { 'entry': 600000, 'mid': 1200000, 'senior': 2000000 },
-      'design': { 'entry': 500000, 'mid': 900000, 'senior': 1500000 },
-      'marketing': { 'entry': 450000, 'mid': 850000, 'senior': 1400000 },
-      'finance': { 'entry': 550000, 'mid': 1100000, 'senior': 1900000 }
-    };
-    
-    const marketAvg = marketAverages[category]?.[experience] || 800000;
+    const experience = (data.experienceLevel || data.experienceRequired || data.experience || 'entry').toLowerCase();
+    const tier = this.getCityTier(data.location || '');
+    const baseByExp = { entry: 600000, mid: 1200000, senior: 2000000, executive: 2800000 };
+    const base = baseByExp[experience] || 800000;
+
+    // Apply role and tier effects to market average
+    const roleM = this.roleMultiplier(data.title || '');
+    const tierM = this.tierMultiplier(tier);
+    const industryM = this.industryMultiplier(data.industry || data.category || '');
+    const marketAvg = Math.round(base * roleM * tierM * industryM);
+
     const difference = predictedSalary - marketAvg;
-    const percentDiff = Math.round((difference / marketAvg) * 100);
+    const percentDiff = Math.round((difference / Math.max(1, marketAvg)) * 100);
     
     return {
       marketAverage: marketAvg,
       yourPrediction: predictedSalary,
-      difference: difference,
+      difference,
       percentDifference: percentDiff,
       status: percentDiff > 10 ? 'above' : percentDiff < -10 ? 'below' : 'at',
-      message: percentDiff > 10 
+      message: percentDiff > 10
         ? `${percentDiff}% above market average`
-        : percentDiff < -10 
+        : percentDiff < -10
         ? `${Math.abs(percentDiff)}% below market average`
         : 'In line with market average'
     };

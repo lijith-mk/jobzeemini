@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
+const { employerAuth } = require('../middleware/employerAuth');
 const User = require('../models/User');
+const Employer = require('../models/Employer');
 const Job = require('../models/Job');
 const Internship = require('../models/Internship');
 const decisionTreePrediction = require('../services/decisionTreePrediction');
@@ -185,7 +187,7 @@ router.get('/salary/my-profile', auth, async (req, res) => {
  * POST /api/predictions/salary/for-job
  * Predict recommended salary for a job posting
  */
-router.post('/salary/for-job', auth, async (req, res) => {
+router.post('/salary/for-job', employerAuth, async (req, res) => {
   try {
     const jobData = req.body;
 
@@ -193,17 +195,43 @@ router.post('/salary/for-job', auth, async (req, res) => {
       return res.status(400).json({ message: 'Job data is required' });
     }
 
-    // Predict salary
-    const prediction = salaryPredictor.predict(jobData);
+    // Enrich with employer context (company size, industry)
+    let employerCtx = {};
+    try {
+      const employer = await Employer.findById(req.employer.id).lean();
+      if (employer) {
+        employerCtx.companySize = employer.companySize;
+        employerCtx.industry = employer.industry;
+      }
+    } catch (_) {}
+
+    // Predict salary using real-world factors
+    const prediction = salaryPredictor.predict(jobData, employerCtx);
     const marketComparison = salaryPredictor.getMarketComparison(
       prediction.predicted.average,
-      jobData
+      { ...jobData, ...employerCtx }
     );
 
+    // Format response to match frontend expectations
     res.json({
       success: true,
-      salary: prediction,
-      marketComparison,
+      prediction: {
+        predictedSalary: prediction.predicted.average,
+        range: {
+          min: prediction.predicted.min,
+          max: prediction.predicted.max
+        },
+        marketComparison: {
+          averageForRole: marketComparison.marketAverage || prediction.predicted.average,
+          top25Percent: Math.round(prediction.predicted.average * 1.25)
+        },
+        breakdown: [
+          { factor: 'Experience Level', impact: jobData.experienceRequired || 'Entry Level' },
+          { factor: 'Skills', impact: `${jobData.skills?.length || 0} skills` },
+          { factor: 'Location', impact: jobData.location || 'Remote' },
+          { factor: 'Job Title', impact: jobData.title || 'N/A' }
+        ]
+      },
       recommendation: `We recommend offering ₹${(prediction.predicted.min / 100000).toFixed(1)}L - ₹${(prediction.predicted.max / 100000).toFixed(1)}L to attract quality candidates`
     });
   } catch (error) {

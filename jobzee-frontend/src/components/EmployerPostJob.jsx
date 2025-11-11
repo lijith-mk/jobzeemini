@@ -519,6 +519,8 @@ const EmployerPostJob = () => {
               skills: form.skills ? form.skills.split(',').map(s => s.trim()).filter(Boolean) : [],
               location: form.location,
               experienceRequired: form.experienceLevel,
+              jobType: form.jobType,
+              industry: form.industry,
               education: 'Bachelor',
               category: 'technology'
             }}

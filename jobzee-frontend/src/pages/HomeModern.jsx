@@ -359,7 +359,7 @@ const HomeModern = () => {
                 {/* Portrait cards */}
                 <div className="relative w-full max-w-md">
                   <img
-                    src="https://res.cloudinary.com/dxspcarx8/image/upload/v1754673462/lijith_apavon.jpg"
+                    src="https://res.cloudinary.com/dxspcarx8/image/upload/v1762845192/vxkddtbawkout8pdvb2b.jpg"
                     alt="Portrait 1"
                     className="absolute -top-6 right-2 w-28 h-36 object-cover rounded-3xl shadow-2xl border border-white/10"
                   />

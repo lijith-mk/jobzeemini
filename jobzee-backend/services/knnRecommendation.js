@@ -6,6 +6,18 @@
 class KNNRecommendation {
   constructor() {
     this.k = 5; // Number of nearest neighbors to return
+    this.MIN_SIMILARITY = 0.35; // 35% minimum to consider relevant
+  }
+
+  // Basic city tiering for looser location matching
+  cityTier(location = '') {
+    const loc = (location || '').toLowerCase();
+    const tier1 = ['bangalore','bengaluru','mumbai','delhi','new delhi','hyderabad','pune','chennai','gurgaon','noida'];
+    const tier2 = ['ahmedabad','kolkata','kochi','cochin','trivandrum','thiruvananthapuram','coimbatore','indore','jaipur','lucknow','bhubaneshwar','bhubaneswar','surat','vadodara','visakhapatnam'];
+    if (tier1.some(c => loc.includes(c))) return 'tier1';
+    if (tier2.some(c => loc.includes(c))) return 'tier2';
+    if (loc.includes('remote')) return 'remote';
+    return 'tier3';
   }
 
   /**
@@ -24,8 +36,9 @@ class KNNRecommendation {
       features.duration = item.duration || 3;
     }
 
-    // Location encoding (same location = 1, different = 0)
+    // Location encoding
     features.location = item.location || '';
+    features.cityTier = this.cityTier(features.location);
 
     // Category encoding
     features.category = item.category || '';
@@ -37,7 +50,10 @@ class KNNRecommendation {
     features.locationType = item.locationType || item.remote || 'on-site';
 
     // Experience level
-    features.experienceLevel = item.experienceLevel || 'entry';
+    features.experienceLevel = (item.experienceLevel || 'entry').toLowerCase();
+
+    // Job type
+    features.jobType = (item.jobType || item.type || '').toLowerCase();
 
     return features;
   }
@@ -47,12 +63,16 @@ class KNNRecommendation {
    */
   calculateDistance(features1, features2, type = 'job') {
     let distance = 0;
+    // Weights sum ~= 1.0
     const weights = {
-      salary: 0.3,
-      skills: 0.4,
-      location: 0.15,
-      category: 0.1,
-      locationType: 0.05
+      salary: 0.15,
+      skills: 0.45,
+      location: 0.12,
+      cityTier: 0.06,
+      category: 0.08,
+      locationType: 0.05,
+      experience: 0.07,
+      jobType: 0.02
     };
 
     // Salary/Stipend distance
@@ -74,17 +94,28 @@ class KNNRecommendation {
     const skillsSimilarity = this.calculateJaccardSimilarity(features1.skills, features2.skills);
     distance += (1 - skillsSimilarity) * weights.skills;
 
-    // Location similarity
+    // Location similarity (exact match) and city tier similarity (looser)
     const locationMatch = features1.location.toLowerCase() === features2.location.toLowerCase() ? 0 : 1;
     distance += locationMatch * weights.location;
+    const tierMatch = features1.cityTier === features2.cityTier ? 0 : 1;
+    distance += tierMatch * weights.cityTier;
 
     // Category similarity
-    const categoryMatch = features1.category === features2.category ? 0 : 1;
+    const categoryMatch = (features1.category || '').toLowerCase() === (features2.category || '').toLowerCase() ? 0 : 1;
     distance += categoryMatch * weights.category;
 
     // Location type similarity
-    const locationTypeMatch = features1.locationType === features2.locationType ? 0 : 1;
+    const locationTypeMatch = (features1.locationType || '').toLowerCase() === (features2.locationType || '').toLowerCase() ? 0 : 1;
     distance += locationTypeMatch * weights.locationType;
+
+    // Experience similarity (map to buckets)
+    const expMap = lvl => (lvl.includes('entry')||lvl.includes('fresher'))?'entry':(lvl.includes('mid')?'mid':(lvl.includes('senior')?'senior':(lvl.includes('executive')?'executive':lvl)));
+    const expMatch = expMap(features1.experienceLevel) === expMap(features2.experienceLevel) ? 0 : 1;
+    distance += expMatch * weights.experience;
+
+    // Job type similarity
+    const jobMatch = (features1.jobType||'') === (features2.jobType||'') ? 0 : 1;
+    distance += jobMatch * weights.jobType;
 
     return distance;
   }
@@ -144,7 +175,7 @@ class KNNRecommendation {
     const numNeighbors = k || this.k;
 
     if (!userApplications || userApplications.length === 0) {
-      // Return random popular items if no history
+      // Return popular items, but prefer ones matching user saved or profile (not available here), so keep generic
       return allItems
         .filter(item => item.status === 'active')
         .sort((a, b) => (b.viewsCount || 0) - (a.viewsCount || 0))
@@ -158,25 +189,64 @@ class KNNRecommendation {
     const distances = allItems
       .filter(item => {
         // Exclude items user has already applied to
-        const hasApplied = userApplications.some(app => 
-          app[type === 'job' ? 'job' : 'internship']?.toString() === item._id.toString()
-        );
-        return !hasApplied && item.status === 'active';
+        const hasApplied = userApplications.some(app => {
+          const ref = type === 'job' ? (app.job || app.jobId) : app.internship;
+          return (ref?._id?.toString?.() || ref?.toString?.() || '') === item._id.toString();
+        });
+        // allItems are pre-filtered (active/approved + not expired), so only exclude applied
+        return !hasApplied;
       })
       .map(item => {
         const itemFeatures = this.extractFeatures(item, type);
         const distance = this.calculateDistance(userProfile, itemFeatures, type);
+        const similarity = 1 / (1 + distance);
+        const skillsOverlap = this.calculateJaccardSimilarity(userProfile.skills, itemFeatures.skills);
         return {
           item,
           distance,
-          similarity: 1 / (1 + distance)
+          similarity,
+          skillsOverlap
         };
       });
 
-    // Sort by distance and take top K
-    distances.sort((a, b) => a.distance - b.distance);
-    
-    return distances.slice(0, numNeighbors).map(d => ({
+    // Filter by minimum similarity threshold
+    let filtered = distances.filter(d => d.similarity >= this.MIN_SIMILARITY);
+
+    // If too few, backfill by highest skill overlap
+    if (filtered.length < Math.min(3, numNeighbors)) {
+      const backfill = distances
+        .filter(d => d.skillsOverlap > 0)
+        .sort((a, b) => b.skillsOverlap - a.skillsOverlap)
+        .slice(0, numNeighbors);
+      const set = new Map();
+      [...filtered, ...backfill].forEach(d => set.set(d.item._id.toString(), d));
+      filtered = Array.from(set.values());
+    }
+
+    // If still empty, fall back to popular items that share skills or city tier
+    if (filtered.length === 0) {
+      // Determine user’s dominant city tier from profile
+      const userTier = this.cityTier(userProfile.location || '');
+      const fallback = allItems
+        .filter(item => item.status === 'active')
+        .map(item => {
+          const f = this.extractFeatures(item, type);
+          const overlap = this.calculateJaccardSimilarity(userProfile.skills, f.skills);
+          const tierBonus = (f.cityTier === userTier) ? 0.1 : 0; // small boost for same tier
+          return { item, score: overlap + tierBonus + ((item.viewsCount || 0) / 100000) };
+        })
+        .sort((a, b) => b.score - a.score)
+        .slice(0, numNeighbors)
+        .map(x => ({
+          ...x.item.toObject ? x.item.toObject() : x.item,
+          recommendationScore: Math.round(Math.min(1, x.score) * 100)
+        }));
+      return fallback;
+    }
+
+    // Sort by (similarity, skillsOverlap) and take top K
+    filtered.sort((a, b) => (b.similarity - a.similarity) || (b.skillsOverlap - a.skillsOverlap));
+    return filtered.slice(0, numNeighbors).map(d => ({
       ...d.item.toObject ? d.item.toObject() : d.item,
       recommendationScore: Math.round(d.similarity * 100)
     }));
@@ -204,7 +274,7 @@ class KNNRecommendation {
     let durationCount = 0;
 
     applications.forEach(app => {
-      const item = app[type === 'job' ? 'job' : 'internship'];
+      const item = type === 'job' ? (app.job || app.jobId) : app.internship;
       if (!item) return;
 
       // Aggregate skills
