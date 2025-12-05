@@ -12,7 +12,7 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isEmployerDropdownOpen, setIsEmployerDropdownOpen] = useState(false);
-  
+
   // Refs for click outside detection
   const employerDropdownRef = useRef(null);
   const profileDropdownRef = useRef(null);
@@ -24,7 +24,7 @@ const Navbar = () => {
       const userType = sessionManager.getUserType();
       console.log('🔄 Navbar: Current user:', currentUser);
       console.log('🔄 Navbar: User type:', userType);
-      
+
       if (currentUser) {
         setIsLoggedIn(true);
         if (userType === 'user') {
@@ -57,7 +57,7 @@ const Navbar = () => {
       console.log('🔄 Navbar: User updated event received');
       refreshFromSession();
     };
-    
+
     const handleStorageChange = (e) => {
       if (e.key === 'employer' || e.key === 'employerToken' || e.key === 'token' || e.key === 'user') {
         console.log('🔄 Navbar: Storage change detected for auth/cart related data');
@@ -65,15 +65,15 @@ const Navbar = () => {
         setTimeout(() => {
           refreshFromSession();
         }, 100);
-        
+
         // Dispatch auth change event for cart context
         window.dispatchEvent(new CustomEvent('authChange'));
       }
     };
-    
+
     window.addEventListener('user-updated', handleUserUpdated);
     window.addEventListener('storage', handleStorageChange);
-    
+
     return () => {
       window.removeEventListener('user-updated', handleUserUpdated);
       window.removeEventListener('storage', handleStorageChange);
@@ -105,7 +105,7 @@ const Navbar = () => {
     setUser(null);
     setIsProfileDropdownOpen(false);
     toast.success('👋 Successfully logged out!');
-    
+
     // Redirect based on user type
     if (userType === 'employer') {
       navigate('/employer/login');
@@ -150,33 +150,30 @@ const Navbar = () => {
                   {isLoggedIn && (
                     <Link
                       to="/orders"
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                        isActive('/orders')
-                          ? 'text-blue-600 bg-blue-50' 
-                          : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                      }`}
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${isActive('/orders')
+                        ? 'text-blue-600 bg-blue-50'
+                        : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                        }`}
                     >
                       My Purchases
                     </Link>
                   )}
                   <Link
                     to="/shop"
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                      isActive('/shop') || isActive('/marketplace')
-                        ? 'text-blue-600 bg-blue-50' 
-                        : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                    }`}
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${isActive('/shop') || isActive('/marketplace')
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                      }`}
                   >
                     🛒 Shop
                   </Link>
                   {isLoggedIn && (
                     <Link
                       to={user?.userType === 'employer' ? '/employer/dashboard' : '/dashboard'}
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                        isActive('/dashboard') || isActive('/employer/dashboard')
-                          ? 'text-blue-600 bg-blue-50' 
-                          : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                      }`}
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${isActive('/dashboard') || isActive('/employer/dashboard')
+                        ? 'text-blue-600 bg-blue-50'
+                        : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                        }`}
                     >
                       Dashboard
                     </Link>
@@ -186,11 +183,10 @@ const Navbar = () => {
                 <>
                   <Link
                     to="/jobs"
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                      isActive('/jobs') 
-                        ? 'text-blue-600 bg-blue-50' 
-                        : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                    }`}
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${isActive('/jobs')
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                      }`}
                   >
                     Browse Jobs
                   </Link>
@@ -198,11 +194,10 @@ const Navbar = () => {
                   {isLoggedIn ? (
                     <Link
                       to="/internships"
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                        isActive('/internships') 
-                          ? 'text-blue-600 bg-blue-50' 
-                          : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                      }`}
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${isActive('/internships')
+                        ? 'text-blue-600 bg-blue-50'
+                        : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                        }`}
                     >
                       Internships
                     </Link>
@@ -217,11 +212,10 @@ const Navbar = () => {
                   {isLoggedIn && !hideShopNav && (
                     <Link
                       to="/orders"
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                        isActive('/orders')
-                          ? 'text-blue-600 bg-blue-50' 
-                          : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                      }`}
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${isActive('/orders')
+                        ? 'text-blue-600 bg-blue-50'
+                        : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                        }`}
                     >
                       My Purchases
                     </Link>
@@ -229,11 +223,10 @@ const Navbar = () => {
                   {!hideShopNav && (
                     <Link
                       to="/shop"
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                        isActive('/shop') || isActive('/marketplace')
-                          ? 'text-blue-600 bg-blue-50' 
-                          : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                      }`}
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${isActive('/shop') || isActive('/marketplace')
+                        ? 'text-blue-600 bg-blue-50'
+                        : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                        }`}
                     >
                       🛒 Shop
                     </Link>
@@ -241,11 +234,10 @@ const Navbar = () => {
                   {!hideShopNav && isLoggedIn && (
                     <Link
                       to={user?.userType === 'employer' ? '/employer/dashboard' : '/dashboard'}
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                        isActive('/dashboard') || isActive('/employer/dashboard')
-                          ? 'text-blue-600 bg-blue-50' 
-                          : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                      }`}
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${isActive('/dashboard') || isActive('/employer/dashboard')
+                        ? 'text-blue-600 bg-blue-50'
+                        : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                        }`}
                     >
                       Dashboard
                     </Link>
@@ -253,40 +245,38 @@ const Navbar = () => {
                   {!hideShopNav && isLoggedIn && user?.userType === 'user' && (
                     <Link
                       to="/my-applications"
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                        isActive('/my-applications') || isActive('/applications')
-                          ? 'text-blue-600 bg-blue-50' 
-                          : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                      }`}
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${isActive('/my-applications') || isActive('/applications')
+                        ? 'text-blue-600 bg-blue-50'
+                        : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                        }`}
                     >
                       My Applications
                     </Link>
                   )}
                   {!hideShopNav && (
-                  <Link
-                    to="/about"
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                      isActive('/about') 
-                        ? 'text-blue-600 bg-blue-50' 
+                    <Link
+                      to="/about"
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${isActive('/about')
+                        ? 'text-blue-600 bg-blue-50'
                         : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                    }`}
-                  >
-                    About
-                  </Link>
+                        }`}
+                    >
+                      About
+                    </Link>
                   )}
                   {/* Contact link removed as per requirement */}
                   {(!hideShopNav && (!isLoggedIn || user?.userType === 'employer')) && (
                     <Link
                       to="/pricing"
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                        isActive('/pricing') || isActive('/plans')
-                          ? 'text-blue-600 bg-blue-50' 
-                          : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                      }`}
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${isActive('/pricing') || isActive('/plans')
+                        ? 'text-blue-600 bg-blue-50'
+                        : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                        }`}
                     >
                       Pricing
                     </Link>
                   )}
+                  {/* Mentor Registration Link removed */}
                 </>
               )}
             </div>
@@ -295,73 +285,73 @@ const Navbar = () => {
           {/* Employer Dropdown - Only show when NOT logged in */}
           {!isLoggedIn && (
             <div className="hidden md:block relative" ref={employerDropdownRef}>
-            <button
-              onClick={() => setIsEmployerDropdownOpen(!isEmployerDropdownOpen)}
-              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-orange-500 rounded-lg hover:from-purple-700 hover:to-orange-600 transform hover:scale-105 transition-all duration-200 shadow-lg"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-              <span>For Employers</span>
-              <svg className={`w-4 h-4 transition-transform duration-200 ${isEmployerDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
+              <button
+                onClick={() => setIsEmployerDropdownOpen(!isEmployerDropdownOpen)}
+                className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-orange-500 rounded-lg hover:from-purple-700 hover:to-orange-600 transform hover:scale-105 transition-all duration-200 shadow-lg"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                <span>For Employers</span>
+                <svg className={`w-4 h-4 transition-transform duration-200 ${isEmployerDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
 
-            {/* Employer Dropdown Menu */}
-            {isEmployerDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl py-2 z-50 border border-gray-100 animate-fade-in-up">
-                <div className="px-4 py-3 border-b border-gray-100">
-                  <p className="text-sm font-semibold text-gray-900">🏢 Employer Portal</p>
-                  <p className="text-xs text-gray-600">Post jobs and find talent</p>
+              {/* Employer Dropdown Menu */}
+              {isEmployerDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl py-2 z-50 border border-gray-100 animate-fade-in-up">
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    <p className="text-sm font-semibold text-gray-900">🏢 Employer Portal</p>
+                    <p className="text-xs text-gray-600">Post jobs and find talent</p>
+                  </div>
+                  <Link
+                    to="/employer/register"
+                    className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors duration-200"
+                    onClick={() => setIsEmployerDropdownOpen(false)}
+                  >
+                    <div className="w-8 h-8 bg-gradient-to-r from-purple-100 to-purple-200 rounded-lg flex items-center justify-center mr-3">
+                      <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium">Register Company</p>
+                      <p className="text-xs text-gray-500">Create employer account</p>
+                    </div>
+                  </Link>
+                  <Link
+                    to="/employer/login"
+                    className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors duration-200"
+                    onClick={() => setIsEmployerDropdownOpen(false)}
+                  >
+                    <div className="w-8 h-8 bg-gradient-to-r from-orange-100 to-orange-200 rounded-lg flex items-center justify-center mr-3">
+                      <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium">Employer Login</p>
+                      <p className="text-xs text-gray-500">Access your dashboard</p>
+                    </div>
+                  </Link>
+                  <Link
+                    to="/pricing"
+                    className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
+                    onClick={() => setIsEmployerDropdownOpen(false)}
+                  >
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-100 to-blue-200 rounded-lg flex items-center justify-center mr-3">
+                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium">View Pricing</p>
+                      <p className="text-xs text-gray-500">See our plans</p>
+                    </div>
+                  </Link>
                 </div>
-                <Link
-                  to="/employer/register"
-                  className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors duration-200"
-                  onClick={() => setIsEmployerDropdownOpen(false)}
-                >
-                  <div className="w-8 h-8 bg-gradient-to-r from-purple-100 to-purple-200 rounded-lg flex items-center justify-center mr-3">
-                    <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="font-medium">Register Company</p>
-                    <p className="text-xs text-gray-500">Create employer account</p>
-                  </div>
-                </Link>
-                <Link
-                  to="/employer/login"
-                  className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors duration-200"
-                  onClick={() => setIsEmployerDropdownOpen(false)}
-                >
-                  <div className="w-8 h-8 bg-gradient-to-r from-orange-100 to-orange-200 rounded-lg flex items-center justify-center mr-3">
-                    <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="font-medium">Employer Login</p>
-                    <p className="text-xs text-gray-500">Access your dashboard</p>
-                  </div>
-                </Link>
-                <Link
-                  to="/pricing"
-                  className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
-                  onClick={() => setIsEmployerDropdownOpen(false)}
-                >
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-100 to-blue-200 rounded-lg flex items-center justify-center mr-3">
-                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="font-medium">View Pricing</p>
-                    <p className="text-xs text-gray-500">See our plans</p>
-                  </div>
-                </Link>
-              </div>
-            )}
+              )}
             </div>
           )}
 
@@ -398,7 +388,7 @@ const Navbar = () => {
                   {/* Enhanced User Avatar with Photo Support */}
                   <div className="relative">
                     {user?.avatar || user?.profilePhoto || user?.companyLogo ? (
-                      <img 
+                      <img
                         src={user.avatar || user.profilePhoto || user.companyLogo}
                         alt={user?.name || 'User'}
                         className="w-8 h-8 rounded-full object-cover border-2 border-transparent hover:border-blue-300 transition-all duration-300 transform hover:scale-110"
@@ -549,11 +539,10 @@ const Navbar = () => {
               {isLoggedIn && (
                 <Link
                   to="/orders"
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                    isActive('/orders')
-                      ? 'text-blue-600 bg-blue-50' 
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                  }`}
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${isActive('/orders')
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                    }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   My Purchases
@@ -561,11 +550,10 @@ const Navbar = () => {
               )}
               <Link
                 to="/shop"
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                  isActive('/shop') || isActive('/marketplace')
-                    ? 'text-blue-600 bg-blue-50' 
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                }`}
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${isActive('/shop') || isActive('/marketplace')
+                  ? 'text-blue-600 bg-blue-50'
+                  : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                  }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 🛒 Shop
@@ -573,11 +561,10 @@ const Navbar = () => {
               {isLoggedIn && (
                 <Link
                   to={user?.userType === 'employer' ? '/employer/dashboard' : '/dashboard'}
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                    isActive('/dashboard') || isActive('/employer/dashboard')
-                      ? 'text-blue-600 bg-blue-50' 
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                  }`}
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${isActive('/dashboard') || isActive('/employer/dashboard')
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                    }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Dashboard
@@ -588,11 +575,10 @@ const Navbar = () => {
             <>
               <Link
                 to="/jobs"
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                  isActive('/jobs') 
-                    ? 'text-blue-600 bg-blue-50' 
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                }`}
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${isActive('/jobs')
+                  ? 'text-blue-600 bg-blue-50'
+                  : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                  }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Browse Jobs
@@ -600,11 +586,10 @@ const Navbar = () => {
               {isLoggedIn && !hideShopNav && (
                 <Link
                   to="/orders"
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                    isActive('/orders')
-                      ? 'text-blue-600 bg-blue-50' 
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                  }`}
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${isActive('/orders')
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                    }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   My Purchases
@@ -613,11 +598,10 @@ const Navbar = () => {
               {!hideShopNav && (
                 <Link
                   to="/shop"
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                    isActive('/shop') || isActive('/marketplace')
-                      ? 'text-blue-600 bg-blue-50' 
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                  }`}
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${isActive('/shop') || isActive('/marketplace')
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                    }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   🛒 Shop
@@ -626,11 +610,10 @@ const Navbar = () => {
               {!hideShopNav && isLoggedIn && (
                 <Link
                   to={user?.userType === 'employer' ? '/employer/dashboard' : '/dashboard'}
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                    isActive('/dashboard') || isActive('/employer/dashboard')
-                      ? 'text-blue-600 bg-blue-50' 
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                  }`}
+                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${isActive('/dashboard') || isActive('/employer/dashboard')
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                    }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Dashboard
@@ -641,11 +624,10 @@ const Navbar = () => {
           {isLoggedIn && user?.userType === 'user' && (
             <Link
               to="/my-applications"
-              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                isActive('/my-applications') || isActive('/applications')
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-              }`}
+              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${isActive('/my-applications') || isActive('/applications')
+                ? 'text-blue-600 bg-blue-50'
+                : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               My Applications
@@ -653,11 +635,10 @@ const Navbar = () => {
           )}
           <Link
             to="/about"
-            className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-              isActive('/about') 
-                ? 'text-blue-600 bg-blue-50' 
-                : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-            }`}
+            className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${isActive('/about')
+              ? 'text-blue-600 bg-blue-50'
+              : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+              }`}
             onClick={() => setIsMobileMenuOpen(false)}
           >
             About
@@ -666,16 +647,16 @@ const Navbar = () => {
           {(!isLoggedIn || user?.userType === 'employer') && (
             <Link
               to="/pricing"
-              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                isActive('/pricing') || isActive('/plans')
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-              }`}
+              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${isActive('/pricing') || isActive('/plans')
+                ? 'text-blue-600 bg-blue-50'
+                : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Pricing
             </Link>
           )}
+          {/* Mentor Registration Link - Mobile removed */}
         </div>
 
         {/* Mobile Employer Section - Only show when NOT logged in */}
@@ -749,7 +730,7 @@ const Navbar = () => {
               <div className="flex items-center px-3 py-3 bg-gray-50 rounded-lg mx-2">
                 <div className="relative mr-3">
                   {user?.avatar || user?.profilePhoto || user?.companyLogo ? (
-                    <img 
+                    <img
                       src={user.avatar || user.profilePhoto || user.companyLogo}
                       alt={user?.name || 'User'}
                       className="w-10 h-10 rounded-full object-cover border-2 border-blue-300"

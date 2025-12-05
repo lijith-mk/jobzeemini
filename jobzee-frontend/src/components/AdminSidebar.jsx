@@ -5,6 +5,7 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout, admin, isMobile = fals
     { id: 'dashboard', name: 'Dashboard', icon: '📊' },
     { id: 'users', name: 'Users', icon: '👥' },
     { id: 'employers', name: 'Employers', icon: '🏢' },
+    { id: 'mentors', name: 'Mentors', icon: '👨‍🏫' },
     { id: 'jobs', name: 'Jobs', icon: '💼' },
     { id: 'internships', name: 'Internships', icon: '🎓' },
     { id: 'events', name: 'Events', icon: '🎉' },
@@ -35,20 +36,17 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout, admin, isMobile = fals
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`group relative w-full flex items-center space-x-3 px-3 py-3 rounded-xl text-left transition-all ${
-                activeTab === tab.id
+              className={`group relative w-full flex items-center space-x-3 px-3 py-3 rounded-xl text-left transition-all ${activeTab === tab.id
                   ? 'text-white shadow-lg bg-gradient-to-r from-blue-600 to-indigo-600'
                   : 'text-gray-700 hover:text-gray-900 hover:bg-white/60 hover:shadow'
-              }`}
+                }`}
             >
-              <span className={`absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full transition-all ${
-                activeTab === tab.id ? 'bg-white/90' : 'bg-transparent group-hover:bg-blue-500/60'
-              }`} />
-              <span className={`inline-flex items-center justify-center w-9 h-9 rounded-lg ring-1 ${
-                activeTab === tab.id
+              <span className={`absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full transition-all ${activeTab === tab.id ? 'bg-white/90' : 'bg-transparent group-hover:bg-blue-500/60'
+                }`} />
+              <span className={`inline-flex items-center justify-center w-9 h-9 rounded-lg ring-1 ${activeTab === tab.id
                   ? 'bg-white/20 ring-white/30 text-white'
                   : 'bg-white/70 ring-gray-200 text-gray-700 group-hover:bg-white'
-              }`}>
+                }`}>
                 <span className="text-base">{tab.icon}</span>
               </span>
               <span className="font-semibold tracking-wide">{tab.name}</span>
@@ -85,20 +83,17 @@ const AdminSidebar = ({ activeTab, onTabChange, onLogout, admin, isMobile = fals
             <button
               key={tab.id}
               onClick={() => { onTabChange(tab.id); onClose && onClose(); }}
-              className={`group relative w-full flex items-center space-x-3 px-3 py-3 rounded-xl text-left transition-all ${
-                activeTab === tab.id
+              className={`group relative w-full flex items-center space-x-3 px-3 py-3 rounded-xl text-left transition-all ${activeTab === tab.id
                   ? 'text-white shadow-lg bg-gradient-to-r from-blue-600 to-indigo-600'
                   : 'text-gray-700 hover:text-gray-900 hover:bg-white/60 hover:shadow'
-              }`}
+                }`}
             >
-              <span className={`absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full transition-all ${
-                activeTab === tab.id ? 'bg-white/90' : 'bg-transparent group-hover:bg-blue-500/60'
-              }`} />
-              <span className={`inline-flex items-center justify-center w-9 h-9 rounded-lg ring-1 ${
-                activeTab === tab.id
+              <span className={`absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full transition-all ${activeTab === tab.id ? 'bg-white/90' : 'bg-transparent group-hover:bg-blue-500/60'
+                }`} />
+              <span className={`inline-flex items-center justify-center w-9 h-9 rounded-lg ring-1 ${activeTab === tab.id
                   ? 'bg-white/20 ring-white/30 text-white'
                   : 'bg-white/70 ring-gray-200 text-gray-700 group-hover:bg-white'
-              }`}>
+                }`}>
                 <span className="text-base">{tab.icon}</span>
               </span>
               <span className="font-semibold tracking-wide">{tab.name}</span>

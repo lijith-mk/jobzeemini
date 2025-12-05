@@ -16,21 +16,21 @@ const Login = () => {
 
   const validate = () => {
     const newErrors = {};
-    
+
     // Email validation
     if (!form.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(form.email)) {
       newErrors.email = "Please enter a valid email address";
     }
-    
+
     // Password validation
     if (!form.password.trim()) {
       newErrors.password = "Password is required";
     } else if (form.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
-    
+
     return newErrors;
   };
 
@@ -48,30 +48,30 @@ const Login = () => {
     for (let i = 0; i < retries; i++) {
       try {
         console.log(`Login attempt ${i + 1}/${retries} to ${url}`);
-        
+
         // Add timeout to prevent hanging requests
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-        
+
         const response = await fetch(url, {
           ...options,
           signal: controller.signal
         });
-        
+
         clearTimeout(timeoutId);
         console.log(`Login response status: ${response.status}`);
-        
+
         return response;
       } catch (error) {
         console.error(`Request attempt ${i + 1} failed:`, error.name, error.message);
-        
+
         // Don't retry on abort or if it's the last attempt
         if (error.name === 'AbortError') {
           throw new Error('Request timed out. Please try again.');
         }
-        
+
         if (i === retries - 1) throw error;
-        
+
         // Wait before retry (exponential backoff: 1s, 2s, 4s)
         const delay = Math.pow(2, i) * 1000;
         console.log(`Retrying in ${delay}ms...`);
@@ -89,10 +89,10 @@ const Login = () => {
       setLoading(true);
       try {
         console.log('Starting login process...');
-        
+
         const res = await makeRequestWithRetry(`${API_BASE_URL}/api/auth/login`, {
           method: "POST",
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
             "Accept": "application/json"
           },
@@ -112,7 +112,7 @@ const Login = () => {
           console.log('Login failed with status:', res.status, 'Data:', data);
           // Enhanced error handling based on backend response
           let errorMessage = "Login failed. Please try again.";
-          
+
           if (data?.errorType === 'validation_error') {
             // Handle validation errors from backend
             if (data.errors) {
@@ -134,14 +134,14 @@ const Login = () => {
           } else if (data?.message) {
             errorMessage = data.message;
           }
-          
+
           toast.error(`❌ ${errorMessage}`);
           handleShake();
           return;
         }
 
         console.log('Login successful, saving to localStorage...');
-        
+
         // Validate response data before saving
         if (!data?.token || !data?.user) {
           console.error('Invalid response data:', data);
@@ -151,7 +151,7 @@ const Login = () => {
         // Save token & user details in localStorage
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
-        
+
         // Dispatch auth change event for cart context
         window.dispatchEvent(new CustomEvent('authChange'));
 
@@ -180,9 +180,9 @@ const Login = () => {
           message: err.message,
           stack: err.stack
         });
-        
+
         let errorMessage = "🚫 Something went wrong. Please try again.";
-        
+
         // Detailed error handling for different scenarios
         if (err.message === 'Request timed out. Please try again.') {
           errorMessage = "🚫 Request timed out. Please check your connection and try again.";
@@ -199,7 +199,7 @@ const Login = () => {
         } else {
           errorMessage = `🚫 Login failed: ${err.message}`;
         }
-        
+
         toast.error(errorMessage);
         handleShake();
       } finally {
@@ -220,9 +220,8 @@ const Login = () => {
 
       <form
         onSubmit={handleSubmit}
-        className={`bg-white bg-opacity-95 backdrop-blur-md rounded-xl shadow-2xl max-w-md w-full p-8 transform transition-all duration-700 ease-out ${
-          animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-        } ${shake ? 'animate-shake' : ''}`}
+        className={`bg-white bg-opacity-95 backdrop-blur-md rounded-xl shadow-2xl max-w-md w-full p-8 transform transition-all duration-700 ease-out ${animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          } ${shake ? 'animate-shake' : ''}`}
         noValidate
       >
         {/* Header with Animation */}
@@ -258,9 +257,8 @@ const Login = () => {
                   setErrors({ ...errors, email: "" });
                 }
               }}
-              className={`w-full border-2 rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ${
-                errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-blue-400'
-              }`}
+              className={`w-full border-2 rounded-lg px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ${errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-blue-400'
+                }`}
               disabled={loading || success}
             />
             {errors.email && (
@@ -294,9 +292,8 @@ const Login = () => {
                   setErrors({ ...errors, password: "" });
                 }
               }}
-              className={`w-full border-2 rounded-lg px-4 py-3 pr-12 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ${
-                errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-blue-400'
-              }`}
+              className={`w-full border-2 rounded-lg px-4 py-3 pr-12 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ${errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-blue-400'
+                }`}
               disabled={loading || success}
             />
             <button
@@ -331,13 +328,12 @@ const Login = () => {
         <button
           type="submit"
           disabled={loading || success}
-          className={`w-full py-3 rounded-lg font-semibold shadow-lg transition-all duration-300 flex justify-center items-center ${
-            success
+          className={`w-full py-3 rounded-lg font-semibold shadow-lg transition-all duration-300 flex justify-center items-center ${success
               ? "bg-gradient-to-r from-green-500 to-green-600 text-white cursor-default"
               : loading
-              ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white cursor-wait"
-              : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:scale-105 transform"
-          } ${!loading && !success ? "hover-lift" : ""}`}
+                ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white cursor-wait"
+                : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:scale-105 transform"
+            } ${!loading && !success ? "hover-lift" : ""}`}
         >
           {loading ? (
             <div className="flex items-center">
@@ -358,10 +354,16 @@ const Login = () => {
 
         {/* Additional Links */}
         <div className="mt-6 text-center">
-          <p className="text-gray-600 mb-4">
+          <p className="text-gray-600 mb-2">
             Don't have an account?{" "}
             <Link to="/register" className="text-blue-600 hover:text-blue-800 font-semibold hover:underline transition-colors">
               Register here
+            </Link>
+          </p>
+          <p className="text-gray-600 mb-4">
+            Want to mentor?{" "}
+            <Link to="/mentor/register" className="text-purple-600 hover:text-purple-800 font-semibold hover:underline transition-colors">
+              Join as Mentor
             </Link>
           </p>
           <Link to="/forgot-password" className="text-sm text-gray-500 hover:text-gray-700 hover:underline transition-colors">
@@ -380,7 +382,7 @@ const Login = () => {
             </div>
           </div>
           <div className="mt-4">
-            <GoogleSignIn 
+            <GoogleSignIn
               disabled={loading || success}
               onSuccess={(data) => {
                 // Custom success handler for login page

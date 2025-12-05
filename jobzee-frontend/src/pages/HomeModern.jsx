@@ -12,13 +12,13 @@ const HomeModern = () => {
   const [typedTitle, setTypedTitle] = useState("");
   const [hoveredFeatureIndex, setHoveredFeatureIndex] = useState(null);
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
-  
+
   const heroRef = useRef(null);
   const statsRef = useRef(null);
 
   useEffect(() => {
     setAnimate(true);
-    
+
     // Auto-rotate tips
     const tipInterval = setInterval(() => {
       setCurrentTip((prev) => (prev + 1) % jobTips.length);
@@ -43,19 +43,19 @@ const HomeModern = () => {
         const start = 0;
         const end = target;
         const startTime = Date.now();
-        
+
         const updateCounter = () => {
           const elapsed = Date.now() - startTime;
           const progress = Math.min(elapsed / duration, 1);
           const current = Math.floor(start + (end - start) * progress);
-          
+
           setCountedStats(prev => ({ ...prev, [key]: current }));
-          
+
           if (progress < 1) {
             requestAnimationFrame(updateCounter);
           }
         };
-        
+
         updateCounter();
       };
 
@@ -126,29 +126,29 @@ const HomeModern = () => {
   ];
 
   const stats = [
-    { 
-      number: countedStats.jobs > 1000 ? `${Math.floor(countedStats.jobs / 1000)}K+` : countedStats.jobs, 
-      label: "Active Jobs", 
-      icon: "💼", 
-      color: "from-blue-500 to-cyan-500" 
+    {
+      number: countedStats.jobs > 1000 ? `${Math.floor(countedStats.jobs / 1000)}K+` : countedStats.jobs,
+      label: "Active Jobs",
+      icon: "💼",
+      color: "from-blue-500 to-cyan-500"
     },
-    { 
-      number: countedStats.companies > 1000 ? `${Math.floor(countedStats.companies / 1000)}K+` : countedStats.companies, 
-      label: "Companies", 
-      icon: "🏢", 
-      color: "from-purple-500 to-pink-500" 
+    {
+      number: countedStats.companies > 1000 ? `${Math.floor(countedStats.companies / 1000)}K+` : countedStats.companies,
+      label: "Companies",
+      icon: "🏢",
+      color: "from-purple-500 to-pink-500"
     },
-    { 
-      number: countedStats.users > 1000 ? `${Math.floor(countedStats.users / 1000)}K+` : countedStats.users, 
-      label: "Job Seekers", 
-      icon: "👥", 
-      color: "from-green-500 to-emerald-500" 
+    {
+      number: countedStats.users > 1000 ? `${Math.floor(countedStats.users / 1000)}K+` : countedStats.users,
+      label: "Job Seekers",
+      icon: "👥",
+      color: "from-green-500 to-emerald-500"
     },
-    { 
-      number: `${countedStats.success}%`, 
-      label: "Success Rate", 
-      icon: "🎯", 
-      color: "from-orange-500 to-red-500" 
+    {
+      number: `${countedStats.success}%`,
+      label: "Success Rate",
+      icon: "🎯",
+      color: "from-orange-500 to-red-500"
     },
   ];
 
@@ -263,7 +263,7 @@ const HomeModern = () => {
       {/* Animated Mesh Background */}
       <div className="absolute inset-0 opacity-30">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-cyan-400/20 animate-gradient-x"></div>
-        <div 
+        <div
           className="absolute inset-0 opacity-40"
           style={{
             backgroundImage: `
@@ -279,19 +279,19 @@ const HomeModern = () => {
       </div>
 
       {/* Floating 3D Elements */}
-      <div 
+      <div
         className="absolute top-20 left-10 w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-600 rounded-3xl opacity-20 animate-float"
         style={{
           transform: `translate(${mousePosition.x}px, ${mousePosition.y}px) rotateX(${mousePosition.y}deg) rotateY(${mousePosition.x}deg)`
         }}
       />
-      <div 
+      <div
         className="absolute top-40 right-16 w-16 h-16 bg-gradient-to-br from-pink-400 to-red-600 rotate-45 opacity-20 animate-bounce-subtle"
         style={{
           transform: `translate(${mousePosition.x * -0.5}px, ${mousePosition.y * -0.5}px) rotate(${45 + mousePosition.x}deg)`
         }}
       />
-      <div 
+      <div
         className="absolute bottom-32 left-20 w-12 h-12 bg-gradient-to-br from-green-400 to-cyan-600 rounded-full opacity-30 animate-pulse-slow"
         style={{
           transform: `translate(${mousePosition.x * 0.3}px, ${mousePosition.y * 0.3}px)`
@@ -300,7 +300,7 @@ const HomeModern = () => {
 
       {/* Main Content Container */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 py-20">
-        
+
         {/* Hero Section - Dark split card with portraits */}
         <section ref={heroRef} className="w-full max-w-7xl mx-auto mb-10">
           <div className={`relative overflow-hidden rounded-3xl shadow-2xl bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-800 text-white ${animate ? 'animate-fade-in-down' : 'opacity-0'}`}>
@@ -333,6 +333,12 @@ const HomeModern = () => {
                     className="px-7 py-3 rounded-xl border border-white/20 font-semibold text-slate-100 hover:bg-white/10 transition"
                   >
                     Learn more →
+                  </Link>
+                  <Link
+                    to="/mentor/register"
+                    className="px-7 py-3 rounded-xl bg-purple-100 text-purple-900 font-bold shadow-lg hover:bg-purple-200 hover:scale-[1.02] transition"
+                  >
+                    Become a Mentor
                   </Link>
                 </div>
 
@@ -478,11 +484,10 @@ const HomeModern = () => {
                   <button
                     key={index}
                     onClick={() => setCurrentTip(index)}
-                    className={`w-3.5 h-3.5 rounded-full transition-all duration-300 ring-1 ring-white/10 ${
-                      index === currentTip
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 scale-125 shadow-lg shadow-blue-900/40'
-                        : 'bg-slate-700/80 hover:bg-slate-600 hover:scale-110'
-                    }`}
+                    className={`w-3.5 h-3.5 rounded-full transition-all duration-300 ring-1 ring-white/10 ${index === currentTip
+                      ? 'bg-gradient-to-r from-blue-500 to-purple-500 scale-125 shadow-lg shadow-blue-900/40'
+                      : 'bg-slate-700/80 hover:bg-slate-600 hover:scale-110'
+                      }`}
                   />
                 ))}
               </div>
@@ -521,8 +526,8 @@ const HomeModern = () => {
                     🔍 Explore Jobs
                   </Link>
                   {/* Hidden Admin Link */}
-                  <Link 
-                    to="/admin/login" 
+                  <Link
+                    to="/admin/login"
                     className="absolute -bottom-8 left-0 right-0 text-[10px] text-black/30 hover:text-black/50 transition-colors duration-300 inline-flex items-center justify-center gap-1 opacity-40 hover:opacity-70"
                     style={{ textShadow: '0 0 2px rgba(0,0,0,0.1)' }}
                   >

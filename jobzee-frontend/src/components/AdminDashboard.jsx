@@ -74,7 +74,7 @@ const AdminDashboard = () => {
     benefitsCSV: '',
     skillsCSV: ''
   });
-  
+
   // Payment management state
   const [payments, setPayments] = useState([]);
   const [paymentStats, setPaymentStats] = useState(null);
@@ -90,7 +90,7 @@ const AdminDashboard = () => {
   const [paymentEndDate, setPaymentEndDate] = useState('');
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState(null);
-  
+
   // Plan management state
   const [plans, setPlans] = useState([]);
   const [planPage, setPlanPage] = useState(1);
@@ -129,7 +129,7 @@ const AdminDashboard = () => {
   const [createPlanErrors, setCreatePlanErrors] = useState({});
   const [editPlanForm, setEditPlanForm] = useState({});
   const [editPlanErrors, setEditPlanErrors] = useState({});
-  
+
   // Product management state
   const [products, setProducts] = useState([]);
   const [productPage, setProductPage] = useState(1);
@@ -159,7 +159,7 @@ const AdminDashboard = () => {
   const [productErrors, setProductErrors] = useState({});
   const [productTouched, setProductTouched] = useState({});
   const [uploadingProductImage, setUploadingProductImage] = useState(false);
-  
+
   // Product purchase details state
   const [showProductPurchases, setShowProductPurchases] = useState(false);
   const [productPurchases, setProductPurchases] = useState([]);
@@ -171,7 +171,7 @@ const AdminDashboard = () => {
   const [productPurchasePaymentStatus, setProductPurchasePaymentStatus] = useState('');
   const [productPurchaseStartDate, setProductPurchaseStartDate] = useState('');
   const [productPurchaseEndDate, setProductPurchaseEndDate] = useState('');
-  
+
   // Shop Analytics state
   const [shopPayments, setShopPayments] = useState([]);
   const [shopAnalytics, setShopAnalytics] = useState(null);
@@ -185,7 +185,7 @@ const AdminDashboard = () => {
   const [shopCategory, setShopCategory] = useState('');
   const [showShopPaymentDetails, setShowShopPaymentDetails] = useState(false);
   const [selectedShopPayment, setSelectedShopPayment] = useState(null);
-  
+
   // Internship management state
   const [internships, setInternships] = useState([]);
   const [internshipPage, setInternshipPage] = useState(1);
@@ -223,7 +223,7 @@ const AdminDashboard = () => {
     skillsCSV: ''
   });
   const [createInternshipFormErrors, setCreateInternshipFormErrors] = useState({});
-  
+
   // Internship applications state
   const [showInternshipApplications, setShowInternshipApplications] = useState(false);
   const [internshipApplications, setInternshipApplications] = useState([]);
@@ -232,7 +232,51 @@ const AdminDashboard = () => {
   const [applicationTotalPages, setApplicationTotalPages] = useState(1);
   const [applicationStatusFilter, setApplicationStatusFilter] = useState('');
   const [selectedInternshipForApps, setSelectedInternshipForApps] = useState(null);
-  
+
+  // Mentor management state
+  const [mentors, setMentors] = useState([]);
+
+  const fetchMentors = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${API_BASE_URL}/api/mentors/all`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setMentors(data);
+      } else {
+        toast.error('Failed to fetch mentors');
+      }
+    } catch (error) {
+      console.error('Mentors fetch error:', error);
+      toast.error('Network error occurred');
+    }
+  };
+
+  const updateMentorStatus = async (mentorId, status) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`${API_BASE_URL}/api/mentors/${mentorId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status })
+      });
+      if (response.ok) {
+        toast.success(`Mentor status updated to ${status}`);
+        fetchMentors();
+      } else {
+        toast.error('Failed to update mentor status');
+      }
+    } catch (error) {
+      console.error('Update mentor status error:', error);
+      toast.error('Network error occurred');
+    }
+  };
+
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const admin = JSON.parse(localStorage.getItem('admin') || '{}');
@@ -243,9 +287,15 @@ const AdminDashboard = () => {
       navigate('/admin/login');
       return;
     }
-    
+
     fetchDashboardData();
   }, [navigate]);
+
+  useEffect(() => {
+    if (activeTab === 'mentors') {
+      fetchMentors();
+    }
+  }, [activeTab]);
 
   const fetchDashboardData = async () => {
     try {
@@ -501,7 +551,7 @@ const AdminDashboard = () => {
         const data = await res.json();
         setEmployerOptions(data.employers || []);
       }
-    } catch (_) {}
+    } catch (_) { }
     setShowCreateJob(true);
   };
 
@@ -526,9 +576,9 @@ const AdminDashboard = () => {
           max: createJobForm.salaryMax !== '' ? Number(createJobForm.salaryMax) : undefined,
           currency: createJobForm.salaryCurrency || 'USD'
         },
-        requirements: String(createJobForm.requirementsCSV || '').split(',').map(s=>s.trim()).filter(Boolean),
-        benefits: String(createJobForm.benefitsCSV || '').split(',').map(s=>s.trim()).filter(Boolean),
-        skills: String(createJobForm.skillsCSV || '').split(',').map(s=>s.trim()).filter(Boolean)
+        requirements: String(createJobForm.requirementsCSV || '').split(',').map(s => s.trim()).filter(Boolean),
+        benefits: String(createJobForm.benefitsCSV || '').split(',').map(s => s.trim()).filter(Boolean),
+        skills: String(createJobForm.skillsCSV || '').split(',').map(s => s.trim()).filter(Boolean)
       };
       const res = await fetch(`${API_BASE_URL}/api/admin/jobs`, {
         method: 'POST',
@@ -596,7 +646,7 @@ const AdminDashboard = () => {
   // Real-time validation for individual fields
   const handleJobFormChange = (field, value) => {
     setJobForm(prev => ({ ...prev, [field]: value }));
-    
+
     // Clear error for this field when user starts typing
     if (jobFormErrors[field]) {
       setJobFormErrors(prev => {
@@ -610,7 +660,7 @@ const AdminDashboard = () => {
     if (field === 'salaryMin' || field === 'salaryMax') {
       const salaryMin = field === 'salaryMin' ? Number(value) : Number(jobForm.salaryMin);
       const salaryMax = field === 'salaryMax' ? Number(value) : Number(jobForm.salaryMax);
-      
+
       if (salaryMin && salaryMax && salaryMin > salaryMax) {
         setJobFormErrors(prev => ({
           ...prev,
@@ -931,7 +981,7 @@ const AdminDashboard = () => {
         const data = await res.json();
         setEmployerOptions(data.employers || []);
       }
-    } catch (_) {}
+    } catch (_) { }
     setCreateInternshipFormErrors({});
     setShowCreateInternship(true);
   };
@@ -957,8 +1007,8 @@ const AdminDashboard = () => {
           max: createInternshipForm.stipendMax !== '' ? Number(createInternshipForm.stipendMax) : undefined,
           currency: createInternshipForm.stipendCurrency || 'INR'
         },
-        requirements: String(createInternshipForm.requirementsCSV || '').split(',').map(s=>s.trim()).filter(Boolean),
-        skills: String(createInternshipForm.skillsCSV || '').split(',').map(s=>s.trim()).filter(Boolean)
+        requirements: String(createInternshipForm.requirementsCSV || '').split(',').map(s => s.trim()).filter(Boolean),
+        skills: String(createInternshipForm.skillsCSV || '').split(',').map(s => s.trim()).filter(Boolean)
       };
       const res = await fetch(`${API_BASE_URL}/api/admin/internships`, {
         method: 'POST',
@@ -1135,7 +1185,7 @@ const AdminDashboard = () => {
           headers: { 'Authorization': `Bearer ${token}` }
         }
       );
-      
+
       if (res.ok) {
         const data = await res.json();
         setInternshipApplications(data.applications);
@@ -1194,7 +1244,7 @@ const AdminDashboard = () => {
     setSearchTerm('');
     setFilterStatus('');
     setCurrentPage(1);
-    
+
     if (tab === 'users') fetchUsers();
     else if (tab === 'employers') fetchEmployers();
     else if (tab === 'jobs') fetchJobs();
@@ -1283,7 +1333,7 @@ const AdminDashboard = () => {
   // Product validation functions
   const validateProductForm = () => {
     const errs = {};
-    
+
     // Name validation
     if (!productForm.name || productForm.name.trim().length === 0) {
       errs.name = 'Product name is required';
@@ -1292,7 +1342,7 @@ const AdminDashboard = () => {
     } else if (productForm.name.trim().length > 100) {
       errs.name = 'Product name must be less than 100 characters';
     }
-    
+
     // Price validation
     if (productForm.price === '' || productForm.price === null || productForm.price === undefined) {
       errs.price = 'Price is required';
@@ -1304,7 +1354,7 @@ const AdminDashboard = () => {
         errs.price = 'Price cannot exceed 999,999';
       }
     }
-    
+
     // Description validation
     if (!productForm.description || productForm.description.trim().length === 0) {
       errs.description = 'Description is required';
@@ -1313,12 +1363,12 @@ const AdminDashboard = () => {
     } else if (productForm.description.trim().length > 2000) {
       errs.description = 'Description must be less than 2000 characters';
     }
-    
+
     // Short description validation
     if (productForm.shortDescription && productForm.shortDescription.trim().length > 200) {
       errs.shortDescription = 'Short description must be less than 200 characters';
     }
-    
+
     // Stock validation (only if not unlimited)
     if (!productForm.isUnlimited) {
       if (productForm.stock === '' || productForm.stock === null || productForm.stock === undefined) {
@@ -1332,30 +1382,30 @@ const AdminDashboard = () => {
         }
       }
     }
-    
+
     // Image alt validation (only if image URL exists)
     if (productForm.imageUrl && (!productForm.imageAlt || productForm.imageAlt.trim().length === 0)) {
       errs.imageAlt = 'Image alt text is required when image is provided';
     } else if (productForm.imageAlt && productForm.imageAlt.trim().length > 100) {
       errs.imageAlt = 'Image alt text must be less than 100 characters';
     }
-    
+
     return errs;
   };
-  
+
   const handleProductFocus = (field) => {
     setProductTouched(prev => ({ ...prev, [field]: true }));
-    
+
     // Show immediate validation feedback for required fields
     if (!String(productForm[field] || '').trim() && ['name', 'price', 'description'].includes(field)) {
       setProductErrors(prev => ({ ...prev, [field]: 'This field is required' }));
     }
   };
-  
+
   const handleProductBlur = (field) => {
     const value = String(productForm[field] || '').trim();
     let message = '';
-    
+
     // Validate based on field type
     if (field === 'name') {
       if (!value) {
@@ -1404,7 +1454,7 @@ const AdminDashboard = () => {
         message = 'Image alt text must be less than 100 characters';
       }
     }
-    
+
     setProductErrors(prev => ({ ...prev, [field]: message }));
   };
 
@@ -1514,14 +1564,14 @@ const AdminDashboard = () => {
 
   const updateProduct = async () => {
     if (!selectedProduct) return;
-    
+
     const errs = validateProductForm();
     if (Object.keys(errs).length > 0) {
       setProductErrors(errs);
       toast.error('Please fix the validation errors before updating the product');
       return;
     }
-    
+
     try {
       const token = localStorage.getItem('adminToken');
       const payload = {
@@ -1617,11 +1667,11 @@ const AdminDashboard = () => {
         ...(startDate && { startDate }),
         ...(endDate && { endDate })
       });
-      
+
       const res = await fetch(`${API_BASE_URL}/api/orders/admin/products/${productId}/purchases?${params}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
+
       if (res.ok) {
         const data = await res.json();
         setProductPurchases(data.orders || []);
@@ -1669,7 +1719,7 @@ const AdminDashboard = () => {
         ...(endDate && { endDate }),
         ...(category && { category })
       });
-      
+
       const response = await fetch(`${API_BASE_URL}/api/admin/shop-payments?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -1697,7 +1747,7 @@ const AdminDashboard = () => {
         ...(startDate && { startDate }),
         ...(endDate && { endDate })
       });
-      
+
       const response = await fetch(`${API_BASE_URL}/api/admin/shop-analytics?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -1780,7 +1830,7 @@ const AdminDashboard = () => {
         ...(startDate && { startDate }),
         ...(endDate && { endDate })
       });
-      
+
       const response = await fetch(`${API_BASE_URL}/api/admin/payments?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -1882,7 +1932,7 @@ const AdminDashboard = () => {
         ...(status && { status }),
         ...(category && { category })
       });
-      
+
       const response = await fetch(`${API_BASE_URL}/api/admin/plans?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -2105,7 +2155,7 @@ const AdminDashboard = () => {
   const addFeature = (formType) => {
     const form = formType === 'create' ? createPlanForm : editPlanForm;
     const setForm = formType === 'create' ? setCreatePlanForm : setEditPlanForm;
-    
+
     setForm({
       ...form,
       features: [...form.features, { name: '', included: true, description: '' }]
@@ -2115,7 +2165,7 @@ const AdminDashboard = () => {
   const updateFeature = (index, field, value, formType) => {
     const form = formType === 'create' ? createPlanForm : editPlanForm;
     const setForm = formType === 'create' ? setCreatePlanForm : setEditPlanForm;
-    
+
     const newFeatures = [...form.features];
     newFeatures[index] = { ...newFeatures[index], [field]: value };
     setForm({ ...form, features: newFeatures });
@@ -2124,7 +2174,7 @@ const AdminDashboard = () => {
   const removeFeature = (index, formType) => {
     const form = formType === 'create' ? createPlanForm : editPlanForm;
     const setForm = formType === 'create' ? setCreatePlanForm : setEditPlanForm;
-    
+
     const newFeatures = form.features.filter((_, i) => i !== index);
     setForm({ ...form, features: newFeatures });
   };
@@ -2132,7 +2182,7 @@ const AdminDashboard = () => {
   const addTag = (formType) => {
     const form = formType === 'create' ? createPlanForm : editPlanForm;
     const setForm = formType === 'create' ? setCreatePlanForm : setEditPlanForm;
-    
+
     setForm({
       ...form,
       tags: [...form.tags, '']
@@ -2142,7 +2192,7 @@ const AdminDashboard = () => {
   const updateTag = (index, value, formType) => {
     const form = formType === 'create' ? createPlanForm : editPlanForm;
     const setForm = formType === 'create' ? setCreatePlanForm : setEditPlanForm;
-    
+
     const newTags = [...form.tags];
     newTags[index] = value;
     setForm({ ...form, tags: newTags });
@@ -2151,7 +2201,7 @@ const AdminDashboard = () => {
   const removeTag = (index, formType) => {
     const form = formType === 'create' ? createPlanForm : editPlanForm;
     const setForm = formType === 'create' ? setCreatePlanForm : setEditPlanForm;
-    
+
     const newTags = form.tags.filter((_, i) => i !== index);
     setForm({ ...form, tags: newTags });
   };
@@ -2261,251 +2311,19 @@ const AdminDashboard = () => {
           admin={admin}
         />
         <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Dashboard Stats */}
-        {activeTab === 'dashboard' && dashboardData && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Total Users</p>
-                    <p className="text-3xl font-bold text-blue-600">{dashboardData.stats.totalUsers}</p>
-                  </div>
-                  <div className="bg-blue-100 p-3 rounded-full">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Total Employers</p>
-                    <p className="text-3xl font-bold text-green-600">{dashboardData.stats.totalEmployers}</p>
-                  </div>
-                  <div className="bg-green-100 p-3 rounded-full">
-                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Total Jobs</p>
-                    <p className="text-3xl font-bold text-purple-600">{dashboardData.stats.totalJobs}</p>
-                  </div>
-                  <div className="bg-purple-100 p-3 rounded-full">
-                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Active Jobs</p>
-                    <p className="text-3xl font-bold text-indigo-600">{dashboardData.stats.activeJobs}</p>
-                  </div>
-                  <div className="bg-indigo-100 p-3 rounded-full">
-                    <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Pending Jobs</p>
-                    <p className="text-3xl font-bold text-yellow-600">{dashboardData.stats.pendingJobs}</p>
-                  </div>
-                  <div className="bg-yellow-100 p-3 rounded-full">
-                    <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Rejected Jobs</p>
-                    <p className="text-3xl font-bold text-red-600">{dashboardData.stats.rejectedJobs}</p>
-                  </div>
-                  <div className="bg-red-100 p-3 rounded-full">
-                    <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Recent Activity */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Users</h3>
-                <div className="space-y-4">
-                  {dashboardData.recentActivity.users.map((user) => (
-                    <div key={user._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <p className="font-medium text-gray-900">{user.name}</p>
-                        <p className="text-sm text-gray-600">{user.email}</p>
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {new Date(user.createdAt).toLocaleDateString()}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Jobs</h3>
-                <div className="space-y-4">
-                  {dashboardData.recentActivity.jobs.map((job) => (
-                    <div key={job._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <p className="font-medium text-gray-900">{job.title}</p>
-                        <p className="text-sm text-gray-600">{job.company}</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          job.status === 'active' ? 'bg-green-100 text-green-800' :
-                          job.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {job.status}
-                        </span>
-                        <div className="text-sm text-gray-500">
-                          {new Date(job.createdAt).toLocaleDateString()}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        {activeTab === 'analytics' && (
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm p-4">
-              <div className="flex flex-wrap items-end gap-4">
-                <div>
-                  <label className="block text-sm text-gray-600">Start date</label>
-                  <input type="date" value={orderStatsStartDate} onChange={(e)=>setOrderStatsStartDate(e.target.value)} className="mt-1 border rounded px-3 py-2" />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-600">End date</label>
-                  <input type="date" value={orderStatsEndDate} onChange={(e)=>setOrderStatsEndDate(e.target.value)} className="mt-1 border rounded px-3 py-2" />
-                </div>
-                <button onClick={fetchAdminOrderStats} className="ml-auto bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Apply</button>
-              </div>
-            </div>
-
-            {orderStats && (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="bg-white rounded-lg shadow-sm p-4">
-                    <div className="text-sm text-gray-600">Total Orders</div>
-                    <div className="text-2xl font-bold">{orderStats.total?.totalOrders || 0}</div>
-                  </div>
-                  <div className="bg-white rounded-lg shadow-sm p-4">
-                    <div className="text-sm text-gray-600">Total Revenue</div>
-                    <div className="text-2xl font-bold">{orderStats.total?.totalRevenue?.toFixed ? orderStats.total.totalRevenue.toFixed(2) : orderStats.total?.totalRevenue || 0}</div>
-                  </div>
-                  <div className="bg-white rounded-lg shadow-sm p-4">
-                    <div className="text-sm text-gray-600">Items Sold</div>
-                    <div className="text-2xl font-bold">{orderStats.total?.totalItemsSold || 0}</div>
-                  </div>
-                  <div className="bg-white rounded-lg shadow-sm p-4">
-                    <div className="text-sm text-gray-600">Unique Customers</div>
-                    <div className="text-2xl font-bold">{orderStats.total?.uniqueCustomers || 0}</div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="bg-white rounded-lg shadow-sm p-4">
-                    <div className="font-semibold mb-3">Payment Status</div>
-                    <div className="space-y-2">
-                      {(orderStats.paymentsByStatus || []).map((p)=> (
-                        <div key={p._id} className="flex justify-between text-sm">
-                          <span className="capitalize">{p._id || 'unknown'}</span>
-                          <span>{p.count} • {p.amount?.toFixed ? p.amount.toFixed(2) : p.amount}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-lg shadow-sm p-4">
-                    <div className="font-semibold mb-3">Payment Method</div>
-                    <div className="space-y-2">
-                      {(orderStats.paymentsByMethod || []).map((p)=> (
-                        <div key={p._id} className="flex justify-between text-sm">
-                          <span className="capitalize">{p._id || 'unknown'}</span>
-                          <span>{p.count} • {p.amount?.toFixed ? p.amount.toFixed(2) : p.amount}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="bg-white rounded-lg shadow-sm p-4">
-                    <div className="font-semibold mb-3">Revenue by Product</div>
-                    <div className="divide-y">
-                      {(orderStats.revenueByProduct || []).map((r)=> (
-                        <div key={r.productId} className="py-2 flex justify-between text-sm">
-                          <span className="truncate mr-3">{r.name || String(r.productId).slice(-6)}</span>
-                          <span>{r.quantitySold} • {r.revenue?.toFixed ? r.revenue.toFixed(2) : r.revenue}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-lg shadow-sm p-4">
-                    <div className="font-semibold mb-3">Revenue by Category</div>
-                    <div className="divide-y">
-                      {(orderStats.revenueByCategory || []).map((r)=> (
-                        <div key={r._id || 'unknown'} className="py-2 flex justify-between text-sm">
-                          <span className="truncate mr-3">{r._id || 'Unknown'}</span>
-                          <span>{r.quantitySold} • {r.revenue?.toFixed ? r.revenue.toFixed(2) : r.revenue}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-        {activeTab === 'events' && (
-          <AdminEventsModeration />
-        )}
-
-        {/* Payments Management */}
-        {activeTab === 'payments' && (
-          <div className="space-y-6">
-            {/* Payment Statistics */}
-            {paymentStats && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Dashboard Stats */}
+          {activeTab === 'dashboard' && dashboardData && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="bg-white p-6 rounded-lg shadow-sm">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Total Payments</p>
-                      <p className="text-3xl font-bold text-blue-600">{paymentStats.stats.totalPayments}</p>
+                      <p className="text-sm font-medium text-gray-600">Total Users</p>
+                      <p className="text-3xl font-bold text-blue-600">{dashboardData.stats.totalUsers}</p>
                     </div>
                     <div className="bg-blue-100 p-3 rounded-full">
                       <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                       </svg>
                     </div>
                   </div>
@@ -2514,11 +2332,39 @@ const AdminDashboard = () => {
                 <div className="bg-white p-6 rounded-lg shadow-sm">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Successful</p>
-                      <p className="text-3xl font-bold text-green-600">{paymentStats.stats.successfulPayments}</p>
+                      <p className="text-sm font-medium text-gray-600">Total Employers</p>
+                      <p className="text-3xl font-bold text-green-600">{dashboardData.stats.totalEmployers}</p>
                     </div>
                     <div className="bg-green-100 p-3 rounded-full">
                       <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Total Jobs</p>
+                      <p className="text-3xl font-bold text-purple-600">{dashboardData.stats.totalJobs}</p>
+                    </div>
+                    <div className="bg-purple-100 p-3 rounded-full">
+                      <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Active Jobs</p>
+                      <p className="text-3xl font-bold text-indigo-600">{dashboardData.stats.activeJobs}</p>
+                    </div>
+                    <div className="bg-indigo-100 p-3 rounded-full">
+                      <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
@@ -2528,12 +2374,12 @@ const AdminDashboard = () => {
                 <div className="bg-white p-6 rounded-lg shadow-sm">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                      <p className="text-3xl font-bold text-purple-600">{formatCurrency(paymentStats.stats.successfulAmount)}</p>
+                      <p className="text-sm font-medium text-gray-600">Pending Jobs</p>
+                      <p className="text-3xl font-bold text-yellow-600">{dashboardData.stats.pendingJobs}</p>
                     </div>
-                    <div className="bg-purple-100 p-3 rounded-full">
-                      <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    <div className="bg-yellow-100 p-3 rounded-full">
+                      <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                   </div>
@@ -2542,309 +2388,399 @@ const AdminDashboard = () => {
                 <div className="bg-white p-6 rounded-lg shadow-sm">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Failed</p>
-                      <p className="text-3xl font-bold text-red-600">{paymentStats.stats.failedPayments}</p>
+                      <p className="text-sm font-medium text-gray-600">Rejected Jobs</p>
+                      <p className="text-3xl font-bold text-red-600">{dashboardData.stats.rejectedJobs}</p>
                     </div>
                     <div className="bg-red-100 p-3 rounded-full">
                       <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                   </div>
                 </div>
               </div>
-            )}
 
-            {/* Payment List */}
-            <div className="bg-white rounded-lg shadow-sm">
-              <div className="p-6 border-b">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Payment Transactions</h3>
-                  <div className="space-x-2">
-                    <button
-                      onClick={() => fetchPayments(paymentPage, paymentSearch, paymentStatus, paymentPlan, paymentStartDate, paymentEndDate)}
-                      className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
-                    >
-                      Refresh
-                    </button>
+              {/* Recent Activity */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Users</h3>
+                  <div className="space-y-4">
+                    {dashboardData.recentActivity.users.map((user) => (
+                      <div key={user._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900">{user.name}</p>
+                          <p className="text-sm text-gray-600">{user.email}</p>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {new Date(user.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                
-                {/* Filters */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
-                  <input
-                    type="text"
-                    placeholder="Search by company..."
-                    value={paymentSearch}
-                    onChange={(e) => setPaymentSearch(e.target.value)}
-                    className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <select
-                    value={paymentStatus}
-                    onChange={(e) => setPaymentStatus(e.target.value)}
-                    className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">All Status</option>
-                    <option value="success">Success</option>
-                    <option value="failed">Failed</option>
-                    <option value="pending">Pending</option>
-                    <option value="cancelled">Cancelled</option>
-                    <option value="refunded">Refunded</option>
-                  </select>
-                  <select
-                    value={paymentPlan}
-                    onChange={(e) => setPaymentPlan(e.target.value)}
-                    className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">All Plans</option>
-                    <option value="free">Free</option>
-                    <option value="basic">Basic</option>
-                    <option value="premium">Premium</option>
-                    <option value="enterprise">Enterprise</option>
-                  </select>
-                  <input
-                    type="date"
-                    value={paymentStartDate}
-                    onChange={(e) => setPaymentStartDate(e.target.value)}
-                    className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Start Date"
-                  />
-                  <input
-                    type="date"
-                    value={paymentEndDate}
-                    onChange={(e) => setPaymentEndDate(e.target.value)}
-                    className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="End Date"
-                  />
-                </div>
-                
-                <button
-                  onClick={() => fetchPayments(1, paymentSearch, paymentStatus, paymentPlan, paymentStartDate, paymentEndDate)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                >
-                  Apply Filters
-                </button>
-              </div>
 
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {payments.map((payment) => (
-                      <tr key={payment._id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">
-                              {payment.employerId?.companyName || 'Unknown Company'}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {payment.employerId?.companyEmail || 'No email'}
-                            </div>
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Jobs</h3>
+                  <div className="space-y-4">
+                    {dashboardData.recentActivity.jobs.map((job) => (
+                      <div key={job._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900">{job.title}</p>
+                          <p className="text-sm text-gray-600">{job.company}</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className={`px-2 py-1 text-xs rounded-full ${job.status === 'active' ? 'bg-green-100 text-green-800' :
+                              job.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-red-100 text-red-800'
+                            }`}>
+                            {job.status}
+                          </span>
+                          <div className="text-sm text-gray-500">
+                            {new Date(job.createdAt).toLocaleDateString()}
                           </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {payment.planId}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {formatCurrency(payment.amount, payment.currency)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(payment.status)}`}>
-                            {payment.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatDate(payment.initiatedAt)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button
-                            onClick={() => fetchPaymentDetails(payment._id)}
-                            className="text-blue-600 hover:text-blue-900 mr-3"
-                          >
-                            View Details
-                          </button>
-                        </td>
-                      </tr>
+                        </div>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {activeTab === 'analytics' && (
+            <div className="space-y-6">
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <div className="flex flex-wrap items-end gap-4">
+                  <div>
+                    <label className="block text-sm text-gray-600">Start date</label>
+                    <input type="date" value={orderStatsStartDate} onChange={(e) => setOrderStatsStartDate(e.target.value)} className="mt-1 border rounded px-3 py-2" />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600">End date</label>
+                    <input type="date" value={orderStatsEndDate} onChange={(e) => setOrderStatsEndDate(e.target.value)} className="mt-1 border rounded px-3 py-2" />
+                  </div>
+                  <button onClick={fetchAdminOrderStats} className="ml-auto bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Apply</button>
+                </div>
               </div>
 
-              {/* Pagination */}
-              {paymentTotalPages > 1 && (
-                <div className="px-6 py-3 border-t flex items-center justify-between">
-                  <div className="text-sm text-gray-700">
-                    Page {paymentPage} of {paymentTotalPages}
+              {orderStats && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="bg-white rounded-lg shadow-sm p-4">
+                      <div className="text-sm text-gray-600">Total Orders</div>
+                      <div className="text-2xl font-bold">{orderStats.total?.totalOrders || 0}</div>
+                    </div>
+                    <div className="bg-white rounded-lg shadow-sm p-4">
+                      <div className="text-sm text-gray-600">Total Revenue</div>
+                      <div className="text-2xl font-bold">{orderStats.total?.totalRevenue?.toFixed ? orderStats.total.totalRevenue.toFixed(2) : orderStats.total?.totalRevenue || 0}</div>
+                    </div>
+                    <div className="bg-white rounded-lg shadow-sm p-4">
+                      <div className="text-sm text-gray-600">Items Sold</div>
+                      <div className="text-2xl font-bold">{orderStats.total?.totalItemsSold || 0}</div>
+                    </div>
+                    <div className="bg-white rounded-lg shadow-sm p-4">
+                      <div className="text-sm text-gray-600">Unique Customers</div>
+                      <div className="text-2xl font-bold">{orderStats.total?.uniqueCustomers || 0}</div>
+                    </div>
                   </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => fetchPayments(paymentPage - 1, paymentSearch, paymentStatus, paymentPlan, paymentStartDate, paymentEndDate)}
-                      disabled={paymentPage === 1}
-                      className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Previous
-                    </button>
-                    <button
-                      onClick={() => fetchPayments(paymentPage + 1, paymentSearch, paymentStatus, paymentPlan, paymentStartDate, paymentEndDate)}
-                      disabled={paymentPage === paymentTotalPages}
-                      className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Next
-                    </button>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="bg-white rounded-lg shadow-sm p-4">
+                      <div className="font-semibold mb-3">Payment Status</div>
+                      <div className="space-y-2">
+                        {(orderStats.paymentsByStatus || []).map((p) => (
+                          <div key={p._id} className="flex justify-between text-sm">
+                            <span className="capitalize">{p._id || 'unknown'}</span>
+                            <span>{p.count} • {p.amount?.toFixed ? p.amount.toFixed(2) : p.amount}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="bg-white rounded-lg shadow-sm p-4">
+                      <div className="font-semibold mb-3">Payment Method</div>
+                      <div className="space-y-2">
+                        {(orderStats.paymentsByMethod || []).map((p) => (
+                          <div key={p._id} className="flex justify-between text-sm">
+                            <span className="capitalize">{p._id || 'unknown'}</span>
+                            <span>{p.count} • {p.amount?.toFixed ? p.amount.toFixed(2) : p.amount}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="bg-white rounded-lg shadow-sm p-4">
+                      <div className="font-semibold mb-3">Revenue by Product</div>
+                      <div className="divide-y">
+                        {(orderStats.revenueByProduct || []).map((r) => (
+                          <div key={r.productId} className="py-2 flex justify-between text-sm">
+                            <span className="truncate mr-3">{r.name || String(r.productId).slice(-6)}</span>
+                            <span>{r.quantitySold} • {r.revenue?.toFixed ? r.revenue.toFixed(2) : r.revenue}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="bg-white rounded-lg shadow-sm p-4">
+                      <div className="font-semibold mb-3">Revenue by Category</div>
+                      <div className="divide-y">
+                        {(orderStats.revenueByCategory || []).map((r) => (
+                          <div key={r._id || 'unknown'} className="py-2 flex justify-between text-sm">
+                            <span className="truncate mr-3">{r._id || 'Unknown'}</span>
+                            <span>{r.quantitySold} • {r.revenue?.toFixed ? r.revenue.toFixed(2) : r.revenue}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+          {activeTab === 'events' && (
+            <AdminEventsModeration />
+          )}
+
+          {/* Payments Management */}
+          {activeTab === 'payments' && (
+            <div className="space-y-6">
+              {/* Payment Statistics */}
+              {paymentStats && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="bg-white p-6 rounded-lg shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Total Payments</p>
+                        <p className="text-3xl font-bold text-blue-600">{paymentStats.stats.totalPayments}</p>
+                      </div>
+                      <div className="bg-blue-100 p-3 rounded-full">
+                        <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-6 rounded-lg shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Successful</p>
+                        <p className="text-3xl font-bold text-green-600">{paymentStats.stats.successfulPayments}</p>
+                      </div>
+                      <div className="bg-green-100 p-3 rounded-full">
+                        <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-6 rounded-lg shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                        <p className="text-3xl font-bold text-purple-600">{formatCurrency(paymentStats.stats.successfulAmount)}</p>
+                      </div>
+                      <div className="bg-purple-100 p-3 rounded-full">
+                        <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-6 rounded-lg shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Failed</p>
+                        <p className="text-3xl font-bold text-red-600">{paymentStats.stats.failedPayments}</p>
+                      </div>
+                      <div className="bg-red-100 p-3 rounded-full">
+                        <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
-            </div>
-          </div>
-        )}
 
-        {/* Products Management */}
-        {activeTab === 'products' && (
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm">
-              <div className="p-6 border-b">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Products</h3>
-                  <div className="space-x-2">
-                    <button onClick={() => fetchAdminProducts(productPage, productSearch, productStatus, productCategory)} className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800">Refresh</button>
-                    <button onClick={openCreateProductModal} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">+ New Product</button>
+              {/* Payment List */}
+              <div className="bg-white rounded-lg shadow-sm">
+                <div className="p-6 border-b">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Payment Transactions</h3>
+                    <div className="space-x-2">
+                      <button
+                        onClick={() => fetchPayments(paymentPage, paymentSearch, paymentStatus, paymentPlan, paymentStartDate, paymentEndDate)}
+                        className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+                      >
+                        Refresh
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                  <input type="text" placeholder="Search products..." value={productSearch} onChange={(e)=>setProductSearch(e.target.value)} className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                  <select value={productStatus} onChange={(e)=>setProductStatus(e.target.value)} className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="draft">Draft</option>
-                    <option value="archived">Archived</option>
-                  </select>
-                  <select value={productCategory} onChange={(e)=>setProductCategory(e.target.value)} className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">All Categories</option>
-                    <option value="Books">Books</option>
-                    <option value="Courses">Courses</option>
-                    <option value="Templates">Templates</option>
-                    <option value="Tools">Tools</option>
-                    <option value="Certificates">Certificates</option>
-                    <option value="Consultation">Consultation</option>
-                    <option value="Resume Services">Resume Services</option>
-                    <option value="Interview Prep">Interview Prep</option>
-                    <option value="Career Coaching">Career Coaching</option>
-                    <option value="Skills Assessment">Skills Assessment</option>
-                    <option value="Other">Other</option>
-                  </select>
-                  <button onClick={() => fetchAdminProducts(1, productSearch, productStatus, productCategory)} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Apply Filters</button>
-                </div>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Visibility</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {products.map((p) => (
-                      <tr key={p._id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{p.name}</div>
-                          <div className="text-xs text-gray-500">{p.shortDescription}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{p.category}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{p.currency} {Number(p.price).toFixed(2)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap"><span className={`px-2 py-1 text-xs rounded-full ${p.status === 'active' ? 'bg-green-100 text-green-800' : p.status === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}`}>{p.status}</span></td>
-                        <td className="px-6 py-4 whitespace-nowrap"><span className={`px-2 py-1 text-xs rounded-full ${p.isVisible ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>{p.isVisible ? 'Visible' : 'Hidden'}</span></td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button onClick={() => openEditProduct(p)} className="text-green-600 hover:text-green-900 mr-3">Edit</button>
-                          <button onClick={() => openProductPurchases(p)} className="text-blue-600 hover:text-blue-900 mr-3">View Purchases</button>
-                          <button onClick={() => deleteProduct(p)} className="text-red-600 hover:text-red-900">Delete</button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {productTotalPages > 1 && (
-                <div className="px-6 py-3 border-t flex items-center justify-between">
-                  <div className="text-sm text-gray-700">Page {productPage} of {productTotalPages}</div>
-                  <div className="flex space-x-2">
-                    <button onClick={() => fetchAdminProducts(productPage - 1, productSearch, productStatus, productCategory)} disabled={productPage === 1} className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed">Previous</button>
-                    <button onClick={() => fetchAdminProducts(productPage + 1, productSearch, productStatus, productCategory)} disabled={productPage === productTotalPages} className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
-                  </div>
-                </div>
-              )}
-            </div>
 
-            {/* Create/Edit Product Modal */}
-            {(showCreateProduct || showEditProduct) && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-                  <h3 className="text-xl font-semibold mb-4">{showCreateProduct ? 'New Product' : 'Edit Product'}</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Product Name */}
-                    <div>
-                      <input 
-                        value={productForm.name} 
-                        onChange={(e)=>setProductForm({...productForm, name:e.target.value})} 
-                        onFocus={() => handleProductFocus('name')}
-                        onBlur={() => handleProductBlur('name')}
-                        placeholder="Product Name *" 
-                        className={`px-3 py-2 border rounded w-full focus:outline-none focus:ring-2 ${
-                          productErrors.name ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
-                        }`} 
-                      />
-                      {productErrors.name && <p className="text-red-600 text-sm mt-1">{productErrors.name}</p>}
-                    </div>
-                    {/* Price */}
-                    <div>
-                      <input 
-                        value={productForm.price} 
-                        onChange={(e)=>setProductForm({...productForm, price:e.target.value})} 
-                        onFocus={() => handleProductFocus('price')}
-                        onBlur={() => handleProductBlur('price')}
-                        placeholder="Price *" 
-                        type="number" 
-                        step="0.01" 
-                        min="0"
-                        className={`px-3 py-2 border rounded w-full focus:outline-none focus:ring-2 ${
-                          productErrors.price ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
-                        }`} 
-                      />
-                      {productErrors.price && <p className="text-red-600 text-sm mt-1">{productErrors.price}</p>}
-                    </div>
-                    {/* Currency */}
-                    <select 
-                      value={productForm.currency} 
-                      onChange={(e)=>setProductForm({...productForm, currency:e.target.value})} 
-                      className="px-3 py-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  {/* Filters */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+                    <input
+                      type="text"
+                      placeholder="Search by company..."
+                      value={paymentSearch}
+                      onChange={(e) => setPaymentSearch(e.target.value)}
+                      className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <select
+                      value={paymentStatus}
+                      onChange={(e) => setPaymentStatus(e.target.value)}
+                      className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="USD">USD</option>
-                      <option value="INR">INR</option>
-                      <option value="EUR">EUR</option>
-                      <option value="GBP">GBP</option>
+                      <option value="">All Status</option>
+                      <option value="success">Success</option>
+                      <option value="failed">Failed</option>
+                      <option value="pending">Pending</option>
+                      <option value="cancelled">Cancelled</option>
+                      <option value="refunded">Refunded</option>
                     </select>
-                    {/* Category */}
-                    <select 
-                      value={productForm.category} 
-                      onChange={(e)=>setProductForm({...productForm, category:e.target.value})} 
-                      className="px-3 py-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    <select
+                      value={paymentPlan}
+                      onChange={(e) => setPaymentPlan(e.target.value)}
+                      className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
+                      <option value="">All Plans</option>
+                      <option value="free">Free</option>
+                      <option value="basic">Basic</option>
+                      <option value="premium">Premium</option>
+                      <option value="enterprise">Enterprise</option>
+                    </select>
+                    <input
+                      type="date"
+                      value={paymentStartDate}
+                      onChange={(e) => setPaymentStartDate(e.target.value)}
+                      className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Start Date"
+                    />
+                    <input
+                      type="date"
+                      value={paymentEndDate}
+                      onChange={(e) => setPaymentEndDate(e.target.value)}
+                      className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="End Date"
+                    />
+                  </div>
+
+                  <button
+                    onClick={() => fetchPayments(1, paymentSearch, paymentStatus, paymentPlan, paymentStartDate, paymentEndDate)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                  >
+                    Apply Filters
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {payments.map((payment) => (
+                        <tr key={payment._id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {payment.employerId?.companyName || 'Unknown Company'}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {payment.employerId?.companyEmail || 'No email'}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              {payment.planId}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {formatCurrency(payment.amount, payment.currency)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(payment.status)}`}>
+                              {payment.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {formatDate(payment.initiatedAt)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button
+                              onClick={() => fetchPaymentDetails(payment._id)}
+                              className="text-blue-600 hover:text-blue-900 mr-3"
+                            >
+                              View Details
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                {paymentTotalPages > 1 && (
+                  <div className="px-6 py-3 border-t flex items-center justify-between">
+                    <div className="text-sm text-gray-700">
+                      Page {paymentPage} of {paymentTotalPages}
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => fetchPayments(paymentPage - 1, paymentSearch, paymentStatus, paymentPlan, paymentStartDate, paymentEndDate)}
+                        disabled={paymentPage === 1}
+                        className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Previous
+                      </button>
+                      <button
+                        onClick={() => fetchPayments(paymentPage + 1, paymentSearch, paymentStatus, paymentPlan, paymentStartDate, paymentEndDate)}
+                        disabled={paymentPage === paymentTotalPages}
+                        className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Products Management */}
+          {activeTab === 'products' && (
+            <div className="space-y-6">
+              <div className="bg-white rounded-lg shadow-sm">
+                <div className="p-6 border-b">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Products</h3>
+                    <div className="space-x-2">
+                      <button onClick={() => fetchAdminProducts(productPage, productSearch, productStatus, productCategory)} className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800">Refresh</button>
+                      <button onClick={openCreateProductModal} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">+ New Product</button>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <input type="text" placeholder="Search products..." value={productSearch} onChange={(e) => setProductSearch(e.target.value)} className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <select value={productStatus} onChange={(e) => setProductStatus(e.target.value)} className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <option value="">All Status</option>
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                      <option value="draft">Draft</option>
+                      <option value="archived">Archived</option>
+                    </select>
+                    <select value={productCategory} onChange={(e) => setProductCategory(e.target.value)} className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <option value="">All Categories</option>
                       <option value="Books">Books</option>
                       <option value="Courses">Courses</option>
                       <option value="Templates">Templates</option>
@@ -2857,2071 +2793,2251 @@ const AdminDashboard = () => {
                       <option value="Skills Assessment">Skills Assessment</option>
                       <option value="Other">Other</option>
                     </select>
-                    {/* Product Type */}
-                    <select 
-                      value={productForm.productType} 
-                      onChange={(e)=>setProductForm({...productForm, productType:e.target.value})} 
-                      className="px-3 py-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="digital">Digital</option>
-                      <option value="physical">Physical</option>
-                      <option value="service">Service</option>
-                    </select>
-                    {/* Stock */}
-                    <div>
-                      <input 
-                        value={productForm.stock} 
-                        onChange={(e)=>setProductForm({...productForm, stock:e.target.value})} 
-                        onFocus={() => handleProductFocus('stock')}
-                        onBlur={() => handleProductBlur('stock')}
-                        placeholder={productForm.isUnlimited ? "Stock (Unlimited)" : "Stock *"}
-                        type="number" 
-                        min="0"
-                        disabled={productForm.isUnlimited}
-                        className={`px-3 py-2 border rounded w-full focus:outline-none focus:ring-2 ${
-                          productForm.isUnlimited ? 'bg-gray-100 text-gray-500' : 
-                          productErrors.stock ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
-                        }`}
-                      />
-                      {productErrors.stock && <p className="text-red-600 text-sm mt-1">{productErrors.stock}</p>}
-                    </div>
-                    {/* Product Image Upload */}
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Product Image</label>
-                      <div className="flex items-center space-x-4">
-                        <input type="file" accept="image/*" onChange={(e)=>{ const f = e.target.files?.[0]; if (f) uploadProductImage(f); }} />
-                        {uploadingProductImage && <span className="text-sm text-gray-500">Uploading...</span>}
-                      </div>
-                      {productForm.imageUrl && (
-                        <div className="mt-3">
-                          <img src={productForm.imageUrl} alt="preview" className="w-32 h-32 object-cover rounded border" />
-                        </div>
-                      )}
-                    </div>
-                    {/* Image Alt Text */}
-                    <div className="md:col-span-2">
-                      <input 
-                        value={productForm.imageAlt} 
-                        onChange={(e)=>setProductForm({...productForm, imageAlt:e.target.value})} 
-                        onFocus={() => handleProductFocus('imageAlt')}
-                        onBlur={() => handleProductBlur('imageAlt')}
-                        placeholder={productForm.imageUrl ? "Image Alt Text *" : "Image Alt Text"}
-                        className={`px-3 py-2 border rounded w-full focus:outline-none focus:ring-2 ${
-                          productErrors.imageAlt ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
-                        }`} 
-                      />
-                      {productErrors.imageAlt && <p className="text-red-600 text-sm mt-1">{productErrors.imageAlt}</p>}
-                    </div>
-                    {/* Short Description */}
-                    <div className="md:col-span-2">
-                      <textarea 
-                        value={productForm.shortDescription} 
-                        onChange={(e)=>setProductForm({...productForm, shortDescription:e.target.value})} 
-                        onFocus={() => handleProductFocus('shortDescription')}
-                        onBlur={() => handleProductBlur('shortDescription')}
-                        placeholder="Short Description (Optional)"
-                        rows={2}
-                        className={`px-3 py-2 border rounded w-full focus:outline-none focus:ring-2 resize-none ${
-                          productErrors.shortDescription ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
-                        }`} 
-                      />
-                      {productErrors.shortDescription && <p className="text-red-600 text-sm mt-1">{productErrors.shortDescription}</p>}
-                    </div>
-                    {/* Description */}
-                    <div className="md:col-span-2">
-                      <textarea 
-                        value={productForm.description} 
-                        onChange={(e)=>setProductForm({...productForm, description:e.target.value})} 
-                        onFocus={() => handleProductFocus('description')}
-                        onBlur={() => handleProductBlur('description')}
-                        placeholder="Product Description *"
-                        rows={4}
-                        className={`px-3 py-2 border rounded w-full focus:outline-none focus:ring-2 resize-none ${
-                          productErrors.description ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
-                        }`} 
-                      />
-                      {productErrors.description && <p className="text-red-600 text-sm mt-1">{productErrors.description}</p>}
-                    </div>
-                    <div className="flex items-center space-x-4 md:col-span-2">
-                      <label className="flex items-center space-x-2">
-                        <input type="checkbox" checked={productForm.isVisible} onChange={(e)=>setProductForm({...productForm, isVisible:e.target.checked})} />
-                        <span>Visible</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input type="checkbox" checked={productForm.isFeatured} onChange={(e)=>setProductForm({...productForm, isFeatured:e.target.checked})} />
-                        <span>Featured</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input 
-                          type="checkbox" 
-                          checked={productForm.isUnlimited} 
-                          onChange={(e)=>{
-                            const isUnlimited = e.target.checked;
-                            setProductForm({...productForm, isUnlimited, stock: isUnlimited ? 0 : productForm.stock});
-                            // Clear stock error if unlimited is checked
-                            if (isUnlimited && productErrors.stock) {
-                              setProductErrors(prev => {
-                                const newErrors = {...prev};
-                                delete newErrors.stock;
-                                return newErrors;
-                              });
-                            }
-                          }} 
-                        />
-                        <span>Unlimited Stock</span>
-                      </label>
-                      <select value={productForm.status} onChange={(e)=>setProductForm({...productForm, status:e.target.value})} className="px-3 py-2 border rounded">
-                        <option value="active">active</option>
-                        <option value="inactive">inactive</option>
-                        <option value="draft">draft</option>
-                        <option value="archived">archived</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="flex justify-end space-x-2 mt-6">
-                    <button onClick={()=>{ setShowCreateProduct(false); setShowEditProduct(false); }} className="px-4 py-2 rounded border">Cancel</button>
-                    {showCreateProduct ? (
-                      <button onClick={createProduct} className="px-4 py-2 rounded bg-blue-600 text-white">Create</button>
-                    ) : (
-                      <button onClick={updateProduct} className="px-4 py-2 rounded bg-green-600 text-white">Save</button>
-                    )}
+                    <button onClick={() => fetchAdminProducts(1, productSearch, productStatus, productCategory)} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Apply Filters</button>
                   </div>
                 </div>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Visibility</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {products.map((p) => (
+                        <tr key={p._id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">{p.name}</div>
+                            <div className="text-xs text-gray-500">{p.shortDescription}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{p.category}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{p.currency} {Number(p.price).toFixed(2)}</td>
+                          <td className="px-6 py-4 whitespace-nowrap"><span className={`px-2 py-1 text-xs rounded-full ${p.status === 'active' ? 'bg-green-100 text-green-800' : p.status === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}`}>{p.status}</span></td>
+                          <td className="px-6 py-4 whitespace-nowrap"><span className={`px-2 py-1 text-xs rounded-full ${p.isVisible ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>{p.isVisible ? 'Visible' : 'Hidden'}</span></td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onClick={() => openEditProduct(p)} className="text-green-600 hover:text-green-900 mr-3">Edit</button>
+                            <button onClick={() => openProductPurchases(p)} className="text-blue-600 hover:text-blue-900 mr-3">View Purchases</button>
+                            <button onClick={() => deleteProduct(p)} className="text-red-600 hover:text-red-900">Delete</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {productTotalPages > 1 && (
+                  <div className="px-6 py-3 border-t flex items-center justify-between">
+                    <div className="text-sm text-gray-700">Page {productPage} of {productTotalPages}</div>
+                    <div className="flex space-x-2">
+                      <button onClick={() => fetchAdminProducts(productPage - 1, productSearch, productStatus, productCategory)} disabled={productPage === 1} className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed">Previous</button>
+                      <button onClick={() => fetchAdminProducts(productPage + 1, productSearch, productStatus, productCategory)} disabled={productPage === productTotalPages} className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        )}
 
-        {/* Plans Management */}
-        {activeTab === 'plans' && (
-          <div className="space-y-6">
-            {/* Plans List */}
+              {/* Create/Edit Product Modal */}
+              {(showCreateProduct || showEditProduct) && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                  <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
+                    <h3 className="text-xl font-semibold mb-4">{showCreateProduct ? 'New Product' : 'Edit Product'}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Product Name */}
+                      <div>
+                        <input
+                          value={productForm.name}
+                          onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
+                          onFocus={() => handleProductFocus('name')}
+                          onBlur={() => handleProductBlur('name')}
+                          placeholder="Product Name *"
+                          className={`px-3 py-2 border rounded w-full focus:outline-none focus:ring-2 ${productErrors.name ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                            }`}
+                        />
+                        {productErrors.name && <p className="text-red-600 text-sm mt-1">{productErrors.name}</p>}
+                      </div>
+                      {/* Price */}
+                      <div>
+                        <input
+                          value={productForm.price}
+                          onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
+                          onFocus={() => handleProductFocus('price')}
+                          onBlur={() => handleProductBlur('price')}
+                          placeholder="Price *"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          className={`px-3 py-2 border rounded w-full focus:outline-none focus:ring-2 ${productErrors.price ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                            }`}
+                        />
+                        {productErrors.price && <p className="text-red-600 text-sm mt-1">{productErrors.price}</p>}
+                      </div>
+                      {/* Currency */}
+                      <select
+                        value={productForm.currency}
+                        onChange={(e) => setProductForm({ ...productForm, currency: e.target.value })}
+                        className="px-3 py-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="USD">USD</option>
+                        <option value="INR">INR</option>
+                        <option value="EUR">EUR</option>
+                        <option value="GBP">GBP</option>
+                      </select>
+                      {/* Category */}
+                      <select
+                        value={productForm.category}
+                        onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
+                        className="px-3 py-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="Books">Books</option>
+                        <option value="Courses">Courses</option>
+                        <option value="Templates">Templates</option>
+                        <option value="Tools">Tools</option>
+                        <option value="Certificates">Certificates</option>
+                        <option value="Consultation">Consultation</option>
+                        <option value="Resume Services">Resume Services</option>
+                        <option value="Interview Prep">Interview Prep</option>
+                        <option value="Career Coaching">Career Coaching</option>
+                        <option value="Skills Assessment">Skills Assessment</option>
+                        <option value="Other">Other</option>
+                      </select>
+                      {/* Product Type */}
+                      <select
+                        value={productForm.productType}
+                        onChange={(e) => setProductForm({ ...productForm, productType: e.target.value })}
+                        className="px-3 py-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="digital">Digital</option>
+                        <option value="physical">Physical</option>
+                        <option value="service">Service</option>
+                      </select>
+                      {/* Stock */}
+                      <div>
+                        <input
+                          value={productForm.stock}
+                          onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })}
+                          onFocus={() => handleProductFocus('stock')}
+                          onBlur={() => handleProductBlur('stock')}
+                          placeholder={productForm.isUnlimited ? "Stock (Unlimited)" : "Stock *"}
+                          type="number"
+                          min="0"
+                          disabled={productForm.isUnlimited}
+                          className={`px-3 py-2 border rounded w-full focus:outline-none focus:ring-2 ${productForm.isUnlimited ? 'bg-gray-100 text-gray-500' :
+                              productErrors.stock ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                            }`}
+                        />
+                        {productErrors.stock && <p className="text-red-600 text-sm mt-1">{productErrors.stock}</p>}
+                      </div>
+                      {/* Product Image Upload */}
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Product Image</label>
+                        <div className="flex items-center space-x-4">
+                          <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadProductImage(f); }} />
+                          {uploadingProductImage && <span className="text-sm text-gray-500">Uploading...</span>}
+                        </div>
+                        {productForm.imageUrl && (
+                          <div className="mt-3">
+                            <img src={productForm.imageUrl} alt="preview" className="w-32 h-32 object-cover rounded border" />
+                          </div>
+                        )}
+                      </div>
+                      {/* Image Alt Text */}
+                      <div className="md:col-span-2">
+                        <input
+                          value={productForm.imageAlt}
+                          onChange={(e) => setProductForm({ ...productForm, imageAlt: e.target.value })}
+                          onFocus={() => handleProductFocus('imageAlt')}
+                          onBlur={() => handleProductBlur('imageAlt')}
+                          placeholder={productForm.imageUrl ? "Image Alt Text *" : "Image Alt Text"}
+                          className={`px-3 py-2 border rounded w-full focus:outline-none focus:ring-2 ${productErrors.imageAlt ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                            }`}
+                        />
+                        {productErrors.imageAlt && <p className="text-red-600 text-sm mt-1">{productErrors.imageAlt}</p>}
+                      </div>
+                      {/* Short Description */}
+                      <div className="md:col-span-2">
+                        <textarea
+                          value={productForm.shortDescription}
+                          onChange={(e) => setProductForm({ ...productForm, shortDescription: e.target.value })}
+                          onFocus={() => handleProductFocus('shortDescription')}
+                          onBlur={() => handleProductBlur('shortDescription')}
+                          placeholder="Short Description (Optional)"
+                          rows={2}
+                          className={`px-3 py-2 border rounded w-full focus:outline-none focus:ring-2 resize-none ${productErrors.shortDescription ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                            }`}
+                        />
+                        {productErrors.shortDescription && <p className="text-red-600 text-sm mt-1">{productErrors.shortDescription}</p>}
+                      </div>
+                      {/* Description */}
+                      <div className="md:col-span-2">
+                        <textarea
+                          value={productForm.description}
+                          onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
+                          onFocus={() => handleProductFocus('description')}
+                          onBlur={() => handleProductBlur('description')}
+                          placeholder="Product Description *"
+                          rows={4}
+                          className={`px-3 py-2 border rounded w-full focus:outline-none focus:ring-2 resize-none ${productErrors.description ? 'border-red-300 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                            }`}
+                        />
+                        {productErrors.description && <p className="text-red-600 text-sm mt-1">{productErrors.description}</p>}
+                      </div>
+                      <div className="flex items-center space-x-4 md:col-span-2">
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" checked={productForm.isVisible} onChange={(e) => setProductForm({ ...productForm, isVisible: e.target.checked })} />
+                          <span>Visible</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input type="checkbox" checked={productForm.isFeatured} onChange={(e) => setProductForm({ ...productForm, isFeatured: e.target.checked })} />
+                          <span>Featured</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            checked={productForm.isUnlimited}
+                            onChange={(e) => {
+                              const isUnlimited = e.target.checked;
+                              setProductForm({ ...productForm, isUnlimited, stock: isUnlimited ? 0 : productForm.stock });
+                              // Clear stock error if unlimited is checked
+                              if (isUnlimited && productErrors.stock) {
+                                setProductErrors(prev => {
+                                  const newErrors = { ...prev };
+                                  delete newErrors.stock;
+                                  return newErrors;
+                                });
+                              }
+                            }}
+                          />
+                          <span>Unlimited Stock</span>
+                        </label>
+                        <select value={productForm.status} onChange={(e) => setProductForm({ ...productForm, status: e.target.value })} className="px-3 py-2 border rounded">
+                          <option value="active">active</option>
+                          <option value="inactive">inactive</option>
+                          <option value="draft">draft</option>
+                          <option value="archived">archived</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="flex justify-end space-x-2 mt-6">
+                      <button onClick={() => { setShowCreateProduct(false); setShowEditProduct(false); }} className="px-4 py-2 rounded border">Cancel</button>
+                      {showCreateProduct ? (
+                        <button onClick={createProduct} className="px-4 py-2 rounded bg-blue-600 text-white">Create</button>
+                      ) : (
+                        <button onClick={updateProduct} className="px-4 py-2 rounded bg-green-600 text-white">Save</button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Plans Management */}
+          {activeTab === 'plans' && (
+            <div className="space-y-6">
+              {/* Plans List */}
+              <div className="bg-white rounded-lg shadow-sm">
+                <div className="p-6 border-b">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Subscription Plans</h3>
+                    <div className="space-x-2">
+                      <button
+                        onClick={() => fetchPlans(planPage, planSearch, planStatus, planCategory)}
+                        className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+                      >
+                        Refresh
+                      </button>
+                      <button
+                        onClick={openCreatePlanModal}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                      >
+                        + New Plan
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Filters */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <input
+                      type="text"
+                      placeholder="Search plans..."
+                      value={planSearch}
+                      onChange={(e) => setPlanSearch(e.target.value)}
+                      className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <select
+                      value={planStatus}
+                      onChange={(e) => setPlanStatus(e.target.value)}
+                      className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">All Status</option>
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                      <option value="unavailable">Unavailable</option>
+                    </select>
+                    <select
+                      value={planCategory}
+                      onChange={(e) => setPlanCategory(e.target.value)}
+                      className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">All Categories</option>
+                      <option value="standard">Standard</option>
+                      <option value="premium">Premium</option>
+                      <option value="enterprise">Enterprise</option>
+                    </select>
+                  </div>
+
+                  <button
+                    onClick={() => fetchPlans(1, planSearch, planStatus, planCategory)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                  >
+                    Apply Filters
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Features</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {plans.map((plan) => (
+                        <tr key={plan._id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">{plan.name}</div>
+                              <div className="text-sm text-gray-500">{plan.planId}</div>
+                              <div className="text-xs text-gray-400 mt-1">{plan.description}</div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">
+                              {plan.price?.amount ? formatCurrency(plan.price.amount, plan.price.currency) : 'Free'}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {plan.price?.period || 'one-time'}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900">
+                              {plan.features?.length || 0} features
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {plan.jobPostingLimit ? `${plan.jobPostingLimit} jobs` : 'Unlimited jobs'}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex flex-col space-y-1">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${plan.isActive ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100'
+                                }`}>
+                                {plan.isActive ? 'Active' : 'Inactive'}
+                              </span>
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${plan.isAvailable ? 'text-blue-600 bg-blue-100' : 'text-gray-600 bg-gray-100'
+                                }`}>
+                                {plan.isAvailable ? 'Available' : 'Unavailable'}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                              {plan.category || 'standard'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => openViewPlanModal(plan)}
+                                className="text-blue-600 hover:text-blue-900"
+                              >
+                                View
+                              </button>
+                              <button
+                                onClick={() => openEditPlanModal(plan)}
+                                className="text-green-600 hover:text-green-900"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => togglePlanStatus(plan.planId, !plan.isActive)}
+                                className={`${plan.isActive ? 'text-yellow-600 hover:text-yellow-900' : 'text-green-600 hover:text-green-900'}`}
+                              >
+                                {plan.isActive ? 'Deactivate' : 'Activate'}
+                              </button>
+                              <button
+                                onClick={() => deletePlan(plan.planId)}
+                                className="text-red-600 hover:text-red-900"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                {planTotalPages > 1 && (
+                  <div className="px-6 py-3 border-t flex items-center justify-between">
+                    <div className="text-sm text-gray-700">
+                      Page {planPage} of {planTotalPages}
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => fetchPlans(planPage - 1, planSearch, planStatus, planCategory)}
+                        disabled={planPage === 1}
+                        className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Previous
+                      </button>
+                      <button
+                        onClick={() => fetchPlans(planPage + 1, planSearch, planStatus, planCategory)}
+                        disabled={planPage === planTotalPages}
+                        className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Contact Queries */}
+          {activeTab === 'queries' && (
             <div className="bg-white rounded-lg shadow-sm">
               <div className="p-6 border-b">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Subscription Plans</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">Contact Queries</h3>
+                  <button
+                    onClick={() => fetchQueries(queryPage, querySearch, queryStatus)}
+                    className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+                  >
+                    Refresh
+                  </button>
+                </div>
+                <div className="flex space-x-4">
+                  <input
+                    type="text"
+                    placeholder="Search by name, email, subject..."
+                    value={querySearch}
+                    onChange={(e) => setQuerySearch(e.target.value)}
+                    className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <select
+                    value={queryStatus}
+                    onChange={(e) => setQueryStatus(e.target.value)}
+                    className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">All</option>
+                    <option value="new">New</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="resolved">Resolved</option>
+                  </select>
+                  <button
+                    onClick={() => fetchQueries(1, querySearch, queryStatus)}
+                    className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+                  >
+                    Search
+                  </button>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Received</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {queries.map((q) => (
+                      <tr key={q._id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="font-medium text-gray-900">{q.name}</div>
+                          <div className="text-sm text-gray-500">{q.email}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{q.subject}</td>
+                        <td className="px-6 py-4 text-sm text-gray-700 max-w-md truncate" title={q.message}>{q.message}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 text-xs rounded-full ${q.status === 'resolved' ? 'bg-green-100 text-green-800' : q.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'
+                            }`}>
+                            {q.status.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(q.createdAt).toLocaleString()}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
+                          {q.status !== 'in_progress' && (
+                            <button onClick={() => updateQueryStatus(q._id, 'in_progress')} className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">In Progress</button>
+                          )}
+                          {q.status !== 'resolved' && (
+                            <button onClick={() => updateQueryStatus(q._id, 'resolved')} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">Resolve</button>
+                          )}
+                          <button onClick={() => openQueryModal(q)} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">View</button>
+                          <button onClick={() => deleteQuery(q)} className="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700">Delete</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-between p-4">
+                <div className="text-sm text-gray-600">Page {queryPage} of {queryTotalPages}</div>
+                <div className="space-x-2">
+                  <button
+                    disabled={queryPage <= 1}
+                    onClick={() => fetchQueries(queryPage - 1, querySearch, queryStatus)}
+                    className="px-3 py-1 rounded border disabled:opacity-50"
+                  >
+                    Prev
+                  </button>
+                  <button
+                    disabled={queryPage >= queryTotalPages}
+                    onClick={() => fetchQueries(queryPage + 1, querySearch, queryStatus)}
+                    className="px-3 py-1 rounded border disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Query Detail Modal */}
+          {showQueryModal && selectedQuery && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
+                <h3 className="text-xl font-semibold mb-4">Query Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800">
+                  <div>
+                    <div className="text-sm text-gray-500">From</div>
+                    <div className="font-medium">{selectedQuery.name}</div>
+                    <div className="text-sm text-gray-600 break-all">{selectedQuery.email}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500">Submitted</div>
+                    <div className="font-medium">{new Date(selectedQuery.createdAt).toLocaleString()}</div>
+                  </div>
+                  <div className="md:col-span-2">
+                    <div className="text-sm text-gray-500">Subject</div>
+                    <div className="font-medium">{selectedQuery.subject}</div>
+                  </div>
+                  <div className="md:col-span-2">
+                    <div className="text-sm text-gray-500">Message</div>
+                    <div className="mt-1 p-3 border rounded bg-gray-50 whitespace-pre-wrap">{selectedQuery.message}</div>
+                  </div>
+                  <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <div className="text-sm text-gray-500">IP</div>
+                      <div className="font-medium break-all">{selectedQuery.metadata?.ip || '-'}</div>
+                    </div>
+                    <div className="md:col-span-2">
+                      <div className="text-sm text-gray-500">User Agent</div>
+                      <div className="font-medium break-all">{selectedQuery.metadata?.userAgent || '-'}</div>
+                    </div>
+                  </div>
+                  <div className="md:col-span-2">
+                    <div className="text-sm text-gray-500">Origin</div>
+                    <div className="font-medium break-all">{selectedQuery.metadata?.origin || '-'}</div>
+                  </div>
+                  <div className="md:col-span-2">
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-gray-500">Admin Notes</div>
+                      <div>
+                        <select
+                          value={selectedQuery.status}
+                          onChange={(e) => updateQueryStatus(selectedQuery._id, e.target.value)}
+                          className="px-3 py-1 border rounded"
+                        >
+                          <option value="new">New</option>
+                          <option value="in_progress">In Progress</option>
+                          <option value="resolved">Resolved</option>
+                        </select>
+                      </div>
+                    </div>
+                    <textarea
+                      rows={5}
+                      className="mt-1 w-full border rounded px-3 py-2"
+                      placeholder="Add internal notes..."
+                      value={notesDraft}
+                      onChange={(e) => setNotesDraft(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-2 mt-6">
+                  <button onClick={() => setShowQueryModal(false)} className="px-4 py-2 rounded border">Close</button>
+                  <button onClick={saveQueryNotes} className="px-4 py-2 rounded bg-blue-600 text-white">Save Notes</button>
+                  <button onClick={() => deleteQuery(selectedQuery)} className="px-4 py-2 rounded bg-gray-700 text-white">Delete</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Create Employer Modal */}
+          {showCreateEmployer && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                <h3 className="text-lg font-semibold mb-4">Create Employer</h3>
+                <div className="space-y-3">
+                  <input
+                    className={`w-full border px-3 py-2 rounded ${createEmployerErrors.companyName ? 'border-red-300' : 'border-gray-300'}`}
+                    placeholder="Company Name"
+                    value={createEmployerForm.companyName}
+                    onChange={(e) => { setCreateEmployerForm({ ...createEmployerForm, companyName: e.target.value }); if (createEmployerErrors.companyName) setCreateEmployerErrors(prev => ({ ...prev, companyName: '' })); }}
+                    onFocus={() => handleCreateEmployerFocus('companyName')}
+                    onBlur={() => handleCreateEmployerBlur('companyName')}
+                  />
+                  {createEmployerErrors.companyName && <p className="text-red-500 text-sm">{createEmployerErrors.companyName}</p>}
+                  <input
+                    className={`w-full border px-3 py-2 rounded ${createEmployerErrors.companyEmail ? 'border-red-300' : 'border-gray-300'}`}
+                    placeholder="Company Email"
+                    value={createEmployerForm.companyEmail}
+                    onChange={(e) => { setCreateEmployerForm({ ...createEmployerForm, companyEmail: e.target.value }); if (createEmployerErrors.companyEmail) setCreateEmployerErrors(prev => ({ ...prev, companyEmail: '' })); }}
+                    onFocus={() => handleCreateEmployerFocus('companyEmail')}
+                    onBlur={() => handleCreateEmployerBlur('companyEmail')}
+                  />
+                  {createEmployerErrors.companyEmail && <p className="text-red-500 text-sm">{createEmployerErrors.companyEmail}</p>}
+                  <input
+                    className={`w-full border px-3 py-2 rounded ${createEmployerErrors.contactPersonName ? 'border-red-300' : 'border-gray-300'}`}
+                    placeholder="Contact Person Name"
+                    value={createEmployerForm.contactPersonName}
+                    onChange={(e) => { setCreateEmployerForm({ ...createEmployerForm, contactPersonName: e.target.value }); if (createEmployerErrors.contactPersonName) setCreateEmployerErrors(prev => ({ ...prev, contactPersonName: '' })); }}
+                    onFocus={() => handleCreateEmployerFocus('contactPersonName')}
+                    onBlur={() => handleCreateEmployerBlur('contactPersonName')}
+                  />
+                  {createEmployerErrors.contactPersonName && <p className="text-red-500 text-sm">{createEmployerErrors.contactPersonName}</p>}
+                  <input
+                    className={`w-full border px-3 py-2 rounded ${createEmployerErrors.phone ? 'border-red-300' : 'border-gray-300'}`}
+                    placeholder="Phone (optional)"
+                    value={createEmployerForm.phone}
+                    onChange={(e) => { setCreateEmployerForm({ ...createEmployerForm, phone: e.target.value }); if (createEmployerErrors.phone) setCreateEmployerErrors(prev => ({ ...prev, phone: '' })); }}
+                    onBlur={() => handleCreateEmployerBlur('phone')}
+                  />
+                  {createEmployerErrors.phone && <p className="text-red-500 text-sm">{createEmployerErrors.phone}</p>}
+                  <input
+                    className="w-full border px-3 py-2 rounded"
+                    placeholder="Password (optional)"
+                    type="password"
+                    value={createEmployerForm.password}
+                    onChange={(e) => setCreateEmployerForm({ ...createEmployerForm, password: e.target.value })}
+                  />
+                </div>
+                <div className="flex justify-end space-x-2 mt-4">
+                  <button onClick={() => setShowCreateEmployer(false)} className="px-4 py-2 rounded border">Cancel</button>
+                  <button onClick={async () => {
+                    const errs = validateCreateEmployerForm();
+                    setCreateEmployerErrors(errs);
+                    if (Object.keys(errs).length > 0) return;
+                    try {
+                      const token = localStorage.getItem('adminToken');
+                      const res = await fetch(`${API_BASE_URL}/api/admin/employers`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify(createEmployerForm)
+                      });
+                      const data = await res.json();
+                      if (res.ok) {
+                        toast.success('Employer created');
+                        setShowCreateEmployer(false);
+                        setCreateEmployerForm({ companyName: '', companyEmail: '', contactPersonName: '', phone: '', password: '' });
+                        fetchEmployers(1, searchTerm, filterStatus);
+                      } else {
+                        toast.error(data.message || 'Failed to create employer');
+                      }
+                    } catch (e) {
+                      console.error('Create employer error:', e);
+                      toast.error('Network error');
+                    }
+                  }} className="px-4 py-2 rounded bg-blue-600 text-white">Create</button>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Employers Management */}
+          {activeTab === 'employers' && (
+            <div className="bg-white rounded-lg shadow-sm">
+              <div className="p-6 border-b">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Employer Management</h3>
                   <div className="space-x-2">
                     <button
-                      onClick={() => fetchPlans(planPage, planSearch, planStatus, planCategory)}
+                      onClick={() => fetchEmployers(1, searchTerm, filterStatus)}
                       className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
                     >
                       Refresh
                     </button>
                     <button
-                      onClick={openCreatePlanModal}
+                      onClick={() => { setShowCreateEmployer(true); setCreateEmployerErrors({}); }}
                       className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                     >
-                      + New Plan
+                      + New Employer
                     </button>
                   </div>
                 </div>
-                
-                {/* Filters */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+
+                <div className="flex space-x-4">
                   <input
                     type="text"
-                    placeholder="Search plans..."
-                    value={planSearch}
-                    onChange={(e) => setPlanSearch(e.target.value)}
-                    className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Search employers..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <select
-                    value={planStatus}
-                    onChange={(e) => setPlanStatus(e.target.value)}
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
                     className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">All Status</option>
                     <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="unavailable">Unavailable</option>
+                    <option value="suspended">Suspended</option>
                   </select>
-                  <select
-                    value={planCategory}
-                    onChange={(e) => setPlanCategory(e.target.value)}
-                    className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  <button
+                    onClick={() => fetchEmployers(1, searchTerm, filterStatus)}
+                    className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
                   >
-                    <option value="">All Categories</option>
-                    <option value="standard">Standard</option>
-                    <option value="premium">Premium</option>
-                    <option value="enterprise">Enterprise</option>
-                  </select>
+                    Search
+                  </button>
                 </div>
-                
-                <button
-                  onClick={() => fetchPlans(1, planSearch, planStatus, planCategory)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                >
-                  Apply Filters
-                </button>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Features</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Verification</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {plans.map((plan) => (
-                      <tr key={plan._id} className="hover:bg-gray-50">
+                    {employers.map((emp) => (
+                      <tr key={emp._id}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>
-                            <div className="text-sm font-medium text-gray-900">{plan.name}</div>
-                            <div className="text-sm text-gray-500">{plan.planId}</div>
-                            <div className="text-xs text-gray-400 mt-1">{plan.description}</div>
+                            <div className="font-medium text-gray-900">{emp.companyName || emp.name}</div>
+                            <div className="text-sm text-gray-500">{emp.companyEmail || '-'}</div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {plan.price?.amount ? formatCurrency(plan.price.amount, plan.price.currency) : 'Free'}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {plan.price?.period || 'one-time'}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm text-gray-900">
-                            {plan.features?.length || 0} features
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {plan.jobPostingLimit ? `${plan.jobPostingLimit} jobs` : 'Unlimited jobs'}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex flex-col space-y-1">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              plan.isActive ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100'
-                            }`}>
-                              {plan.isActive ? 'Active' : 'Inactive'}
-                            </span>
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              plan.isAvailable ? 'text-blue-600 bg-blue-100' : 'text-gray-600 bg-gray-100'
-                            }`}>
-                              {plan.isAvailable ? 'Available' : 'Unavailable'}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                            {plan.category || 'standard'}
+                          <span className={`px-2 py-1 text-xs rounded-full ${emp.isActive !== false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                            {emp.isActive !== false ? 'Active' : 'Suspended'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => openViewPlanModal(plan)}
-                              className="text-blue-600 hover:text-blue-900"
-                            >
-                              View
-                            </button>
-                            <button
-                              onClick={() => openEditPlanModal(plan)}
-                              className="text-green-600 hover:text-green-900"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => togglePlanStatus(plan.planId, !plan.isActive)}
-                              className={`${plan.isActive ? 'text-yellow-600 hover:text-yellow-900' : 'text-green-600 hover:text-green-900'}`}
-                            >
-                              {plan.isActive ? 'Deactivate' : 'Activate'}
-                            </button>
-                            <button
-                              onClick={() => deletePlan(plan.planId)}
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              Delete
-                            </button>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center space-x-2">
+                            <span className={`px-2 py-1 text-xs rounded-full ${emp.isVerified ? 'bg-green-100 text-green-800' : emp.verificationStatus === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                              {emp.isVerified ? 'Verified' : (emp.verificationStatus || 'pending')}
+                            </span>
                           </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {emp.createdAt ? new Date(emp.createdAt).toLocaleDateString() : '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
+                          <button
+                            onClick={() => openViewEmployer(emp)}
+                            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                          >
+                            View
+                          </button>
+                          <button
+                            onClick={() => { setSelectedEmployer(emp); setEditEmployerForm({ companyName: emp.companyName || '', companyPhone: emp.companyPhone || '', contactPersonName: emp.contactPersonName || '' }); setShowEditEmployer(true); }}
+                            className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                          >
+                            Edit
+                          </button>
+                          {!emp.isVerified && emp.verificationStatus !== 'rejected' && (
+                            <button
+                              onClick={() => updateEmployerVerification(emp._id, { isVerified: true, status: 'verified' })}
+                              className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                            >
+                              Verify
+                            </button>
+                          )}
+                          {emp.isVerified && (
+                            <button
+                              onClick={() => updateEmployerVerification(emp._id, { isVerified: false, status: 'pending' })}
+                              className="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700"
+                            >
+                              Unverify
+                            </button>
+                          )}
+                          {!emp.isVerified && (
+                            <button
+                              onClick={() => {
+                                const reason = prompt('Reason for rejection:');
+                                if (reason !== null) updateEmployerVerification(emp._id, { status: 'rejected', notes: reason });
+                              }}
+                              className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                            >
+                              Reject
+                            </button>
+                          )}
+                          {emp.isActive !== false ? (
+                            <button
+                              onClick={() => {
+                                const reason = prompt('Reason for suspension:');
+                                if (reason !== null) updateEmployerActiveStatus(emp._id, false, reason);
+                              }}
+                              className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                            >
+                              Suspend
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => updateEmployerActiveStatus(emp._id, true)}
+                              className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                            >
+                              Activate
+                            </button>
+                          )}
+                          <button
+                            onClick={async () => {
+                              if (!window.confirm(`Delete employer ${emp.companyName}?`)) return;
+                              try {
+                                const token = localStorage.getItem('adminToken');
+                                const res = await fetch(`${API_BASE_URL}/api/admin/employers/${emp._id}`, {
+                                  method: 'DELETE',
+                                  headers: { 'Authorization': `Bearer ${token}` }
+                                });
+                                const data = await res.json();
+                                if (res.ok) {
+                                  toast.success(data.message || 'Employer deleted');
+                                  setEmployers(prev => prev.filter(e => e._id !== emp._id));
+                                } else {
+                                  toast.error(data.message || 'Failed to delete employer');
+                                }
+                              } catch (e) {
+                                console.error('Delete employer error:', e);
+                                toast.error('Network error');
+                              }
+                            }}
+                            className="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700"
+                          >
+                            Delete
+                          </button>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-
-              {/* Pagination */}
-              {planTotalPages > 1 && (
-                <div className="px-6 py-3 border-t flex items-center justify-between">
-                  <div className="text-sm text-gray-700">
-                    Page {planPage} of {planTotalPages}
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => fetchPlans(planPage - 1, planSearch, planStatus, planCategory)}
-                      disabled={planPage === 1}
-                      className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Previous
-                    </button>
-                    <button
-                      onClick={() => fetchPlans(planPage + 1, planSearch, planStatus, planCategory)}
-                      disabled={planPage === planTotalPages}
-                      className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Next
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Contact Queries */}
-        {activeTab === 'queries' && (
-          <div className="bg-white rounded-lg shadow-sm">
-            <div className="p-6 border-b">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Contact Queries</h3>
-                <button
-                  onClick={() => fetchQueries(queryPage, querySearch, queryStatus)}
-                  className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
-                >
-                  Refresh
-                </button>
-              </div>
-              <div className="flex space-x-4">
-                <input
-                  type="text"
-                  placeholder="Search by name, email, subject..."
-                  value={querySearch}
-                  onChange={(e) => setQuerySearch(e.target.value)}
-                  className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <select
-                  value={queryStatus}
-                  onChange={(e) => setQueryStatus(e.target.value)}
-                  className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All</option>
-                  <option value="new">New</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="resolved">Resolved</option>
-                </select>
-                <button
-                  onClick={() => fetchQueries(1, querySearch, queryStatus)}
-                  className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
-                >
-                  Search
-                </button>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Received</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {queries.map((q) => (
-                    <tr key={q._id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-medium text-gray-900">{q.name}</div>
-                        <div className="text-sm text-gray-500">{q.email}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{q.subject}</td>
-                      <td className="px-6 py-4 text-sm text-gray-700 max-w-md truncate" title={q.message}>{q.message}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          q.status === 'resolved' ? 'bg-green-100 text-green-800' : q.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'
-                        }`}>
-                          {q.status.replace('_', ' ')}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(q.createdAt).toLocaleString()}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                        {q.status !== 'in_progress' && (
-                          <button onClick={() => updateQueryStatus(q._id, 'in_progress')} className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">In Progress</button>
-                        )}
-                        {q.status !== 'resolved' && (
-                          <button onClick={() => updateQueryStatus(q._id, 'resolved')} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">Resolve</button>
-                        )}
-                        <button onClick={() => openQueryModal(q)} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">View</button>
-                        <button onClick={() => deleteQuery(q)} className="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700">Delete</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-between p-4">
-              <div className="text-sm text-gray-600">Page {queryPage} of {queryTotalPages}</div>
-              <div className="space-x-2">
-                <button
-                  disabled={queryPage <= 1}
-                  onClick={() => fetchQueries(queryPage - 1, querySearch, queryStatus)}
-                  className="px-3 py-1 rounded border disabled:opacity-50"
-                >
-                  Prev
-                </button>
-                <button
-                  disabled={queryPage >= queryTotalPages}
-                  onClick={() => fetchQueries(queryPage + 1, querySearch, queryStatus)}
-                  className="px-3 py-1 rounded border disabled:opacity-50"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Query Detail Modal */}
-        {showQueryModal && selectedQuery && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-              <h3 className="text-xl font-semibold mb-4">Query Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800">
-                <div>
-                  <div className="text-sm text-gray-500">From</div>
-                  <div className="font-medium">{selectedQuery.name}</div>
-                  <div className="text-sm text-gray-600 break-all">{selectedQuery.email}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">Submitted</div>
-                  <div className="font-medium">{new Date(selectedQuery.createdAt).toLocaleString()}</div>
-                </div>
-                <div className="md:col-span-2">
-                  <div className="text-sm text-gray-500">Subject</div>
-                  <div className="font-medium">{selectedQuery.subject}</div>
-                </div>
-                <div className="md:col-span-2">
-                  <div className="text-sm text-gray-500">Message</div>
-                  <div className="mt-1 p-3 border rounded bg-gray-50 whitespace-pre-wrap">{selectedQuery.message}</div>
-                </div>
-                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* View Employer Modal */}
+          {showViewEmployer && selectedEmployer && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 w-full max-w-lg">
+                <h3 className="text-xl font-semibold mb-4">Employer Details</h3>
+                <div className="space-y-4 text-gray-800">
                   <div>
-                    <div className="text-sm text-gray-500">IP</div>
-                    <div className="font-medium break-all">{selectedQuery.metadata?.ip || '-'}</div>
+                    <div className="text-sm text-gray-500">Company:</div>
+                    <div className="font-medium">{selectedEmployer.companyName || selectedEmployer.name || '-'}</div>
                   </div>
-                  <div className="md:col-span-2">
-                    <div className="text-sm text-gray-500">User Agent</div>
-                    <div className="font-medium break-all">{selectedQuery.metadata?.userAgent || '-'}</div>
+                  <div>
+                    <div className="text-sm text-gray-500">Email:</div>
+                    <div className="font-medium break-all">{selectedEmployer.companyEmail || '-'}</div>
                   </div>
-                </div>
-                <div className="md:col-span-2">
-                  <div className="text-sm text-gray-500">Origin</div>
-                  <div className="font-medium break-all">{selectedQuery.metadata?.origin || '-'}</div>
-                </div>
-                <div className="md:col-span-2">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-500">Admin Notes</div>
+                  <div>
+                    <div className="text-sm text-gray-500">Phone:</div>
+                    <div className="font-medium">{selectedEmployer.companyPhone || selectedEmployer.contactPersonPhone || '-'}</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <select
-                        value={selectedQuery.status}
-                        onChange={(e) => updateQueryStatus(selectedQuery._id, e.target.value)}
-                        className="px-3 py-1 border rounded"
-                      >
-                        <option value="new">New</option>
-                        <option value="in_progress">In Progress</option>
-                        <option value="resolved">Resolved</option>
-                      </select>
+                      <div className="text-sm text-gray-500">Status:</div>
+                      <div className="font-medium">{selectedEmployer.isApproved ? 'Approved' : selectedEmployer.status === 'rejected' ? 'Rejected' : 'Pending'}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-500">Joined:</div>
+                      <div className="font-medium">{selectedEmployer.createdAt ? new Date(selectedEmployer.createdAt).toLocaleDateString() : '-'}</div>
                     </div>
                   </div>
-                  <textarea
-                    rows={5}
-                    className="mt-1 w-full border rounded px-3 py-2"
-                    placeholder="Add internal notes..."
-                    value={notesDraft}
-                    onChange={(e) => setNotesDraft(e.target.value)}
+                </div>
+                <div className="flex justify-end mt-6">
+                  <button onClick={() => setShowViewEmployer(false)} className="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Close</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Edit Employer Modal */}
+          {showEditEmployer && selectedEmployer && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                <h3 className="text-lg font-semibold mb-4">Edit Employer</h3>
+                <div className="space-y-3">
+                  <input className="w-full border px-3 py-2 rounded" placeholder="Company Name" value={editEmployerForm.companyName} onChange={(e) => setEditEmployerForm({ ...editEmployerForm, companyName: e.target.value })} />
+                  <input className="w-full border px-3 py-2 rounded" placeholder="Company Phone" value={editEmployerForm.companyPhone} onChange={(e) => setEditEmployerForm({ ...editEmployerForm, companyPhone: e.target.value })} />
+                  <input className="w-full border px-3 py-2 rounded" placeholder="Contact Person Name" value={editEmployerForm.contactPersonName} onChange={(e) => setEditEmployerForm({ ...editEmployerForm, contactPersonName: e.target.value })} />
+                </div>
+                <div className="flex justify-end space-x-2 mt-4">
+                  <button onClick={() => setShowEditEmployer(false)} className="px-4 py-2 rounded border">Cancel</button>
+                  <button onClick={async () => {
+                    try {
+                      const token = localStorage.getItem('adminToken');
+                      const res = await fetch(`${API_BASE_URL}/api/admin/employers/${selectedEmployer._id}`, {
+                        method: 'PUT',
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify(editEmployerForm)
+                      });
+                      const data = await res.json();
+                      if (res.ok) {
+                        toast.success('Employer updated');
+                        setShowEditEmployer(false);
+                        setEmployers(prev => prev.map(e => e._id === selectedEmployer._id ? { ...e, ...editEmployerForm } : e));
+                      } else {
+                        toast.error(data.message || 'Failed to update employer');
+                      }
+                    } catch (e) {
+                      console.error('Edit employer error:', e);
+                      toast.error('Network error');
+                    }
+                  }} className="px-4 py-2 rounded bg-blue-600 text-white">Save</button>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Users Management */}
+          {activeTab === 'users' && (
+            <div className="bg-white rounded-lg shadow-sm">
+              <div className="p-6 border-b">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">User Management</h3>
+                  <div className="space-x-2">
+                    <button
+                      onClick={() => fetchUsers(1, searchTerm, filterStatus)}
+                      className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+                    >
+                      Refresh
+                    </button>
+                    <button
+                      onClick={() => { setShowCreateUser(true); setCreateErrors({}); setCreateTouched({}); }}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                    >
+                      + New User
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex space-x-4">
+                  <input
+                    type="text"
+                    placeholder="Search users..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                </div>
-              </div>
-              <div className="flex justify-end space-x-2 mt-6">
-                <button onClick={() => setShowQueryModal(false)} className="px-4 py-2 rounded border">Close</button>
-                <button onClick={saveQueryNotes} className="px-4 py-2 rounded bg-blue-600 text-white">Save Notes</button>
-                <button onClick={() => deleteQuery(selectedQuery)} className="px-4 py-2 rounded bg-gray-700 text-white">Delete</button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Create Employer Modal */}
-        {showCreateEmployer && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
-              <h3 className="text-lg font-semibold mb-4">Create Employer</h3>
-              <div className="space-y-3">
-                <input
-                  className={`w-full border px-3 py-2 rounded ${createEmployerErrors.companyName ? 'border-red-300' : 'border-gray-300'}`}
-                  placeholder="Company Name"
-                  value={createEmployerForm.companyName}
-                  onChange={(e)=>{ setCreateEmployerForm({...createEmployerForm,companyName:e.target.value}); if (createEmployerErrors.companyName) setCreateEmployerErrors(prev=>({...prev,companyName:''})); }}
-                  onFocus={()=>handleCreateEmployerFocus('companyName')}
-                  onBlur={()=>handleCreateEmployerBlur('companyName')}
-                />
-                {createEmployerErrors.companyName && <p className="text-red-500 text-sm">{createEmployerErrors.companyName}</p>}
-                <input
-                  className={`w-full border px-3 py-2 rounded ${createEmployerErrors.companyEmail ? 'border-red-300' : 'border-gray-300'}`}
-                  placeholder="Company Email"
-                  value={createEmployerForm.companyEmail}
-                  onChange={(e)=>{ setCreateEmployerForm({...createEmployerForm,companyEmail:e.target.value}); if (createEmployerErrors.companyEmail) setCreateEmployerErrors(prev=>({...prev,companyEmail:''})); }}
-                  onFocus={()=>handleCreateEmployerFocus('companyEmail')}
-                  onBlur={()=>handleCreateEmployerBlur('companyEmail')}
-                />
-                {createEmployerErrors.companyEmail && <p className="text-red-500 text-sm">{createEmployerErrors.companyEmail}</p>}
-                <input
-                  className={`w-full border px-3 py-2 rounded ${createEmployerErrors.contactPersonName ? 'border-red-300' : 'border-gray-300'}`}
-                  placeholder="Contact Person Name"
-                  value={createEmployerForm.contactPersonName}
-                  onChange={(e)=>{ setCreateEmployerForm({...createEmployerForm,contactPersonName:e.target.value}); if (createEmployerErrors.contactPersonName) setCreateEmployerErrors(prev=>({...prev,contactPersonName:''})); }}
-                  onFocus={()=>handleCreateEmployerFocus('contactPersonName')}
-                  onBlur={()=>handleCreateEmployerBlur('contactPersonName')}
-                />
-                {createEmployerErrors.contactPersonName && <p className="text-red-500 text-sm">{createEmployerErrors.contactPersonName}</p>}
-                <input
-                  className={`w-full border px-3 py-2 rounded ${createEmployerErrors.phone ? 'border-red-300' : 'border-gray-300'}`}
-                  placeholder="Phone (optional)"
-                  value={createEmployerForm.phone}
-                  onChange={(e)=> { setCreateEmployerForm({...createEmployerForm,phone:e.target.value}); if (createEmployerErrors.phone) setCreateEmployerErrors(prev=>({...prev,phone:''})); }}
-                  onBlur={()=>handleCreateEmployerBlur('phone')}
-                />
-                {createEmployerErrors.phone && <p className="text-red-500 text-sm">{createEmployerErrors.phone}</p>}
-                <input
-                  className="w-full border px-3 py-2 rounded"
-                  placeholder="Password (optional)"
-                  type="password"
-                  value={createEmployerForm.password}
-                  onChange={(e)=> setCreateEmployerForm({...createEmployerForm,password:e.target.value})}
-                />
-              </div>
-              <div className="flex justify-end space-x-2 mt-4">
-                <button onClick={()=>setShowCreateEmployer(false)} className="px-4 py-2 rounded border">Cancel</button>
-                <button onClick={async ()=>{
-                  const errs = validateCreateEmployerForm();
-                  setCreateEmployerErrors(errs);
-                  if (Object.keys(errs).length>0) return;
-                  try {
-                    const token = localStorage.getItem('adminToken');
-                    const res = await fetch(`${API_BASE_URL}/api/admin/employers`, {
-                      method: 'POST',
-                      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                      body: JSON.stringify(createEmployerForm)
-                    });
-                    const data = await res.json();
-                    if (res.ok) {
-                      toast.success('Employer created');
-                      setShowCreateEmployer(false);
-                      setCreateEmployerForm({ companyName: '', companyEmail: '', contactPersonName: '', phone: '', password: '' });
-                      fetchEmployers(1, searchTerm, filterStatus);
-                    } else {
-                      toast.error(data.message || 'Failed to create employer');
-                    }
-                  } catch (e) {
-                    console.error('Create employer error:', e);
-                    toast.error('Network error');
-                  }
-                }} className="px-4 py-2 rounded bg-blue-600 text-white">Create</button>
-              </div>
-            </div>
-          </div>
-        )}
-        {/* Employers Management */}
-        {activeTab === 'employers' && (
-          <div className="bg-white rounded-lg shadow-sm">
-            <div className="p-6 border-b">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Employer Management</h3>
-                <div className="space-x-2">
-                  <button
-                    onClick={() => fetchEmployers(1, searchTerm, filterStatus)}
-                    className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    Refresh
-                  </button>
-                  <button
-                    onClick={() => { setShowCreateEmployer(true); setCreateEmployerErrors({}); }}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                  >
-                    + New Employer
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex space-x-4">
-                <input
-                  type="text"
-                  placeholder="Search employers..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="suspended">Suspended</option>
-                </select>
-                <button
-                  onClick={() => fetchEmployers(1, searchTerm, filterStatus)}
-                  className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
-                >
-                  Search
-                </button>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Verification</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {employers.map((emp) => (
-                    <tr key={emp._id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="font-medium text-gray-900">{emp.companyName || emp.name}</div>
-                          <div className="text-sm text-gray-500">{emp.companyEmail || '-'}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs rounded-full ${emp.isActive !== false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                          {emp.isActive !== false ? 'Active' : 'Suspended'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center space-x-2">
-                          <span className={`px-2 py-1 text-xs rounded-full ${emp.isVerified ? 'bg-green-100 text-green-800' : emp.verificationStatus === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                            {emp.isVerified ? 'Verified' : (emp.verificationStatus || 'pending')}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {emp.createdAt ? new Date(emp.createdAt).toLocaleDateString() : '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                        <button
-                          onClick={() => openViewEmployer(emp)}
-                          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                        >
-                          View
-                        </button>
-                        <button
-                          onClick={() => { setSelectedEmployer(emp); setEditEmployerForm({ companyName: emp.companyName || '', companyPhone: emp.companyPhone || '', contactPersonName: emp.contactPersonName || '' }); setShowEditEmployer(true); }}
-                          className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
-                        >
-                          Edit
-                        </button>
-                        {!emp.isVerified && emp.verificationStatus !== 'rejected' && (
-                          <button
-                            onClick={() => updateEmployerVerification(emp._id, { isVerified: true, status: 'verified' })}
-                            className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-                          >
-                            Verify
-                          </button>
-                        )}
-                        {emp.isVerified && (
-                          <button
-                            onClick={() => updateEmployerVerification(emp._id, { isVerified: false, status: 'pending' })}
-                            className="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700"
-                          >
-                            Unverify
-                          </button>
-                        )}
-                        {!emp.isVerified && (
-                          <button
-                            onClick={() => {
-                              const reason = prompt('Reason for rejection:');
-                              if (reason !== null) updateEmployerVerification(emp._id, { status: 'rejected', notes: reason });
-                            }}
-                            className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-                          >
-                            Reject
-                          </button>
-                        )}
-                        {emp.isActive !== false ? (
-                          <button
-                            onClick={() => {
-                              const reason = prompt('Reason for suspension:');
-                              if (reason !== null) updateEmployerActiveStatus(emp._id, false, reason);
-                            }}
-                            className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-                          >
-                            Suspend
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => updateEmployerActiveStatus(emp._id, true)}
-                            className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-                          >
-                            Activate
-                          </button>
-                        )}
-                        <button
-                          onClick={async () => {
-                            if (!window.confirm(`Delete employer ${emp.companyName}?`)) return;
-                            try {
-                              const token = localStorage.getItem('adminToken');
-                              const res = await fetch(`${API_BASE_URL}/api/admin/employers/${emp._id}`, {
-                                method: 'DELETE',
-                                headers: { 'Authorization': `Bearer ${token}` }
-                              });
-                              const data = await res.json();
-                              if (res.ok) {
-                                toast.success(data.message || 'Employer deleted');
-                                setEmployers(prev => prev.filter(e => e._id !== emp._id));
-                              } else {
-                                toast.error(data.message || 'Failed to delete employer');
-                              }
-                            } catch (e) {
-                              console.error('Delete employer error:', e);
-                              toast.error('Network error');
-                            }
-                          }}
-                          className="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* View Employer Modal */}
-        {showViewEmployer && selectedEmployer && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-lg">
-              <h3 className="text-xl font-semibold mb-4">Employer Details</h3>
-              <div className="space-y-4 text-gray-800">
-                <div>
-                  <div className="text-sm text-gray-500">Company:</div>
-                  <div className="font-medium">{selectedEmployer.companyName || selectedEmployer.name || '-'}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">Email:</div>
-                  <div className="font-medium break-all">{selectedEmployer.companyEmail || '-'}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">Phone:</div>
-                  <div className="font-medium">{selectedEmployer.companyPhone || selectedEmployer.contactPersonPhone || '-'}</div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Status:</div>
-                    <div className="font-medium">{selectedEmployer.isApproved ? 'Approved' : selectedEmployer.status === 'rejected' ? 'Rejected' : 'Pending'}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Joined:</div>
-                    <div className="font-medium">{selectedEmployer.createdAt ? new Date(selectedEmployer.createdAt).toLocaleDateString() : '-'}</div>
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-end mt-6">
-                <button onClick={() => setShowViewEmployer(false)} className="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Close</button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Edit Employer Modal */}
-        {showEditEmployer && selectedEmployer && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
-              <h3 className="text-lg font-semibold mb-4">Edit Employer</h3>
-              <div className="space-y-3">
-                <input className="w-full border px-3 py-2 rounded" placeholder="Company Name" value={editEmployerForm.companyName} onChange={(e)=>setEditEmployerForm({...editEmployerForm,companyName:e.target.value})} />
-                <input className="w-full border px-3 py-2 rounded" placeholder="Company Phone" value={editEmployerForm.companyPhone} onChange={(e)=>setEditEmployerForm({...editEmployerForm,companyPhone:e.target.value})} />
-                <input className="w-full border px-3 py-2 rounded" placeholder="Contact Person Name" value={editEmployerForm.contactPersonName} onChange={(e)=>setEditEmployerForm({...editEmployerForm,contactPersonName:e.target.value})} />
-              </div>
-              <div className="flex justify-end space-x-2 mt-4">
-                <button onClick={()=>setShowEditEmployer(false)} className="px-4 py-2 rounded border">Cancel</button>
-                <button onClick={async ()=>{
-                  try {
-                    const token = localStorage.getItem('adminToken');
-                    const res = await fetch(`${API_BASE_URL}/api/admin/employers/${selectedEmployer._id}`, {
-                      method: 'PUT',
-                      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                      body: JSON.stringify(editEmployerForm)
-                    });
-                    const data = await res.json();
-                    if (res.ok) {
-                      toast.success('Employer updated');
-                      setShowEditEmployer(false);
-                      setEmployers(prev => prev.map(e => e._id === selectedEmployer._id ? { ...e, ...editEmployerForm } : e));
-                    } else {
-                      toast.error(data.message || 'Failed to update employer');
-                    }
-                  } catch (e) {
-                    console.error('Edit employer error:', e);
-                    toast.error('Network error');
-                  }
-                }} className="px-4 py-2 rounded bg-blue-600 text-white">Save</button>
-              </div>
-            </div>
-          </div>
-        )}
-        {/* Users Management */}
-        {activeTab === 'users' && (
-          <div className="bg-white rounded-lg shadow-sm">
-            <div className="p-6 border-b">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">User Management</h3>
-                <div className="space-x-2">
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="suspended">Suspended</option>
+                  </select>
                   <button
                     onClick={() => fetchUsers(1, searchTerm, filterStatus)}
-                    className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+                    className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
                   >
-                    Refresh
-                  </button>
-                  <button
-                    onClick={() => { setShowCreateUser(true); setCreateErrors({}); setCreateTouched({}); }}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                  >
-                    + New User
+                    Search
                   </button>
                 </div>
               </div>
-              
-              <div className="flex space-x-4">
-                <input
-                  type="text"
-                  placeholder="Search users..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="suspended">Suspended</option>
-                </select>
-                <button
-                  onClick={() => fetchUsers(1, searchTerm, filterStatus)}
-                  className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
-                >
-                  Search
-                </button>
-              </div>
-            </div>
 
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {users.map((user) => (
-                    <tr key={user._id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="font-medium text-gray-900">{user.name}</div>
-                          <div className="text-sm text-gray-500">{user.email}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {user.isActive ? 'Active' : 'Suspended'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(user.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                        <button
-                          onClick={() => openViewUser(user)}
-                          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                        >
-                          View
-                        </button>
-                        {user.isActive ? (
-                          <button
-                            onClick={() => {
-                              const reason = prompt('Reason for suspension:');
-                              if (reason) updateUserStatus(user._id, false, reason);
-                            }}
-                            className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-                          >
-                            Suspend
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => updateUserStatus(user._id, true)}
-                            className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-                          >
-                            Activate
-                          </button>
-                        )}
-                        <button
-                          onClick={() => openEditUser(user)}
-                          className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => deleteUser(user)}
-                          className="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Create User Modal */}
-        {showCreateUser && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
-              <h3 className="text-lg font-semibold mb-4">Create User</h3>
-              <div className="space-y-3">
-                <input
-                  className={`w-full border px-3 py-2 rounded ${createErrors.name ? 'border-red-300' : 'border-gray-300'}`}
-                  placeholder="Name"
-                  value={createForm.name}
-                  onChange={(e)=>{ setCreateForm({...createForm,name:e.target.value}); if (createErrors.name) setCreateErrors(prev=>({...prev,name:''})); }}
-                  onFocus={()=>handleCreateFocus('name')}
-                  onBlur={()=>handleCreateBlur('name')}
-                />
-                {createErrors.name && <p className="text-red-500 text-sm">{createErrors.name}</p>}
-                <input
-                  className={`w-full border px-3 py-2 rounded ${createErrors.email ? 'border-red-300' : 'border-gray-300'}`}
-                  placeholder="Email"
-                  value={createForm.email}
-                  onChange={(e)=>{ setCreateForm({...createForm,email:e.target.value}); if (createErrors.email) setCreateErrors(prev=>({...prev,email:''})); }}
-                  onFocus={()=>handleCreateFocus('email')}
-                  onBlur={()=>handleCreateBlur('email')}
-                />
-                {createErrors.email && <p className="text-red-500 text-sm">{createErrors.email}</p>}
-                <input
-                  className={`w-full border px-3 py-2 rounded ${createErrors.phone ? 'border-red-300' : 'border-gray-300'}`}
-                  placeholder="Phone"
-                  value={createForm.phone}
-                  onChange={(e)=>{ setCreateForm({...createForm,phone:e.target.value}); if (createErrors.phone) setCreateErrors(prev=>({...prev,phone:''})); }}
-                  onFocus={()=>handleCreateFocus('phone')}
-                  onBlur={()=>handleCreateBlur('phone')}
-                />
-                {createErrors.phone && <p className="text-red-500 text-sm">{createErrors.phone}</p>}
-                <select className="w-full border px-3 py-2 rounded" value={createForm.role} onChange={(e)=>setCreateForm({...createForm,role:e.target.value})}>
-                  <option value="user">User</option>
-                </select>
-                <input className="w-full border px-3 py-2 rounded" placeholder="Password (optional)" type="password" value={createForm.password} onChange={(e)=>setCreateForm({...createForm,password:e.target.value})} />
-              </div>
-              <div className="flex justify-end space-x-2 mt-4">
-                <button onClick={()=>setShowCreateUser(false)} className="px-4 py-2 rounded border">Cancel</button>
-                <button onClick={createUser} className="px-4 py-2 rounded bg-blue-600 text-white">Create</button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Edit User Modal */}
-        {showEditUser && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
-              <h3 className="text-lg font-semibold mb-4">Edit User</h3>
-              <div className="space-y-3">
-                <input className="w-full border px-3 py-2 rounded" placeholder="Name" value={editForm.name} onChange={(e)=>setEditForm({...editForm,name:e.target.value})} />
-                <input className="w-full border px-3 py-2 rounded" placeholder="Phone" value={editForm.phone} onChange={(e)=>setEditForm({...editForm,phone:e.target.value})} />
-                <select className="w-full border px-3 py-2 rounded" value={editForm.role} onChange={(e)=>setEditForm({...editForm,role:e.target.value})}>
-                  <option value="user">User</option>
-                </select>
-              </div>
-              <div className="flex justify-end space-x-2 mt-4">
-                <button onClick={()=>setShowEditUser(false)} className="px-4 py-2 rounded border">Cancel</button>
-                <button onClick={saveEditUser} className="px-4 py-2 rounded bg-blue-600 text-white">Save</button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* View User Modal */}
-        {showViewUser && selectedUser && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-lg">
-              <h3 className="text-xl font-semibold mb-4">User Details</h3>
-              <div className="space-y-4 text-gray-800">
-                <div>
-                  <div className="text-sm text-gray-500">Name:</div>
-                  <div className="font-medium">{selectedUser.name || '-'}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">Email:</div>
-                  <div className="font-medium break-all">{selectedUser.email || '-'}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">Phone:</div>
-                  <div className="font-medium">{selectedUser.phone || '-'}</div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Role:</div>
-                    <div className="font-medium capitalize">{selectedUser.role || 'user'}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Status:</div>
-                    <div className="font-medium">{selectedUser.isActive ? 'Active' : 'Suspended'}</div>
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">Joined:</div>
-                  <div className="font-medium">{selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString() : '-'}</div>
-                </div>
-              </div>
-              <div className="flex justify-end mt-6">
-                <button onClick={() => setShowViewUser(false)} className="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Close</button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Internships Management */}
-        {activeTab === 'internships' && (
-          <div className="bg-white rounded-lg shadow-sm">
-            <div className="p-6 border-b">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Internships Management</h3>
-                <div className="space-x-2">
-                  <button
-                    onClick={() => fetchInternships(1, internshipSearch, internshipStatus)}
-                    className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
-                  >
-                    Refresh
-                  </button>
-                  <button
-                    onClick={openCreateInternshipModal}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                  >
-                    + New Internship
-                  </button>
-                </div>
-              </div>
-              <div className="flex space-x-4">
-                <input
-                  type="text"
-                  placeholder="Search by title or company..."
-                  value={internshipSearch}
-                  onChange={(e) => setInternshipSearch(e.target.value)}
-                  className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <select
-                  value={internshipStatus}
-                  onChange={(e) => setInternshipStatus(e.target.value)}
-                  className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="approved">Approved</option>
-                  <option value="active">Active</option>
-                  <option value="rejected">Rejected</option>
-                </select>
-                <button
-                  onClick={() => fetchInternships(1, internshipSearch, internshipStatus)}
-                  className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
-                >
-                  Search
-                </button>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applications</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posted</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {internships.map((internship) => (
-                    <tr key={internship._id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-medium text-gray-900">{internship.title}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{internship.company}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{internship.location}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{internship.duration}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <button 
-                          onClick={() => openInternshipApplications(internship)} 
-                          className="text-blue-600 hover:text-blue-800 font-medium"
-                        >
-                          {internship.applicationsCount || 0} applicants
-                        </button>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          internship.status === 'active' ? 'bg-green-100 text-green-800' :
-                          internship.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          internship.status === 'approved' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {internship.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(internship.createdAt).toLocaleDateString()}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                        {internship.status === 'pending' && (
-                          <>
-                            <button onClick={() => updateInternshipStatus(internship._id, 'approved')} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Approve</button>
-                            <button onClick={() => updateInternshipStatus(internship._id, 'rejected')} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Reject</button>
-                          </>
-                        )}
-                        {internship.status === 'approved' && (
-                          <button onClick={() => updateInternshipStatus(internship._id, 'active')} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">Activate</button>
-                        )}
-                        <button onClick={() => openEditInternship(internship)} className="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-800">Edit</button>
-                        <button onClick={() => deleteInternship(internship)} className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600">Delete</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="flex items-center justify-between p-4">
-              <div className="text-sm text-gray-600">Page {internshipPage} of {internshipTotalPages}</div>
-              <div className="space-x-2">
-                <button
-                  disabled={internshipPage <= 1}
-                  onClick={() => fetchInternships(internshipPage - 1, internshipSearch, internshipStatus)}
-                  className="px-3 py-1 rounded border disabled:opacity-50"
-                >
-                  Prev
-                </button>
-                <button
-                  disabled={internshipPage >= internshipTotalPages}
-                  onClick={() => fetchInternships(internshipPage + 1, internshipSearch, internshipStatus)}
-                  className="px-3 py-1 rounded border disabled:opacity-50"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Edit Internship Modal */}
-        {showEditInternship && selectedInternship && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Edit Internship</h3>
-                <button onClick={() => setShowEditInternship(false)} className="text-gray-500 hover:text-gray-700">✕</button>
-              </div>
-              {Object.keys(internshipFormErrors).length > 0 && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-red-800">Please fix the following errors:</h3>
-                      <div className="mt-2 text-sm text-red-700">
-                        <ul className="list-disc list-inside space-y-1">
-                          {Object.entries(internshipFormErrors).map(([field, error]) => (
-                            <li key={field}>{error}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Internship Title <span className="text-red-500">*</span>
-                  </label>
-                  <input 
-                    value={internshipForm.title} 
-                    onChange={e => handleInternshipFormChange('title', e.target.value)} 
-                    className={`w-full border rounded px-3 py-2 ${internshipFormErrors.title ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
-                    placeholder="Enter internship title"
-                  />
-                  {internshipFormErrors.title && (
-                    <p className="text-red-500 text-xs mt-1">{internshipFormErrors.title}</p>
-                  )}
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description <span className="text-red-500">*</span>
-                  </label>
-                  <textarea 
-                    rows="5" 
-                    value={internshipForm.description} 
-                    onChange={e => handleInternshipFormChange('description', e.target.value)} 
-                    className={`w-full border rounded px-3 py-2 ${internshipFormErrors.description ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
-                    placeholder="Enter internship description"
-                  />
-                  {internshipFormErrors.description && (
-                    <p className="text-red-500 text-xs mt-1">{internshipFormErrors.description}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Stipend Min</label>
-                  <input 
-                    type="number" 
-                    value={internshipForm.stipendMin} 
-                    onChange={e => handleInternshipFormChange('stipendMin', e.target.value)} 
-                    className="w-full border rounded px-3 py-2"
-                    placeholder="e.g. 5000"
-                    min="0"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Stipend Max</label>
-                  <input 
-                    type="number" 
-                    value={internshipForm.stipendMax} 
-                    onChange={e => handleInternshipFormChange('stipendMax', e.target.value)} 
-                    className="w-full border rounded px-3 py-2"
-                    placeholder="e.g. 10000"
-                    min="0"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
-                  <input 
-                    value={internshipForm.stipendCurrency} 
-                    onChange={e => handleInternshipFormChange('stipendCurrency', e.target.value)} 
-                    className="w-full border rounded px-3 py-2"
-                    placeholder="INR"
-                    maxLength="3"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Location <span className="text-red-500">*</span>
-                  </label>
-                  <input 
-                    value={internshipForm.location} 
-                    onChange={e => handleInternshipFormChange('location', e.target.value)} 
-                    className={`w-full border rounded px-3 py-2 ${internshipFormErrors.location ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
-                    placeholder="Enter location"
-                  />
-                  {internshipFormErrors.location && (
-                    <p className="text-red-500 text-xs mt-1">{internshipFormErrors.location}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
-                  <input 
-                    value={internshipForm.duration} 
-                    onChange={e => handleInternshipFormChange('duration', e.target.value)} 
-                    className="w-full border rounded px-3 py-2"
-                    placeholder="e.g. 3 months"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Work Mode</label>
-                  <select 
-                    value={internshipForm.remote} 
-                    onChange={e => handleInternshipFormChange('remote', e.target.value)} 
-                    className="w-full border rounded px-3 py-2"
-                  >
-                    <option value="on-site">On-site</option>
-                    <option value="hybrid">Hybrid</option>
-                    <option value="remote">Remote</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
-                  <select 
-                    value={internshipForm.experienceLevel} 
-                    onChange={e => handleInternshipFormChange('experienceLevel', e.target.value)} 
-                    className="w-full border rounded px-3 py-2"
-                  >
-                    <option value="entry">Entry</option>
-                    <option value="mid">Mid</option>
-                  </select>
-                </div>
-              </div>
-              <div className="mt-6 flex justify-end space-x-2">
-                <button onClick={() => setShowEditInternship(false)} className="px-4 py-2 border rounded hover:bg-gray-50">Cancel</button>
-                <button 
-                  onClick={saveInternshipEdits} 
-                  disabled={Object.keys(internshipFormErrors).length > 0}
-                  className={`px-4 py-2 rounded ${
-                    Object.keys(internshipFormErrors).length > 0 
-                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                >
-                  Save & Update
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Internship Applications Modal */}
-        {showInternshipApplications && selectedInternshipForApps && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl p-6 max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold">Applications for {selectedInternshipForApps.title}</h3>
-                  <p className="text-sm text-gray-600">{selectedInternshipForApps.companyName}</p>
-                </div>
-                <button onClick={() => setShowInternshipApplications(false)} className="text-gray-500 hover:text-gray-700 text-2xl">✕</button>
-              </div>
-
-              {/* Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-6">
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="text-xs text-gray-500">Total</div>
-                  <div className="text-lg font-semibold">{Object.values(applicationStats).reduce((a, b) => a + b, 0)}</div>
-                </div>
-                <div className="bg-blue-50 p-3 rounded-lg">
-                  <div className="text-xs text-gray-500">Applied</div>
-                  <div className="text-lg font-semibold text-blue-600">{applicationStats.applied || 0}</div>
-                </div>
-                <div className="bg-yellow-50 p-3 rounded-lg">
-                  <div className="text-xs text-gray-500">Reviewed</div>
-                  <div className="text-lg font-semibold text-yellow-600">{applicationStats.reviewed || 0}</div>
-                </div>
-                <div className="bg-purple-50 p-3 rounded-lg">
-                  <div className="text-xs text-gray-500">Shortlisted</div>
-                  <div className="text-lg font-semibold text-purple-600">{applicationStats.shortlisted || 0}</div>
-                </div>
-                <div className="bg-indigo-50 p-3 rounded-lg">
-                  <div className="text-xs text-gray-500">Interview</div>
-                  <div className="text-lg font-semibold text-indigo-600">{applicationStats.interview || 0}</div>
-                </div>
-                <div className="bg-green-50 p-3 rounded-lg">
-                  <div className="text-xs text-gray-500">Selected</div>
-                  <div className="text-lg font-semibold text-green-600">{applicationStats.selected || 0}</div>
-                </div>
-                <div className="bg-red-50 p-3 rounded-lg">
-                  <div className="text-xs text-gray-500">Rejected</div>
-                  <div className="text-lg font-semibold text-red-600">{applicationStats.rejected || 0}</div>
-                </div>
-              </div>
-
-              {/* Filters */}
-              <div className="mb-4">
-                <select
-                  value={applicationStatusFilter}
-                  onChange={(e) => {
-                    setApplicationStatusFilter(e.target.value);
-                    fetchInternshipApplications(selectedInternshipForApps._id, 1, e.target.value);
-                  }}
-                  className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All Status</option>
-                  <option value="applied">Applied</option>
-                  <option value="reviewed">Reviewed</option>
-                  <option value="shortlisted">Shortlisted</option>
-                  <option value="interview">Interview</option>
-                  <option value="selected">Selected</option>
-                  <option value="rejected">Rejected</option>
-                  <option value="withdrawn">Withdrawn</option>
-                </select>
-              </div>
-
-              {/* Applications Table */}
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Candidate</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Skills</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Applied</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {internshipApplications.length === 0 ? (
-                      <tr>
-                        <td colSpan="5" className="px-4 py-8 text-center text-gray-500">
-                          No applications found
+                    {users.map((user) => (
+                      <tr key={user._id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div>
+                            <div className="font-medium text-gray-900">{user.name}</div>
+                            <div className="text-sm text-gray-500">{user.email}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 text-xs rounded-full ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                            {user.isActive ? 'Active' : 'Suspended'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(user.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
+                          <button
+                            onClick={() => openViewUser(user)}
+                            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                          >
+                            View
+                          </button>
+                          {user.isActive ? (
+                            <button
+                              onClick={() => {
+                                const reason = prompt('Reason for suspension:');
+                                if (reason) updateUserStatus(user._id, false, reason);
+                              }}
+                              className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                            >
+                              Suspend
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => updateUserStatus(user._id, true)}
+                              className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                            >
+                              Activate
+                            </button>
+                          )}
+                          <button
+                            onClick={() => openEditUser(user)}
+                            className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => deleteUser(user)}
+                            className="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700"
+                          >
+                            Delete
+                          </button>
                         </td>
                       </tr>
-                    ) : (
-                      internshipApplications.map((app) => (
-                        <tr key={app._id} className="hover:bg-gray-50">
-                          <td className="px-4 py-4">
-                            <div className="flex items-center">
-                              <div className="h-10 w-10 flex-shrink-0">
-                                {app.user?.profilePhoto ? (
-                                  <img className="h-10 w-10 rounded-full" src={app.user.profilePhoto} alt="" />
-                                ) : (
-                                  <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-semibold">
-                                    {app.user?.name?.charAt(0).toUpperCase()}
-                                  </div>
-                                )}
-                              </div>
-                              <div className="ml-4">
-                                <div className="font-medium text-gray-900">{app.user?.name || 'N/A'}</div>
-                                <div className="text-sm text-gray-500">{app.user?.location || 'Location not provided'}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="text-sm text-gray-900">{app.user?.email || 'N/A'}</div>
-                            <div className="text-sm text-gray-500">{app.user?.phone || 'N/A'}</div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="flex flex-wrap gap-1">
-                              {app.user?.skills?.slice(0, 3).map((skill, idx) => (
-                                <span key={idx} className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
-                                  {skill}
-                                </span>
-                              ))}
-                              {app.user?.skills?.length > 3 && (
-                                <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
-                                  +{app.user.skills.length - 3}
-                                </span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-4 py-4">
-                            <span className={`px-2 py-1 text-xs rounded-full ${
-                              app.status === 'applied' ? 'bg-blue-100 text-blue-800' :
-                              app.status === 'reviewed' ? 'bg-yellow-100 text-yellow-800' :
-                              app.status === 'shortlisted' ? 'bg-purple-100 text-purple-800' :
-                              app.status === 'interview' ? 'bg-indigo-100 text-indigo-800' :
-                              app.status === 'selected' ? 'bg-green-100 text-green-800' :
-                              app.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                              'bg-gray-100 text-gray-800'
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Create User Modal */}
+          {showCreateUser && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                <h3 className="text-lg font-semibold mb-4">Create User</h3>
+                <div className="space-y-3">
+                  <input
+                    className={`w-full border px-3 py-2 rounded ${createErrors.name ? 'border-red-300' : 'border-gray-300'}`}
+                    placeholder="Name"
+                    value={createForm.name}
+                    onChange={(e) => { setCreateForm({ ...createForm, name: e.target.value }); if (createErrors.name) setCreateErrors(prev => ({ ...prev, name: '' })); }}
+                    onFocus={() => handleCreateFocus('name')}
+                    onBlur={() => handleCreateBlur('name')}
+                  />
+                  {createErrors.name && <p className="text-red-500 text-sm">{createErrors.name}</p>}
+                  <input
+                    className={`w-full border px-3 py-2 rounded ${createErrors.email ? 'border-red-300' : 'border-gray-300'}`}
+                    placeholder="Email"
+                    value={createForm.email}
+                    onChange={(e) => { setCreateForm({ ...createForm, email: e.target.value }); if (createErrors.email) setCreateErrors(prev => ({ ...prev, email: '' })); }}
+                    onFocus={() => handleCreateFocus('email')}
+                    onBlur={() => handleCreateBlur('email')}
+                  />
+                  {createErrors.email && <p className="text-red-500 text-sm">{createErrors.email}</p>}
+                  <input
+                    className={`w-full border px-3 py-2 rounded ${createErrors.phone ? 'border-red-300' : 'border-gray-300'}`}
+                    placeholder="Phone"
+                    value={createForm.phone}
+                    onChange={(e) => { setCreateForm({ ...createForm, phone: e.target.value }); if (createErrors.phone) setCreateErrors(prev => ({ ...prev, phone: '' })); }}
+                    onFocus={() => handleCreateFocus('phone')}
+                    onBlur={() => handleCreateBlur('phone')}
+                  />
+                  {createErrors.phone && <p className="text-red-500 text-sm">{createErrors.phone}</p>}
+                  <select className="w-full border px-3 py-2 rounded" value={createForm.role} onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })}>
+                    <option value="user">User</option>
+                  </select>
+                  <input className="w-full border px-3 py-2 rounded" placeholder="Password (optional)" type="password" value={createForm.password} onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })} />
+                </div>
+                <div className="flex justify-end space-x-2 mt-4">
+                  <button onClick={() => setShowCreateUser(false)} className="px-4 py-2 rounded border">Cancel</button>
+                  <button onClick={createUser} className="px-4 py-2 rounded bg-blue-600 text-white">Create</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Edit User Modal */}
+          {showEditUser && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                <h3 className="text-lg font-semibold mb-4">Edit User</h3>
+                <div className="space-y-3">
+                  <input className="w-full border px-3 py-2 rounded" placeholder="Name" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+                  <input className="w-full border px-3 py-2 rounded" placeholder="Phone" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} />
+                  <select className="w-full border px-3 py-2 rounded" value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}>
+                    <option value="user">User</option>
+                  </select>
+                </div>
+                <div className="flex justify-end space-x-2 mt-4">
+                  <button onClick={() => setShowEditUser(false)} className="px-4 py-2 rounded border">Cancel</button>
+                  <button onClick={saveEditUser} className="px-4 py-2 rounded bg-blue-600 text-white">Save</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* View User Modal */}
+          {showViewUser && selectedUser && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 w-full max-w-lg">
+                <h3 className="text-xl font-semibold mb-4">User Details</h3>
+                <div className="space-y-4 text-gray-800">
+                  <div>
+                    <div className="text-sm text-gray-500">Name:</div>
+                    <div className="font-medium">{selectedUser.name || '-'}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500">Email:</div>
+                    <div className="font-medium break-all">{selectedUser.email || '-'}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500">Phone:</div>
+                    <div className="font-medium">{selectedUser.phone || '-'}</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-sm text-gray-500">Role:</div>
+                      <div className="font-medium capitalize">{selectedUser.role || 'user'}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-500">Status:</div>
+                      <div className="font-medium">{selectedUser.isActive ? 'Active' : 'Suspended'}</div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500">Joined:</div>
+                    <div className="font-medium">{selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString() : '-'}</div>
+                  </div>
+                </div>
+                <div className="flex justify-end mt-6">
+                  <button onClick={() => setShowViewUser(false)} className="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Close</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Internships Management */}
+          {activeTab === 'internships' && (
+            <div className="bg-white rounded-lg shadow-sm">
+              <div className="p-6 border-b">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Internships Management</h3>
+                  <div className="space-x-2">
+                    <button
+                      onClick={() => fetchInternships(1, internshipSearch, internshipStatus)}
+                      className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+                    >
+                      Refresh
+                    </button>
+                    <button
+                      onClick={openCreateInternshipModal}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                    >
+                      + New Internship
+                    </button>
+                  </div>
+                </div>
+                <div className="flex space-x-4">
+                  <input
+                    type="text"
+                    placeholder="Search by title or company..."
+                    value={internshipSearch}
+                    onChange={(e) => setInternshipSearch(e.target.value)}
+                    className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <select
+                    value={internshipStatus}
+                    onChange={(e) => setInternshipStatus(e.target.value)}
+                    className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="active">Active</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                  <button
+                    onClick={() => fetchInternships(1, internshipSearch, internshipStatus)}
+                    className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+                  >
+                    Search
+                  </button>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applications</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posted</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {internships.map((internship) => (
+                      <tr key={internship._id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="font-medium text-gray-900">{internship.title}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{internship.company}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{internship.location}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{internship.duration}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <button
+                            onClick={() => openInternshipApplications(internship)}
+                            className="text-blue-600 hover:text-blue-800 font-medium"
+                          >
+                            {internship.applicationsCount || 0} applicants
+                          </button>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 text-xs rounded-full ${internship.status === 'active' ? 'bg-green-100 text-green-800' :
+                              internship.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                internship.status === 'approved' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
                             }`}>
-                              {app.status}
-                            </span>
-                          </td>
-                          <td className="px-4 py-4 text-sm text-gray-500">
-                            {new Date(app.appliedAt).toLocaleDateString()}
-                          </td>
-                        </tr>
-                      ))
-                    )}
+                            {internship.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(internship.createdAt).toLocaleDateString()}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
+                          {internship.status === 'pending' && (
+                            <>
+                              <button onClick={() => updateInternshipStatus(internship._id, 'approved')} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Approve</button>
+                              <button onClick={() => updateInternshipStatus(internship._id, 'rejected')} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Reject</button>
+                            </>
+                          )}
+                          {internship.status === 'approved' && (
+                            <button onClick={() => updateInternshipStatus(internship._id, 'active')} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">Activate</button>
+                          )}
+                          <button onClick={() => openEditInternship(internship)} className="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-800">Edit</button>
+                          <button onClick={() => deleteInternship(internship)} className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600">Delete</button>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
 
-              {/* Pagination */}
-              {applicationTotalPages > 1 && (
-                <div className="flex items-center justify-between mt-4">
-                  <div className="text-sm text-gray-600">Page {applicationPage} of {applicationTotalPages}</div>
-                  <div className="space-x-2">
-                    <button
-                      disabled={applicationPage <= 1}
-                      onClick={() => fetchInternshipApplications(selectedInternshipForApps._id, applicationPage - 1, applicationStatusFilter)}
-                      className="px-3 py-1 rounded border disabled:opacity-50"
-                    >
-                      Prev
-                    </button>
-                    <button
-                      disabled={applicationPage >= applicationTotalPages}
-                      onClick={() => fetchInternshipApplications(selectedInternshipForApps._id, applicationPage + 1, applicationStatusFilter)}
-                      className="px-3 py-1 rounded border disabled:opacity-50"
-                    >
-                      Next
-                    </button>
-                  </div>
+              <div className="flex items-center justify-between p-4">
+                <div className="text-sm text-gray-600">Page {internshipPage} of {internshipTotalPages}</div>
+                <div className="space-x-2">
+                  <button
+                    disabled={internshipPage <= 1}
+                    onClick={() => fetchInternships(internshipPage - 1, internshipSearch, internshipStatus)}
+                    className="px-3 py-1 rounded border disabled:opacity-50"
+                  >
+                    Prev
+                  </button>
+                  <button
+                    disabled={internshipPage >= internshipTotalPages}
+                    onClick={() => fetchInternships(internshipPage + 1, internshipSearch, internshipStatus)}
+                    className="px-3 py-1 rounded border disabled:opacity-50"
+                  >
+                    Next
+                  </button>
                 </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Create Internship Modal */}
-        {showCreateInternship && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Create Internship</h3>
-                <button onClick={() => setShowCreateInternship(false)} className="text-gray-500 hover:text-gray-700">✕</button>
               </div>
-              {Object.keys(createInternshipFormErrors).length > 0 && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                  <div className="flex">
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-red-800">Please fix the following errors:</h3>
-                      <div className="mt-2 text-sm text-red-700">
-                        <ul className="list-disc list-inside space-y-1">
-                          {Object.entries(createInternshipFormErrors).map(([field, error]) => (
-                            <li key={field}>{error}</li>
-                          ))}
-                        </ul>
+            </div>
+          )}
+
+          {/* Edit Internship Modal */}
+          {showEditInternship && selectedInternship && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Edit Internship</h3>
+                  <button onClick={() => setShowEditInternship(false)} className="text-gray-500 hover:text-gray-700">✕</button>
+                </div>
+                {Object.keys(internshipFormErrors).length > 0 && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-red-800">Please fix the following errors:</h3>
+                        <div className="mt-2 text-sm text-red-700">
+                          <ul className="list-disc list-inside space-y-1">
+                            {Object.entries(internshipFormErrors).map(([field, error]) => (
+                              <li key={field}>{error}</li>
+                            ))}
+                          </ul>
+                        </div>
                       </div>
                     </div>
                   </div>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Internship Title <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      value={internshipForm.title}
+                      onChange={e => handleInternshipFormChange('title', e.target.value)}
+                      className={`w-full border rounded px-3 py-2 ${internshipFormErrors.title ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
+                      placeholder="Enter internship title"
+                    />
+                    {internshipFormErrors.title && (
+                      <p className="text-red-500 text-xs mt-1">{internshipFormErrors.title}</p>
+                    )}
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Description <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      rows="5"
+                      value={internshipForm.description}
+                      onChange={e => handleInternshipFormChange('description', e.target.value)}
+                      className={`w-full border rounded px-3 py-2 ${internshipFormErrors.description ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
+                      placeholder="Enter internship description"
+                    />
+                    {internshipFormErrors.description && (
+                      <p className="text-red-500 text-xs mt-1">{internshipFormErrors.description}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Stipend Min</label>
+                    <input
+                      type="number"
+                      value={internshipForm.stipendMin}
+                      onChange={e => handleInternshipFormChange('stipendMin', e.target.value)}
+                      className="w-full border rounded px-3 py-2"
+                      placeholder="e.g. 5000"
+                      min="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Stipend Max</label>
+                    <input
+                      type="number"
+                      value={internshipForm.stipendMax}
+                      onChange={e => handleInternshipFormChange('stipendMax', e.target.value)}
+                      className="w-full border rounded px-3 py-2"
+                      placeholder="e.g. 10000"
+                      min="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+                    <input
+                      value={internshipForm.stipendCurrency}
+                      onChange={e => handleInternshipFormChange('stipendCurrency', e.target.value)}
+                      className="w-full border rounded px-3 py-2"
+                      placeholder="INR"
+                      maxLength="3"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Location <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      value={internshipForm.location}
+                      onChange={e => handleInternshipFormChange('location', e.target.value)}
+                      className={`w-full border rounded px-3 py-2 ${internshipFormErrors.location ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
+                      placeholder="Enter location"
+                    />
+                    {internshipFormErrors.location && (
+                      <p className="text-red-500 text-xs mt-1">{internshipFormErrors.location}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
+                    <input
+                      value={internshipForm.duration}
+                      onChange={e => handleInternshipFormChange('duration', e.target.value)}
+                      className="w-full border rounded px-3 py-2"
+                      placeholder="e.g. 3 months"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Work Mode</label>
+                    <select
+                      value={internshipForm.remote}
+                      onChange={e => handleInternshipFormChange('remote', e.target.value)}
+                      className="w-full border rounded px-3 py-2"
+                    >
+                      <option value="on-site">On-site</option>
+                      <option value="hybrid">Hybrid</option>
+                      <option value="remote">Remote</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
+                    <select
+                      value={internshipForm.experienceLevel}
+                      onChange={e => handleInternshipFormChange('experienceLevel', e.target.value)}
+                      className="w-full border rounded px-3 py-2"
+                    >
+                      <option value="entry">Entry</option>
+                      <option value="mid">Mid</option>
+                    </select>
+                  </div>
                 </div>
-              )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Employer <span className="text-red-500">*</span></label>
-                  <select 
-                    value={createInternshipForm.employerId} 
-                    onChange={e=>{setCreateInternshipForm({...createInternshipForm, employerId:e.target.value}); setCreateInternshipFormErrors(prev=>{const n={...prev}; delete n.employerId; return n;})}} 
-                    className={`w-full border rounded px-3 py-2 ${createInternshipFormErrors.employerId ? 'border-red-500' : 'border-gray-300'}`}
+                <div className="mt-6 flex justify-end space-x-2">
+                  <button onClick={() => setShowEditInternship(false)} className="px-4 py-2 border rounded hover:bg-gray-50">Cancel</button>
+                  <button
+                    onClick={saveInternshipEdits}
+                    disabled={Object.keys(internshipFormErrors).length > 0}
+                    className={`px-4 py-2 rounded ${Object.keys(internshipFormErrors).length > 0
+                        ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                      }`}
                   >
-                    <option value="">Select employer</option>
-                    {employerOptions.map(emp => (
-                      <option key={emp._id} value={emp._id}>{emp.companyName || emp.name} ({emp.companyEmail})</option>
-                    ))}
-                  </select>
-                  {createInternshipFormErrors.employerId && <p className="text-red-500 text-xs mt-1">{createInternshipFormErrors.employerId}</p>}
+                    Save & Update
+                  </button>
                 </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Internship Title <span className="text-red-500">*</span></label>
-                  <input 
-                    value={createInternshipForm.title} 
-                    onChange={e=>{setCreateInternshipForm({...createInternshipForm, title:e.target.value}); setCreateInternshipFormErrors(prev=>{const n={...prev}; delete n.title; return n;})}} 
-                    className={`w-full border rounded px-3 py-2 ${createInternshipFormErrors.title ? 'border-red-500' : 'border-gray-300'}`}
-                  />
-                  {createInternshipFormErrors.title && <p className="text-red-500 text-xs mt-1">{createInternshipFormErrors.title}</p>}
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description <span className="text-red-500">*</span></label>
-                  <textarea 
-                    rows="5" 
-                    value={createInternshipForm.description} 
-                    onChange={e=>{setCreateInternshipForm({...createInternshipForm, description:e.target.value}); setCreateInternshipFormErrors(prev=>{const n={...prev}; delete n.description; return n;})}} 
-                    className={`w-full border rounded px-3 py-2 ${createInternshipFormErrors.description ? 'border-red-500' : 'border-gray-300'}`}
-                  />
-                  {createInternshipFormErrors.description && <p className="text-red-500 text-xs mt-1">{createInternshipFormErrors.description}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Stipend Min</label>
-                  <input 
-                    type="number" 
-                    value={createInternshipForm.stipendMin} 
-                    onChange={e=>{setCreateInternshipForm({...createInternshipForm, stipendMin:e.target.value}); setCreateInternshipFormErrors(prev=>{const n={...prev}; delete n.stipendMin; return n;})}} 
-                    className={`w-full border rounded px-3 py-2 ${createInternshipFormErrors.stipendMin ? 'border-red-500' : 'border-gray-300'}`}
-                  />
-                  {createInternshipFormErrors.stipendMin && <p className="text-red-500 text-xs mt-1">{createInternshipFormErrors.stipendMin}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Stipend Max</label>
-                  <input 
-                    type="number" 
-                    value={createInternshipForm.stipendMax} 
-                    onChange={e=>{setCreateInternshipForm({...createInternshipForm, stipendMax:e.target.value}); setCreateInternshipFormErrors(prev=>{const n={...prev}; delete n.stipendMax; return n;})}} 
-                    className={`w-full border rounded px-3 py-2 ${createInternshipFormErrors.stipendMax ? 'border-red-500' : 'border-gray-300'}`}
-                  />
-                  {createInternshipFormErrors.stipendMax && <p className="text-red-500 text-xs mt-1">{createInternshipFormErrors.stipendMax}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
-                  <input 
-                    value={createInternshipForm.stipendCurrency} 
-                    onChange={e=>{setCreateInternshipForm({...createInternshipForm, stipendCurrency:e.target.value}); setCreateInternshipFormErrors(prev=>{const n={...prev}; delete n.stipendCurrency; return n;})}} 
-                    className={`w-full border rounded px-3 py-2 ${createInternshipFormErrors.stipendCurrency ? 'border-red-500' : 'border-gray-300'}`}
-                  />
-                  {createInternshipFormErrors.stipendCurrency && <p className="text-red-500 text-xs mt-1">{createInternshipFormErrors.stipendCurrency}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Location <span className="text-red-500">*</span></label>
-                  <input 
-                    value={createInternshipForm.location} 
-                    onChange={e=>{setCreateInternshipForm({...createInternshipForm, location:e.target.value}); setCreateInternshipFormErrors(prev=>{const n={...prev}; delete n.location; return n;})}} 
-                    className={`w-full border rounded px-3 py-2 ${createInternshipFormErrors.location ? 'border-red-500' : 'border-gray-300'}`}
-                  />
-                  {createInternshipFormErrors.location && <p className="text-red-500 text-xs mt-1">{createInternshipFormErrors.location}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Duration (months)</label>
-                  <input 
-                    value={createInternshipForm.duration} 
-                    onChange={e=>{setCreateInternshipForm({...createInternshipForm, duration:e.target.value}); setCreateInternshipFormErrors(prev=>{const n={...prev}; delete n.duration; return n;})}} 
-                    className={`w-full border rounded px-3 py-2 ${createInternshipFormErrors.duration ? 'border-red-500' : 'border-gray-300'}`}
-                    placeholder="e.g. 3"
-                  />
-                  {createInternshipFormErrors.duration && <p className="text-red-500 text-xs mt-1">{createInternshipFormErrors.duration}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Work Mode</label>
-                  <select value={createInternshipForm.remote} onChange={e=>setCreateInternshipForm({...createInternshipForm, remote:e.target.value})} className="w-full border rounded px-3 py-2">
-                    <option value="on-site">On-site</option>
-                    <option value="hybrid">Hybrid</option>
-                    <option value="remote">Remote</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
-                  <select value={createInternshipForm.experienceLevel} onChange={e=>setCreateInternshipForm({...createInternshipForm, experienceLevel:e.target.value})} className="w-full border rounded px-3 py-2">
-                    <option value="entry">Entry</option>
-                    <option value="mid">Mid</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                  <select value={createInternshipForm.status} onChange={e=>setCreateInternshipForm({...createInternshipForm, status:e.target.value})} className="w-full border rounded px-3 py-2">
-                    <option value="approved">Approved</option>
-                    <option value="pending">Pending</option>
-                  </select>
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Requirements (comma separated)</label>
-                  <input value={createInternshipForm.requirementsCSV} onChange={e=>setCreateInternshipForm({...createInternshipForm, requirementsCSV:e.target.value})} className="w-full border rounded px-3 py-2" placeholder="Requirement 1, Requirement 2" />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Skills (comma separated)</label>
-                  <input value={createInternshipForm.skillsCSV} onChange={e=>setCreateInternshipForm({...createInternshipForm, skillsCSV:e.target.value})} className="w-full border rounded px-3 py-2" placeholder="Skill 1, Skill 2" />
-                </div>
-              </div>
-              <div className="mt-6 flex justify-end space-x-2">
-                <button onClick={() => setShowCreateInternship(false)} className="px-4 py-2 border rounded hover:bg-gray-50">Cancel</button>
-                <button onClick={createInternship} className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Create Internship</button>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Jobs Management */}
-        {activeTab === 'jobs' && (
-          <div className="bg-white rounded-lg shadow-sm">
-            <div className="p-6 border-b">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Jobs Management</h3>
-                <div className="space-x-2">
+          {/* Internship Applications Modal */}
+          {showInternshipApplications && selectedInternshipForApps && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl p-6 max-h-[90vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold">Applications for {selectedInternshipForApps.title}</h3>
+                    <p className="text-sm text-gray-600">{selectedInternshipForApps.companyName}</p>
+                  </div>
+                  <button onClick={() => setShowInternshipApplications(false)} className="text-gray-500 hover:text-gray-700 text-2xl">✕</button>
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-6">
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <div className="text-xs text-gray-500">Total</div>
+                    <div className="text-lg font-semibold">{Object.values(applicationStats).reduce((a, b) => a + b, 0)}</div>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <div className="text-xs text-gray-500">Applied</div>
+                    <div className="text-lg font-semibold text-blue-600">{applicationStats.applied || 0}</div>
+                  </div>
+                  <div className="bg-yellow-50 p-3 rounded-lg">
+                    <div className="text-xs text-gray-500">Reviewed</div>
+                    <div className="text-lg font-semibold text-yellow-600">{applicationStats.reviewed || 0}</div>
+                  </div>
+                  <div className="bg-purple-50 p-3 rounded-lg">
+                    <div className="text-xs text-gray-500">Shortlisted</div>
+                    <div className="text-lg font-semibold text-purple-600">{applicationStats.shortlisted || 0}</div>
+                  </div>
+                  <div className="bg-indigo-50 p-3 rounded-lg">
+                    <div className="text-xs text-gray-500">Interview</div>
+                    <div className="text-lg font-semibold text-indigo-600">{applicationStats.interview || 0}</div>
+                  </div>
+                  <div className="bg-green-50 p-3 rounded-lg">
+                    <div className="text-xs text-gray-500">Selected</div>
+                    <div className="text-lg font-semibold text-green-600">{applicationStats.selected || 0}</div>
+                  </div>
+                  <div className="bg-red-50 p-3 rounded-lg">
+                    <div className="text-xs text-gray-500">Rejected</div>
+                    <div className="text-lg font-semibold text-red-600">{applicationStats.rejected || 0}</div>
+                  </div>
+                </div>
+
+                {/* Filters */}
+                <div className="mb-4">
+                  <select
+                    value={applicationStatusFilter}
+                    onChange={(e) => {
+                      setApplicationStatusFilter(e.target.value);
+                      fetchInternshipApplications(selectedInternshipForApps._id, 1, e.target.value);
+                    }}
+                    className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">All Status</option>
+                    <option value="applied">Applied</option>
+                    <option value="reviewed">Reviewed</option>
+                    <option value="shortlisted">Shortlisted</option>
+                    <option value="interview">Interview</option>
+                    <option value="selected">Selected</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="withdrawn">Withdrawn</option>
+                  </select>
+                </div>
+
+                {/* Applications Table */}
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Candidate</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Skills</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Applied</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {internshipApplications.length === 0 ? (
+                        <tr>
+                          <td colSpan="5" className="px-4 py-8 text-center text-gray-500">
+                            No applications found
+                          </td>
+                        </tr>
+                      ) : (
+                        internshipApplications.map((app) => (
+                          <tr key={app._id} className="hover:bg-gray-50">
+                            <td className="px-4 py-4">
+                              <div className="flex items-center">
+                                <div className="h-10 w-10 flex-shrink-0">
+                                  {app.user?.profilePhoto ? (
+                                    <img className="h-10 w-10 rounded-full" src={app.user.profilePhoto} alt="" />
+                                  ) : (
+                                    <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-semibold">
+                                      {app.user?.name?.charAt(0).toUpperCase()}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="ml-4">
+                                  <div className="font-medium text-gray-900">{app.user?.name || 'N/A'}</div>
+                                  <div className="text-sm text-gray-500">{app.user?.location || 'Location not provided'}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="text-sm text-gray-900">{app.user?.email || 'N/A'}</div>
+                              <div className="text-sm text-gray-500">{app.user?.phone || 'N/A'}</div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <div className="flex flex-wrap gap-1">
+                                {app.user?.skills?.slice(0, 3).map((skill, idx) => (
+                                  <span key={idx} className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
+                                    {skill}
+                                  </span>
+                                ))}
+                                {app.user?.skills?.length > 3 && (
+                                  <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
+                                    +{app.user.skills.length - 3}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <span className={`px-2 py-1 text-xs rounded-full ${app.status === 'applied' ? 'bg-blue-100 text-blue-800' :
+                                  app.status === 'reviewed' ? 'bg-yellow-100 text-yellow-800' :
+                                    app.status === 'shortlisted' ? 'bg-purple-100 text-purple-800' :
+                                      app.status === 'interview' ? 'bg-indigo-100 text-indigo-800' :
+                                        app.status === 'selected' ? 'bg-green-100 text-green-800' :
+                                          app.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                                            'bg-gray-100 text-gray-800'
+                                }`}>
+                                {app.status}
+                              </span>
+                            </td>
+                            <td className="px-4 py-4 text-sm text-gray-500">
+                              {new Date(app.appliedAt).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                {applicationTotalPages > 1 && (
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="text-sm text-gray-600">Page {applicationPage} of {applicationTotalPages}</div>
+                    <div className="space-x-2">
+                      <button
+                        disabled={applicationPage <= 1}
+                        onClick={() => fetchInternshipApplications(selectedInternshipForApps._id, applicationPage - 1, applicationStatusFilter)}
+                        className="px-3 py-1 rounded border disabled:opacity-50"
+                      >
+                        Prev
+                      </button>
+                      <button
+                        disabled={applicationPage >= applicationTotalPages}
+                        onClick={() => fetchInternshipApplications(selectedInternshipForApps._id, applicationPage + 1, applicationStatusFilter)}
+                        className="px-3 py-1 rounded border disabled:opacity-50"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Create Internship Modal */}
+          {showCreateInternship && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Create Internship</h3>
+                  <button onClick={() => setShowCreateInternship(false)} className="text-gray-500 hover:text-gray-700">✕</button>
+                </div>
+                {Object.keys(createInternshipFormErrors).length > 0 && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                    <div className="flex">
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-red-800">Please fix the following errors:</h3>
+                        <div className="mt-2 text-sm text-red-700">
+                          <ul className="list-disc list-inside space-y-1">
+                            {Object.entries(createInternshipFormErrors).map(([field, error]) => (
+                              <li key={field}>{error}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Employer <span className="text-red-500">*</span></label>
+                    <select
+                      value={createInternshipForm.employerId}
+                      onChange={e => { setCreateInternshipForm({ ...createInternshipForm, employerId: e.target.value }); setCreateInternshipFormErrors(prev => { const n = { ...prev }; delete n.employerId; return n; }) }}
+                      className={`w-full border rounded px-3 py-2 ${createInternshipFormErrors.employerId ? 'border-red-500' : 'border-gray-300'}`}
+                    >
+                      <option value="">Select employer</option>
+                      {employerOptions.map(emp => (
+                        <option key={emp._id} value={emp._id}>{emp.companyName || emp.name} ({emp.companyEmail})</option>
+                      ))}
+                    </select>
+                    {createInternshipFormErrors.employerId && <p className="text-red-500 text-xs mt-1">{createInternshipFormErrors.employerId}</p>}
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Internship Title <span className="text-red-500">*</span></label>
+                    <input
+                      value={createInternshipForm.title}
+                      onChange={e => { setCreateInternshipForm({ ...createInternshipForm, title: e.target.value }); setCreateInternshipFormErrors(prev => { const n = { ...prev }; delete n.title; return n; }) }}
+                      className={`w-full border rounded px-3 py-2 ${createInternshipFormErrors.title ? 'border-red-500' : 'border-gray-300'}`}
+                    />
+                    {createInternshipFormErrors.title && <p className="text-red-500 text-xs mt-1">{createInternshipFormErrors.title}</p>}
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Description <span className="text-red-500">*</span></label>
+                    <textarea
+                      rows="5"
+                      value={createInternshipForm.description}
+                      onChange={e => { setCreateInternshipForm({ ...createInternshipForm, description: e.target.value }); setCreateInternshipFormErrors(prev => { const n = { ...prev }; delete n.description; return n; }) }}
+                      className={`w-full border rounded px-3 py-2 ${createInternshipFormErrors.description ? 'border-red-500' : 'border-gray-300'}`}
+                    />
+                    {createInternshipFormErrors.description && <p className="text-red-500 text-xs mt-1">{createInternshipFormErrors.description}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Stipend Min</label>
+                    <input
+                      type="number"
+                      value={createInternshipForm.stipendMin}
+                      onChange={e => { setCreateInternshipForm({ ...createInternshipForm, stipendMin: e.target.value }); setCreateInternshipFormErrors(prev => { const n = { ...prev }; delete n.stipendMin; return n; }) }}
+                      className={`w-full border rounded px-3 py-2 ${createInternshipFormErrors.stipendMin ? 'border-red-500' : 'border-gray-300'}`}
+                    />
+                    {createInternshipFormErrors.stipendMin && <p className="text-red-500 text-xs mt-1">{createInternshipFormErrors.stipendMin}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Stipend Max</label>
+                    <input
+                      type="number"
+                      value={createInternshipForm.stipendMax}
+                      onChange={e => { setCreateInternshipForm({ ...createInternshipForm, stipendMax: e.target.value }); setCreateInternshipFormErrors(prev => { const n = { ...prev }; delete n.stipendMax; return n; }) }}
+                      className={`w-full border rounded px-3 py-2 ${createInternshipFormErrors.stipendMax ? 'border-red-500' : 'border-gray-300'}`}
+                    />
+                    {createInternshipFormErrors.stipendMax && <p className="text-red-500 text-xs mt-1">{createInternshipFormErrors.stipendMax}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+                    <input
+                      value={createInternshipForm.stipendCurrency}
+                      onChange={e => { setCreateInternshipForm({ ...createInternshipForm, stipendCurrency: e.target.value }); setCreateInternshipFormErrors(prev => { const n = { ...prev }; delete n.stipendCurrency; return n; }) }}
+                      className={`w-full border rounded px-3 py-2 ${createInternshipFormErrors.stipendCurrency ? 'border-red-500' : 'border-gray-300'}`}
+                    />
+                    {createInternshipFormErrors.stipendCurrency && <p className="text-red-500 text-xs mt-1">{createInternshipFormErrors.stipendCurrency}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Location <span className="text-red-500">*</span></label>
+                    <input
+                      value={createInternshipForm.location}
+                      onChange={e => { setCreateInternshipForm({ ...createInternshipForm, location: e.target.value }); setCreateInternshipFormErrors(prev => { const n = { ...prev }; delete n.location; return n; }) }}
+                      className={`w-full border rounded px-3 py-2 ${createInternshipFormErrors.location ? 'border-red-500' : 'border-gray-300'}`}
+                    />
+                    {createInternshipFormErrors.location && <p className="text-red-500 text-xs mt-1">{createInternshipFormErrors.location}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Duration (months)</label>
+                    <input
+                      value={createInternshipForm.duration}
+                      onChange={e => { setCreateInternshipForm({ ...createInternshipForm, duration: e.target.value }); setCreateInternshipFormErrors(prev => { const n = { ...prev }; delete n.duration; return n; }) }}
+                      className={`w-full border rounded px-3 py-2 ${createInternshipFormErrors.duration ? 'border-red-500' : 'border-gray-300'}`}
+                      placeholder="e.g. 3"
+                    />
+                    {createInternshipFormErrors.duration && <p className="text-red-500 text-xs mt-1">{createInternshipFormErrors.duration}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Work Mode</label>
+                    <select value={createInternshipForm.remote} onChange={e => setCreateInternshipForm({ ...createInternshipForm, remote: e.target.value })} className="w-full border rounded px-3 py-2">
+                      <option value="on-site">On-site</option>
+                      <option value="hybrid">Hybrid</option>
+                      <option value="remote">Remote</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
+                    <select value={createInternshipForm.experienceLevel} onChange={e => setCreateInternshipForm({ ...createInternshipForm, experienceLevel: e.target.value })} className="w-full border rounded px-3 py-2">
+                      <option value="entry">Entry</option>
+                      <option value="mid">Mid</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select value={createInternshipForm.status} onChange={e => setCreateInternshipForm({ ...createInternshipForm, status: e.target.value })} className="w-full border rounded px-3 py-2">
+                      <option value="approved">Approved</option>
+                      <option value="pending">Pending</option>
+                    </select>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Requirements (comma separated)</label>
+                    <input value={createInternshipForm.requirementsCSV} onChange={e => setCreateInternshipForm({ ...createInternshipForm, requirementsCSV: e.target.value })} className="w-full border rounded px-3 py-2" placeholder="Requirement 1, Requirement 2" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Skills (comma separated)</label>
+                    <input value={createInternshipForm.skillsCSV} onChange={e => setCreateInternshipForm({ ...createInternshipForm, skillsCSV: e.target.value })} className="w-full border rounded px-3 py-2" placeholder="Skill 1, Skill 2" />
+                  </div>
+                </div>
+                <div className="mt-6 flex justify-end space-x-2">
+                  <button onClick={() => setShowCreateInternship(false)} className="px-4 py-2 border rounded hover:bg-gray-50">Cancel</button>
+                  <button onClick={createInternship} className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Create Internship</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Mentors Management */}
+          {activeTab === 'mentors' && (
+            <div className="bg-white rounded-lg shadow-sm">
+              <div className="p-6 border-b">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Mentors Management</h3>
                   <button
-                    onClick={() => fetchJobs(1, searchTerm, filterStatus)}
+                    onClick={fetchMentors}
                     className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
                   >
                     Refresh
                   </button>
-                  <button
-                    onClick={openCreateJobModal}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                  >
-                    + New Job
-                  </button>
                 </div>
               </div>
-              <div className="flex space-x-4">
-                <input
-                  type="text"
-                  placeholder="Search by title or company..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="approved">Approved</option>
-                  <option value="active">Active</option>
-                  <option value="rejected">Rejected</option>
-                </select>
-                <button
-                  onClick={() => fetchJobs(1, searchTerm, filterStatus)}
-                  className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
-                >
-                  Search
-                </button>
-              </div>
-            </div>
 
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posted</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {jobs.map((job) => (
-                    <tr key={job._id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-medium text-gray-900">{job.title}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{job.company}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{job.location}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{job.jobType}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          job.status === 'active' ? 'bg-green-100 text-green-800' :
-                          job.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          job.status === 'approved' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {job.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(job.createdAt).toLocaleDateString()}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                        {job.status === 'pending' && (
-                          <>
-                            <button onClick={() => updateJobStatus(job._id, 'approved')} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Approve</button>
-                            <button onClick={() => updateJobStatus(job._id, 'rejected')} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Reject</button>
-                          </>
-                        )}
-                        {job.status === 'approved' && (
-                          <button onClick={() => updateJobStatus(job._id, 'active')} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">Activate</button>
-                        )}
-                        <button onClick={() => openEditJob(job)} className="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-800">Edit</button>
-                        <button onClick={() => deleteJob(job)} className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600">Delete</button>
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mentor</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="flex items-center justify-between p-4">
-              <div className="text-sm text-gray-600">Page {currentPage} of {totalPages}</div>
-              <div className="space-x-2">
-                <button
-                  disabled={currentPage <= 1}
-                  onClick={() => fetchJobs(currentPage - 1, searchTerm, filterStatus)}
-                  className="px-3 py-1 rounded border disabled:opacity-50"
-                >
-                  Prev
-                </button>
-                <button
-                  disabled={currentPage >= totalPages}
-                  onClick={() => fetchJobs(currentPage + 1, searchTerm, filterStatus)}
-                  className="px-3 py-1 rounded border disabled:opacity-50"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        {/* Edit Job Modal */}
-        {showEditJob && selectedJob && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Edit Job</h3>
-                <button onClick={() => setShowEditJob(false)} className="text-gray-500 hover:text-gray-700">✕</button>
-              </div>
-              {Object.keys(jobFormErrors).length > 0 && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-red-800">Please fix the following errors:</h3>
-                      <div className="mt-2 text-sm text-red-700">
-                        <ul className="list-disc list-inside space-y-1">
-                          {Object.entries(jobFormErrors).map(([field, error]) => (
-                            <li key={field}>{error}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Job Title <span className="text-red-500">*</span>
-                  </label>
-                  <input 
-                    value={jobForm.jobTitle} 
-                    onChange={e => handleJobFormChange('jobTitle', e.target.value)} 
-                    className={`w-full border rounded px-3 py-2 ${jobFormErrors.jobTitle ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
-                    placeholder="Enter job title"
-                    maxLength="100"
-                  />
-                  <div className="flex justify-between items-center mt-1">
-                    {jobFormErrors.jobTitle && (
-                      <p className="text-red-500 text-xs">{jobFormErrors.jobTitle}</p>
-                    )}
-                    <p className={`text-xs ml-auto ${jobForm.jobTitle.length > 90 ? 'text-red-500' : 'text-gray-500'}`}>
-                      {jobForm.jobTitle.length}/100 characters
-                    </p>
-                  </div>
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description <span className="text-red-500">*</span>
-                  </label>
-                  <textarea 
-                    rows="5" 
-                    value={jobForm.description} 
-                    onChange={e => handleJobFormChange('description', e.target.value)} 
-                    className={`w-full border rounded px-3 py-2 ${jobFormErrors.description ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
-                    placeholder="Enter job description"
-                    maxLength="2000"
-                  />
-                  <div className="flex justify-between items-center mt-1">
-                    {jobFormErrors.description && (
-                      <p className="text-red-500 text-xs">{jobFormErrors.description}</p>
-                    )}
-                    <p className={`text-xs ml-auto ${jobForm.description.length > 1800 ? 'text-red-500' : 'text-gray-500'}`}>
-                      {jobForm.description.length}/2000 characters
-                    </p>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Salary Min</label>
-                  <input 
-                    type="number" 
-                    value={jobForm.salaryMin} 
-                    onChange={e => handleJobFormChange('salaryMin', e.target.value)} 
-                    className={`w-full border rounded px-3 py-2 ${jobFormErrors.salaryMin ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
-                    placeholder="e.g. 50000"
-                    min="0"
-                  />
-                  {jobFormErrors.salaryMin && (
-                    <p className="text-red-500 text-xs mt-1">{jobFormErrors.salaryMin}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Salary Max</label>
-                  <input 
-                    type="number" 
-                    value={jobForm.salaryMax} 
-                    onChange={e => handleJobFormChange('salaryMax', e.target.value)} 
-                    className={`w-full border rounded px-3 py-2 ${jobFormErrors.salaryMax ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
-                    placeholder="e.g. 80000"
-                    min="0"
-                  />
-                  {jobFormErrors.salaryMax && (
-                    <p className="text-red-500 text-xs mt-1">{jobFormErrors.salaryMax}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
-                  <input 
-                    value={jobForm.salaryCurrency} 
-                    onChange={e => handleJobFormChange('salaryCurrency', e.target.value)} 
-                    className={`w-full border rounded px-3 py-2 ${jobFormErrors.salaryCurrency ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
-                    placeholder="USD"
-                    maxLength="3"
-                  />
-                  {jobFormErrors.salaryCurrency && (
-                    <p className="text-red-500 text-xs mt-1">{jobFormErrors.salaryCurrency}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Location <span className="text-red-500">*</span>
-                  </label>
-                  <input 
-                    value={jobForm.location} 
-                    onChange={e => handleJobFormChange('location', e.target.value)} 
-                    className={`w-full border rounded px-3 py-2 ${jobFormErrors.location ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
-                    placeholder="Enter job location"
-                    maxLength="100"
-                  />
-                  <div className="flex justify-between items-center mt-1">
-                    {jobFormErrors.location && (
-                      <p className="text-red-500 text-xs">{jobFormErrors.location}</p>
-                    )}
-                    <p className={`text-xs ml-auto ${jobForm.location.length > 90 ? 'text-red-500' : 'text-gray-500'}`}>
-                      {jobForm.location.length}/100 characters
-                    </p>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Employment Type</label>
-                  <select 
-                    value={jobForm.employmentType} 
-                    onChange={e => handleJobFormChange('employmentType', e.target.value)} 
-                    className="w-full border rounded px-3 py-2 border-gray-300 focus:border-blue-500"
-                  >
-                    <option value="full-time">Full-time</option>
-                    <option value="part-time">Part-time</option>
-                    <option value="contract">Contract</option>
-                    <option value="internship">Internship</option>
-                    <option value="freelance">Freelance</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Work Mode</label>
-                  <select 
-                    value={jobForm.remote} 
-                    onChange={e => handleJobFormChange('remote', e.target.value)} 
-                    className="w-full border rounded px-3 py-2 border-gray-300 focus:border-blue-500"
-                  >
-                    <option value="on-site">On-site</option>
-                    <option value="hybrid">Hybrid</option>
-                    <option value="remote">Remote</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
-                  <select 
-                    value={jobForm.experienceLevel} 
-                    onChange={e => handleJobFormChange('experienceLevel', e.target.value)} 
-                    className="w-full border rounded px-3 py-2 border-gray-300 focus:border-blue-500"
-                  >
-                    <option value="entry">Entry</option>
-                    <option value="mid">Mid</option>
-                    <option value="senior">Senior</option>
-                    <option value="executive">Executive</option>
-                  </select>
-                </div>
-              </div>
-              <div className="mt-6 flex justify-end space-x-2">
-                <button onClick={() => setShowEditJob(false)} className="px-4 py-2 border rounded hover:bg-gray-50">Cancel</button>
-                <button 
-                  onClick={saveJobEdits} 
-                  disabled={Object.keys(jobFormErrors).length > 0}
-                  className={`px-4 py-2 rounded ${
-                    Object.keys(jobFormErrors).length > 0 
-                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                >
-                  Save & Update
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Create Job Modal */}
-        {showCreateJob && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Create Job</h3>
-                <button onClick={() => setShowCreateJob(false)} className="text-gray-500 hover:text-gray-700">✕</button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Employer</label>
-                  <select value={createJobForm.employerId} onChange={e=>setCreateJobForm({...createJobForm, employerId:e.target.value})} className="w-full border rounded px-3 py-2">
-                    <option value="">Select employer</option>
-                    {employerOptions.map(emp => (
-                      <option key={emp._id} value={emp._id}>{emp.companyName || emp.name} ({emp.companyEmail})</option>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {mentors.map((mentor) => (
+                      <tr key={mentor._id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="h-10 w-10 flex-shrink-0">
+                              {mentor.photo ? (
+                                <img className="h-10 w-10 rounded-full object-cover" src={mentor.photo} alt="" />
+                              ) : (
+                                <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-semibold">
+                                  {mentor.name.charAt(0).toUpperCase()}
+                                </div>
+                              )}
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">{mentor.name}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{mentor.email}</div>
+                          <div className="text-sm text-gray-500">{mentor.phone}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {mentor.city}, {mentor.country}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 text-xs rounded-full ${mentor.status === 'approved' ? 'bg-green-100 text-green-800' :
+                              mentor.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                                'bg-yellow-100 text-yellow-800'
+                            }`}>
+                            {mentor.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
+                          {mentor.status === 'pending' && (
+                            <>
+                              <button onClick={() => updateMentorStatus(mentor._id, 'approved')} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">Approve</button>
+                              <button onClick={() => updateMentorStatus(mentor._id, 'rejected')} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Reject</button>
+                            </>
+                          )}
+                          {mentor.status === 'approved' && (
+                            <button onClick={() => updateMentorStatus(mentor._id, 'rejected')} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Reject</button>
+                          )}
+                          {mentor.status === 'rejected' && (
+                            <button onClick={() => updateMentorStatus(mentor._id, 'approved')} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">Approve</button>
+                          )}
+                        </td>
+                      </tr>
                     ))}
-                  </select>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Jobs Management */}
+          {activeTab === 'jobs' && (
+            <div className="bg-white rounded-lg shadow-sm">
+              <div className="p-6 border-b">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Jobs Management</h3>
+                  <div className="space-x-2">
+                    <button
+                      onClick={() => fetchJobs(1, searchTerm, filterStatus)}
+                      className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+                    >
+                      Refresh
+                    </button>
+                    <button
+                      onClick={openCreateJobModal}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                    >
+                      + New Job
+                    </button>
+                  </div>
                 </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
-                  <input value={createJobForm.jobTitle} onChange={e=>setCreateJobForm({...createJobForm, jobTitle:e.target.value})} className="w-full border rounded px-3 py-2" />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                  <textarea rows="5" value={createJobForm.description} onChange={e=>setCreateJobForm({...createJobForm, description:e.target.value})} className="w-full border rounded px-3 py-2" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Salary Min</label>
-                  <input type="number" value={createJobForm.salaryMin} onChange={e=>setCreateJobForm({...createJobForm, salaryMin:e.target.value})} className="w-full border rounded px-3 py-2" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Salary Max</label>
-                  <input type="number" value={createJobForm.salaryMax} onChange={e=>setCreateJobForm({...createJobForm, salaryMax:e.target.value})} className="w-full border rounded px-3 py-2" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
-                  <input value={createJobForm.salaryCurrency} onChange={e=>setCreateJobForm({...createJobForm, salaryCurrency:e.target.value})} className="w-full border rounded px-3 py-2" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                  <input value={createJobForm.location} onChange={e=>setCreateJobForm({...createJobForm, location:e.target.value})} className="w-full border rounded px-3 py-2" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Employment Type</label>
-                  <select value={createJobForm.employmentType} onChange={e=>setCreateJobForm({...createJobForm, employmentType:e.target.value})} className="w-full border rounded px-3 py-2">
-                    <option value="full-time">Full-time</option>
-                    <option value="part-time">Part-time</option>
-                    <option value="contract">Contract</option>
-                    <option value="internship">Internship</option>
-                    <option value="freelance">Freelance</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Work Mode</label>
-                  <select value={createJobForm.remote} onChange={e=>setCreateJobForm({...createJobForm, remote:e.target.value})} className="w-full border rounded px-3 py-2">
-                    <option value="on-site">On-site</option>
-                    <option value="hybrid">Hybrid</option>
-                    <option value="remote">Remote</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
-                  <select value={createJobForm.experienceLevel} onChange={e=>setCreateJobForm({...createJobForm, experienceLevel:e.target.value})} className="w-full border rounded px-3 py-2">
-                    <option value="entry">Entry</option>
-                    <option value="mid">Mid</option>
-                    <option value="senior">Senior</option>
-                    <option value="executive">Executive</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                  <select value={createJobForm.status} onChange={e=>setCreateJobForm({...createJobForm, status:e.target.value})} className="w-full border rounded px-3 py-2">
-                    <option value="approved">Approved</option>
+                <div className="flex space-x-4">
+                  <input
+                    type="text"
+                    placeholder="Search by title or company..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">All Status</option>
                     <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
                     <option value="active">Active</option>
                     <option value="rejected">Rejected</option>
                   </select>
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Requirements (comma separated)</label>
-                  <input value={createJobForm.requirementsCSV} onChange={e=>setCreateJobForm({...createJobForm, requirementsCSV:e.target.value})} className="w-full border rounded px-3 py-2" />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Benefits (comma separated)</label>
-                  <input value={createJobForm.benefitsCSV} onChange={e=>setCreateJobForm({...createJobForm, benefitsCSV:e.target.value})} className="w-full border rounded px-3 py-2" />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Skills (comma separated)</label>
-                  <input value={createJobForm.skillsCSV} onChange={e=>setCreateJobForm({...createJobForm, skillsCSV:e.target.value})} className="w-full border rounded px-3 py-2" />
+                  <button
+                    onClick={() => fetchJobs(1, searchTerm, filterStatus)}
+                    className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+                  >
+                    Search
+                  </button>
                 </div>
               </div>
-              <div className="mt-6 flex justify-end space-x-2">
-                <button onClick={() => setShowCreateJob(false)} className="px-4 py-2 border rounded">Cancel</button>
-                <button onClick={createJob} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Create Job</button>
+
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posted</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {jobs.map((job) => (
+                      <tr key={job._id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="font-medium text-gray-900">{job.title}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{job.company}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{job.location}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{job.jobType}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 text-xs rounded-full ${job.status === 'active' ? 'bg-green-100 text-green-800' :
+                              job.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                job.status === 'approved' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                            {job.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(job.createdAt).toLocaleDateString()}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
+                          {job.status === 'pending' && (
+                            <>
+                              <button onClick={() => updateJobStatus(job._id, 'approved')} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Approve</button>
+                              <button onClick={() => updateJobStatus(job._id, 'rejected')} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Reject</button>
+                            </>
+                          )}
+                          {job.status === 'approved' && (
+                            <button onClick={() => updateJobStatus(job._id, 'active')} className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">Activate</button>
+                          )}
+                          <button onClick={() => openEditJob(job)} className="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-800">Edit</button>
+                          <button onClick={() => deleteJob(job)} className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600">Delete</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="flex items-center justify-between p-4">
+                <div className="text-sm text-gray-600">Page {currentPage} of {totalPages}</div>
+                <div className="space-x-2">
+                  <button
+                    disabled={currentPage <= 1}
+                    onClick={() => fetchJobs(currentPage - 1, searchTerm, filterStatus)}
+                    className="px-3 py-1 rounded border disabled:opacity-50"
+                  >
+                    Prev
+                  </button>
+                  <button
+                    disabled={currentPage >= totalPages}
+                    onClick={() => fetchJobs(currentPage + 1, searchTerm, filterStatus)}
+                    className="px-3 py-1 rounded border disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-        {/* Add pagination controls */}
+          )}
+          {/* Edit Job Modal */}
+          {showEditJob && selectedJob && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Edit Job</h3>
+                  <button onClick={() => setShowEditJob(false)} className="text-gray-500 hover:text-gray-700">✕</button>
+                </div>
+                {Object.keys(jobFormErrors).length > 0 && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-red-800">Please fix the following errors:</h3>
+                        <div className="mt-2 text-sm text-red-700">
+                          <ul className="list-disc list-inside space-y-1">
+                            {Object.entries(jobFormErrors).map(([field, error]) => (
+                              <li key={field}>{error}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Job Title <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      value={jobForm.jobTitle}
+                      onChange={e => handleJobFormChange('jobTitle', e.target.value)}
+                      className={`w-full border rounded px-3 py-2 ${jobFormErrors.jobTitle ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
+                      placeholder="Enter job title"
+                      maxLength="100"
+                    />
+                    <div className="flex justify-between items-center mt-1">
+                      {jobFormErrors.jobTitle && (
+                        <p className="text-red-500 text-xs">{jobFormErrors.jobTitle}</p>
+                      )}
+                      <p className={`text-xs ml-auto ${jobForm.jobTitle.length > 90 ? 'text-red-500' : 'text-gray-500'}`}>
+                        {jobForm.jobTitle.length}/100 characters
+                      </p>
+                    </div>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Description <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      rows="5"
+                      value={jobForm.description}
+                      onChange={e => handleJobFormChange('description', e.target.value)}
+                      className={`w-full border rounded px-3 py-2 ${jobFormErrors.description ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
+                      placeholder="Enter job description"
+                      maxLength="2000"
+                    />
+                    <div className="flex justify-between items-center mt-1">
+                      {jobFormErrors.description && (
+                        <p className="text-red-500 text-xs">{jobFormErrors.description}</p>
+                      )}
+                      <p className={`text-xs ml-auto ${jobForm.description.length > 1800 ? 'text-red-500' : 'text-gray-500'}`}>
+                        {jobForm.description.length}/2000 characters
+                      </p>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Salary Min</label>
+                    <input
+                      type="number"
+                      value={jobForm.salaryMin}
+                      onChange={e => handleJobFormChange('salaryMin', e.target.value)}
+                      className={`w-full border rounded px-3 py-2 ${jobFormErrors.salaryMin ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
+                      placeholder="e.g. 50000"
+                      min="0"
+                    />
+                    {jobFormErrors.salaryMin && (
+                      <p className="text-red-500 text-xs mt-1">{jobFormErrors.salaryMin}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Salary Max</label>
+                    <input
+                      type="number"
+                      value={jobForm.salaryMax}
+                      onChange={e => handleJobFormChange('salaryMax', e.target.value)}
+                      className={`w-full border rounded px-3 py-2 ${jobFormErrors.salaryMax ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
+                      placeholder="e.g. 80000"
+                      min="0"
+                    />
+                    {jobFormErrors.salaryMax && (
+                      <p className="text-red-500 text-xs mt-1">{jobFormErrors.salaryMax}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+                    <input
+                      value={jobForm.salaryCurrency}
+                      onChange={e => handleJobFormChange('salaryCurrency', e.target.value)}
+                      className={`w-full border rounded px-3 py-2 ${jobFormErrors.salaryCurrency ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
+                      placeholder="USD"
+                      maxLength="3"
+                    />
+                    {jobFormErrors.salaryCurrency && (
+                      <p className="text-red-500 text-xs mt-1">{jobFormErrors.salaryCurrency}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Location <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      value={jobForm.location}
+                      onChange={e => handleJobFormChange('location', e.target.value)}
+                      className={`w-full border rounded px-3 py-2 ${jobFormErrors.location ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
+                      placeholder="Enter job location"
+                      maxLength="100"
+                    />
+                    <div className="flex justify-between items-center mt-1">
+                      {jobFormErrors.location && (
+                        <p className="text-red-500 text-xs">{jobFormErrors.location}</p>
+                      )}
+                      <p className={`text-xs ml-auto ${jobForm.location.length > 90 ? 'text-red-500' : 'text-gray-500'}`}>
+                        {jobForm.location.length}/100 characters
+                      </p>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Employment Type</label>
+                    <select
+                      value={jobForm.employmentType}
+                      onChange={e => handleJobFormChange('employmentType', e.target.value)}
+                      className="w-full border rounded px-3 py-2 border-gray-300 focus:border-blue-500"
+                    >
+                      <option value="full-time">Full-time</option>
+                      <option value="part-time">Part-time</option>
+                      <option value="contract">Contract</option>
+                      <option value="internship">Internship</option>
+                      <option value="freelance">Freelance</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Work Mode</label>
+                    <select
+                      value={jobForm.remote}
+                      onChange={e => handleJobFormChange('remote', e.target.value)}
+                      className="w-full border rounded px-3 py-2 border-gray-300 focus:border-blue-500"
+                    >
+                      <option value="on-site">On-site</option>
+                      <option value="hybrid">Hybrid</option>
+                      <option value="remote">Remote</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
+                    <select
+                      value={jobForm.experienceLevel}
+                      onChange={e => handleJobFormChange('experienceLevel', e.target.value)}
+                      className="w-full border rounded px-3 py-2 border-gray-300 focus:border-blue-500"
+                    >
+                      <option value="entry">Entry</option>
+                      <option value="mid">Mid</option>
+                      <option value="senior">Senior</option>
+                      <option value="executive">Executive</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="mt-6 flex justify-end space-x-2">
+                  <button onClick={() => setShowEditJob(false)} className="px-4 py-2 border rounded hover:bg-gray-50">Cancel</button>
+                  <button
+                    onClick={saveJobEdits}
+                    disabled={Object.keys(jobFormErrors).length > 0}
+                    className={`px-4 py-2 rounded ${Object.keys(jobFormErrors).length > 0
+                        ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                      }`}
+                  >
+                    Save & Update
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Create Job Modal */}
+          {showCreateJob && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Create Job</h3>
+                  <button onClick={() => setShowCreateJob(false)} className="text-gray-500 hover:text-gray-700">✕</button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Employer</label>
+                    <select value={createJobForm.employerId} onChange={e => setCreateJobForm({ ...createJobForm, employerId: e.target.value })} className="w-full border rounded px-3 py-2">
+                      <option value="">Select employer</option>
+                      {employerOptions.map(emp => (
+                        <option key={emp._id} value={emp._id}>{emp.companyName || emp.name} ({emp.companyEmail})</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
+                    <input value={createJobForm.jobTitle} onChange={e => setCreateJobForm({ ...createJobForm, jobTitle: e.target.value })} className="w-full border rounded px-3 py-2" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea rows="5" value={createJobForm.description} onChange={e => setCreateJobForm({ ...createJobForm, description: e.target.value })} className="w-full border rounded px-3 py-2" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Salary Min</label>
+                    <input type="number" value={createJobForm.salaryMin} onChange={e => setCreateJobForm({ ...createJobForm, salaryMin: e.target.value })} className="w-full border rounded px-3 py-2" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Salary Max</label>
+                    <input type="number" value={createJobForm.salaryMax} onChange={e => setCreateJobForm({ ...createJobForm, salaryMax: e.target.value })} className="w-full border rounded px-3 py-2" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+                    <input value={createJobForm.salaryCurrency} onChange={e => setCreateJobForm({ ...createJobForm, salaryCurrency: e.target.value })} className="w-full border rounded px-3 py-2" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                    <input value={createJobForm.location} onChange={e => setCreateJobForm({ ...createJobForm, location: e.target.value })} className="w-full border rounded px-3 py-2" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Employment Type</label>
+                    <select value={createJobForm.employmentType} onChange={e => setCreateJobForm({ ...createJobForm, employmentType: e.target.value })} className="w-full border rounded px-3 py-2">
+                      <option value="full-time">Full-time</option>
+                      <option value="part-time">Part-time</option>
+                      <option value="contract">Contract</option>
+                      <option value="internship">Internship</option>
+                      <option value="freelance">Freelance</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Work Mode</label>
+                    <select value={createJobForm.remote} onChange={e => setCreateJobForm({ ...createJobForm, remote: e.target.value })} className="w-full border rounded px-3 py-2">
+                      <option value="on-site">On-site</option>
+                      <option value="hybrid">Hybrid</option>
+                      <option value="remote">Remote</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
+                    <select value={createJobForm.experienceLevel} onChange={e => setCreateJobForm({ ...createJobForm, experienceLevel: e.target.value })} className="w-full border rounded px-3 py-2">
+                      <option value="entry">Entry</option>
+                      <option value="mid">Mid</option>
+                      <option value="senior">Senior</option>
+                      <option value="executive">Executive</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select value={createJobForm.status} onChange={e => setCreateJobForm({ ...createJobForm, status: e.target.value })} className="w-full border rounded px-3 py-2">
+                      <option value="approved">Approved</option>
+                      <option value="pending">Pending</option>
+                      <option value="active">Active</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Requirements (comma separated)</label>
+                    <input value={createJobForm.requirementsCSV} onChange={e => setCreateJobForm({ ...createJobForm, requirementsCSV: e.target.value })} className="w-full border rounded px-3 py-2" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Benefits (comma separated)</label>
+                    <input value={createJobForm.benefitsCSV} onChange={e => setCreateJobForm({ ...createJobForm, benefitsCSV: e.target.value })} className="w-full border rounded px-3 py-2" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Skills (comma separated)</label>
+                    <input value={createJobForm.skillsCSV} onChange={e => setCreateJobForm({ ...createJobForm, skillsCSV: e.target.value })} className="w-full border rounded px-3 py-2" />
+                  </div>
+                </div>
+                <div className="mt-6 flex justify-end space-x-2">
+                  <button onClick={() => setShowCreateJob(false)} className="px-4 py-2 border rounded">Cancel</button>
+                  <button onClick={createJob} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Create Job</button>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Add pagination controls */}
         </main>
       </div>
 
@@ -4938,7 +5054,7 @@ const AdminDashboard = () => {
                 ×
               </button>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Payment Information */}
               <div className="space-y-4">
@@ -5030,9 +5146,8 @@ const AdminDashboard = () => {
                   <div className="space-y-3">
                     <div>
                       <div className="text-sm text-gray-500">Subscription Status</div>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        selectedPayment.subscription.status === 'active' ? 'text-green-600 bg-green-100' : 'text-gray-600 bg-gray-100'
-                      }`}>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${selectedPayment.subscription.status === 'active' ? 'text-green-600 bg-green-100' : 'text-gray-600 bg-gray-100'
+                        }`}>
                         {selectedPayment.subscription.status}
                       </span>
                     </div>
@@ -5113,8 +5228,8 @@ const AdminDashboard = () => {
 
             {/* Filters */}
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-              <select 
-                value={productPurchaseStatus} 
+              <select
+                value={productPurchaseStatus}
                 onChange={(e) => setProductPurchaseStatus(e.target.value)}
                 className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
@@ -5127,8 +5242,8 @@ const AdminDashboard = () => {
                 <option value="cancelled">Cancelled</option>
                 <option value="refunded">Refunded</option>
               </select>
-              <select 
-                value={productPurchasePaymentStatus} 
+              <select
+                value={productPurchasePaymentStatus}
                 onChange={(e) => setProductPurchasePaymentStatus(e.target.value)}
                 className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
@@ -5138,21 +5253,21 @@ const AdminDashboard = () => {
                 <option value="failed">Failed</option>
                 <option value="refunded">Refunded</option>
               </select>
-              <input 
-                type="date" 
-                value={productPurchaseStartDate} 
+              <input
+                type="date"
+                value={productPurchaseStartDate}
                 onChange={(e) => setProductPurchaseStartDate(e.target.value)}
                 placeholder="Start Date"
                 className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <input 
-                type="date" 
-                value={productPurchaseEndDate} 
+              <input
+                type="date"
+                value={productPurchaseEndDate}
                 onChange={(e) => setProductPurchaseEndDate(e.target.value)}
                 placeholder="End Date"
                 className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <button 
+              <button
                 onClick={() => fetchProductPurchases(selectedProduct._id, 1, productPurchaseStatus, productPurchasePaymentStatus, productPurchaseStartDate, productPurchaseEndDate)}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
               >
@@ -5181,7 +5296,7 @@ const AdminDashboard = () => {
                     const customer = order.user || order.employer;
                     const customerName = order.user ? customer.name : customer.companyName;
                     const customerEmail = order.user ? customer.email : customer.companyEmail;
-                    
+
                     return (
                       <tr key={order._id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -5201,23 +5316,21 @@ const AdminDashboard = () => {
                           {order.currency} {productItem?.totalPrice?.toFixed(2) || '0.00'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 text-xs rounded-full ${
-                            order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                            order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
-                            order.status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
-                            order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
+                          <span className={`px-2 py-1 text-xs rounded-full ${order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                              order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                                order.status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
+                                  order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                                    'bg-gray-100 text-gray-800'
+                            }`}>
                             {order.status}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 text-xs rounded-full ${
-                            order.paymentInfo?.status === 'paid' ? 'bg-green-100 text-green-800' :
-                            order.paymentInfo?.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                            order.paymentInfo?.status === 'failed' ? 'bg-red-100 text-red-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
+                          <span className={`px-2 py-1 text-xs rounded-full ${order.paymentInfo?.status === 'paid' ? 'bg-green-100 text-green-800' :
+                              order.paymentInfo?.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                order.paymentInfo?.status === 'failed' ? 'bg-red-100 text-red-800' :
+                                  'bg-gray-100 text-gray-800'
+                            }`}>
                             {order.paymentInfo?.status || 'Unknown'}
                           </span>
                         </td>
@@ -5238,14 +5351,14 @@ const AdminDashboard = () => {
                   Page {productPurchasePage} of {productPurchaseTotalPages}
                 </div>
                 <div className="flex space-x-2">
-                  <button 
+                  <button
                     onClick={() => fetchProductPurchases(selectedProduct._id, productPurchasePage - 1, productPurchaseStatus, productPurchasePaymentStatus, productPurchaseStartDate, productPurchaseEndDate)}
                     disabled={productPurchasePage === 1}
                     className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Previous
                   </button>
-                  <button 
+                  <button
                     onClick={() => fetchProductPurchases(selectedProduct._id, productPurchasePage + 1, productPurchaseStatus, productPurchasePaymentStatus, productPurchaseStartDate, productPurchaseEndDate)}
                     disabled={productPurchasePage === productPurchaseTotalPages}
                     className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"

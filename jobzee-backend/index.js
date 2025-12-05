@@ -22,7 +22,7 @@ app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    
+
     // Allow localhost, configured frontend URL, and Render domains
     if (allowedOrigins.indexOf(origin) !== -1 || origin.includes('onrender.com')) {
       callback(null, true);
@@ -78,6 +78,7 @@ const internshipApplicationRoutes = require('./routes/internshipApplicationRoute
 const recommendationRoutes = require('./routes/recommendationRoutes');
 const predictionRoutes = require('./routes/predictionRoutes');
 const screeningRoutes = require('./routes/screeningRoutes');
+const mentorRoutes = require('./routes/mentorRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/employers', employerRoutes);
@@ -106,6 +107,7 @@ app.use('/api/internship-applications', internshipApplicationRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/predictions', predictionRoutes);
 app.use('/api/screening', screeningRoutes);
+app.use('/api/mentors', mentorRoutes);
 
 // Debug endpoint to test frontend connectivity
 app.get('/api/debug', (req, res) => {
@@ -142,7 +144,7 @@ app.get('/api/health', async (req, res) => {
       2: 'connecting',
       3: 'disconnecting'
     };
-    
+
     let dbPing = 'Unknown';
     try {
       if (mongoose.connection.readyState === 1) {
@@ -152,7 +154,7 @@ app.get('/api/health', async (req, res) => {
     } catch (pingError) {
       dbPing = 'Failed';
     }
-    
+
     res.json({
       status: 'OK',
       timestamp: new Date().toISOString(),
@@ -200,7 +202,7 @@ app.use((err, req, res, next) => {
     method: req.method,
     timestamp: new Date().toISOString()
   });
-  
+
   if (!res.headersSent) {
     res.status(500).json({
       success: false,
@@ -213,8 +215,8 @@ app.use((err, req, res, next) => {
 // ====================
 // MongoDB Connection
 // ====================
-const mongoUri = process.env.MONGODB_URI?.includes('mongodb+srv') 
-  ? process.env.MONGODB_URI 
+const mongoUri = process.env.MONGODB_URI?.includes('mongodb+srv')
+  ? process.env.MONGODB_URI
   : process.env.MONGO_URI;
 
 console.log('Attempting to connect to MongoDB...');
