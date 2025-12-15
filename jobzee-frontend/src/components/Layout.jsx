@@ -5,20 +5,21 @@ import Footer from './Footer';
 
 const Layout = ({ children }) => {
   const location = useLocation();
-  
+
   // Hide global navbar/footer on admin and app dashboards
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const isMentorRoute = location.pathname.startsWith('/mentor/dashboard');
   const hiddenNavbarRoutes = ['/dashboard', '/employer/dashboard', '/participate', '/profile', '/user-profile', '/payments', '/my-tickets', '/my-events'];
   const isEventDetailsRoute = location.pathname.startsWith('/events/') && location.pathname !== '/events';
-  const shouldHideNavbar = isAdminRoute || hiddenNavbarRoutes.includes(location.pathname) || isEventDetailsRoute;
-  
+  const shouldHideNavbar = isAdminRoute || isMentorRoute || hiddenNavbarRoutes.includes(location.pathname) || isEventDetailsRoute;
+
   return (
     <div className="min-h-screen flex flex-col">
       {!shouldHideNavbar && <Navbar />}
       <main className="flex-grow">
         {children}
       </main>
-      {!isAdminRoute && <Footer />}
+      {!isAdminRoute && !isMentorRoute && <Footer />}
     </div>
   );
 };

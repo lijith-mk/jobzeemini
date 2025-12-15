@@ -13,6 +13,7 @@ const MentorRegister = () => {
         country: '',
         city: ''
     });
+    const [errors, setErrors] = useState({});
     const [photo, setPhoto] = useState(null);
     const [photoPreview, setPhotoPreview] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -22,8 +23,54 @@ const MentorRegister = () => {
         setAnimate(true);
     }, []);
 
+    const validateField = (name, value) => {
+        let error = '';
+        switch (name) {
+            case 'name':
+                if (!value.trim()) error = 'Full name is required';
+                else if (value.length < 3) error = 'Name must be at least 3 characters';
+                break;
+            case 'email':
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!value.trim()) error = 'Email is required';
+                else if (!emailRegex.test(value)) error = 'Invalid email format';
+                break;
+            case 'phone':
+                // Indian phone number validation
+                const phoneRegex = /^(\+91[\-\s]?)?[6789]\d{9}$/;
+                if (!value.trim()) error = 'Phone number is required';
+                else if (!phoneRegex.test(value)) error = 'Enter a valid Indian phone number';
+                break;
+            case 'password':
+                if (!value) error = 'Password is required';
+                else if (value.length < 6) error = 'Password must be at least 6 characters';
+                break;
+            case 'country':
+                if (!value.trim()) error = 'Country is required';
+                break;
+            case 'city':
+                if (!value.trim()) error = 'City is required';
+                break;
+            default:
+                break;
+        }
+        return error;
+    };
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+        // Optional: clear error on change if desired, but sticking to onFocus as requested/implied
+    };
+
+    const handleBlur = (e) => {
+        const { name, value } = e.target;
+        const error = validateField(name, value);
+        setErrors(prev => ({ ...prev, [name]: error }));
+    };
+
+    const handleFocus = (e) => {
+        const { name } = e.target;
+        setErrors(prev => ({ ...prev, [name]: '' }));
     };
 
     const handlePhotoChange = (e) => {
@@ -36,6 +83,20 @@ const MentorRegister = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validate all fields
+        const newErrors = {};
+        Object.keys(formData).forEach(key => {
+            const error = validateField(key, formData[key]);
+            if (error) newErrors[key] = error;
+        });
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            toast.error('Please fix the errors in the form');
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -54,7 +115,7 @@ const MentorRegister = () => {
 
             if (response.ok) {
                 toast.success(result.message);
-                navigate('/login');
+                navigate('/mentor/login');
             } else {
                 toast.error(result.message || 'Registration failed');
             }
@@ -122,7 +183,7 @@ const MentorRegister = () => {
                         <p className="text-slate-500 mt-2">Start your mentorship journey today</p>
                     </div>
 
-                    <form className="space-y-5" onSubmit={handleSubmit}>
+                    <form className="space-y-5" onSubmit={handleSubmit} noValidate>
                         {/* Photo Upload - Premium Style */}
                         <div className="flex justify-center mb-8">
                             <div className="relative group cursor-pointer">
@@ -154,12 +215,14 @@ const MentorRegister = () => {
                                     <input
                                         name="name"
                                         type="text"
-                                        required
-                                        className="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all group-hover:border-slate-300"
+                                        className={`w-full px-4 py-3.5 rounded-xl bg-slate-50 border ${errors.name ? 'border-red-500' : 'border-slate-200'} text-slate-900 placeholder-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all group-hover:border-slate-300`}
                                         placeholder="John Doe"
                                         value={formData.name}
                                         onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        onFocus={handleFocus}
                                     />
+                                    {errors.name && <p className="text-red-500 text-xs mt-1 ml-1">{errors.name}</p>}
                                 </div>
                             </div>
 
@@ -169,12 +232,14 @@ const MentorRegister = () => {
                                     <input
                                         name="email"
                                         type="email"
-                                        required
-                                        className="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all group-hover:border-slate-300"
+                                        className={`w-full px-4 py-3.5 rounded-xl bg-slate-50 border ${errors.email ? 'border-red-500' : 'border-slate-200'} text-slate-900 placeholder-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all group-hover:border-slate-300`}
                                         placeholder="john@example.com"
                                         value={formData.email}
                                         onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        onFocus={handleFocus}
                                     />
+                                    {errors.email && <p className="text-red-500 text-xs mt-1 ml-1">{errors.email}</p>}
                                 </div>
                             </div>
 
@@ -184,24 +249,28 @@ const MentorRegister = () => {
                                     <input
                                         name="phone"
                                         type="tel"
-                                        required
-                                        className="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all"
-                                        placeholder="+1 234 567 890"
+                                        className={`w-full px-4 py-3.5 rounded-xl bg-slate-50 border ${errors.phone ? 'border-red-500' : 'border-slate-200'} text-slate-900 placeholder-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all`}
+                                        placeholder="+91 98765 43210"
                                         value={formData.phone}
                                         onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        onFocus={handleFocus}
                                     />
+                                    {errors.phone && <p className="text-red-500 text-xs mt-1 ml-1">{errors.phone}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-1.5 ml-1">Password</label>
                                     <input
                                         name="password"
                                         type="password"
-                                        required
-                                        className="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all"
+                                        className={`w-full px-4 py-3.5 rounded-xl bg-slate-50 border ${errors.password ? 'border-red-500' : 'border-slate-200'} text-slate-900 placeholder-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all`}
                                         placeholder="••••••••"
                                         value={formData.password}
                                         onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        onFocus={handleFocus}
                                     />
+                                    {errors.password && <p className="text-red-500 text-xs mt-1 ml-1">{errors.password}</p>}
                                 </div>
                             </div>
 
@@ -211,24 +280,28 @@ const MentorRegister = () => {
                                     <input
                                         name="country"
                                         type="text"
-                                        required
-                                        className="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all"
-                                        placeholder="USA"
+                                        className={`w-full px-4 py-3.5 rounded-xl bg-slate-50 border ${errors.country ? 'border-red-500' : 'border-slate-200'} text-slate-900 placeholder-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all`}
+                                        placeholder="India"
                                         value={formData.country}
                                         onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        onFocus={handleFocus}
                                     />
+                                    {errors.country && <p className="text-red-500 text-xs mt-1 ml-1">{errors.country}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-1.5 ml-1">City</label>
                                     <input
                                         name="city"
                                         type="text"
-                                        required
-                                        className="w-full px-4 py-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all"
-                                        placeholder="New York"
+                                        className={`w-full px-4 py-3.5 rounded-xl bg-slate-50 border ${errors.city ? 'border-red-500' : 'border-slate-200'} text-slate-900 placeholder-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all`}
+                                        placeholder="Mumbai"
                                         value={formData.city}
                                         onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        onFocus={handleFocus}
                                     />
+                                    {errors.city && <p className="text-red-500 text-xs mt-1 ml-1">{errors.city}</p>}
                                 </div>
                             </div>
                         </div>
@@ -246,10 +319,30 @@ const MentorRegister = () => {
                             ) : 'Complete Registration'}
                         </button>
 
+                        <div className="mt-6">
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-gray-300"></div>
+                                </div>
+                                <div className="relative flex justify-center text-sm">
+                                    <span className="px-2 bg-white text-gray-500">Already have an account?</span>
+                                </div>
+                            </div>
+
+                            <div className="mt-6">
+                                <Link 
+                                    to="/mentor/login" 
+                                    className="w-full flex justify-center py-3 px-4 border border-purple-600 rounded-xl shadow-sm text-sm font-medium text-purple-600 bg-white hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+                                >
+                                    Sign in as Mentor
+                                </Link>
+                            </div>
+                        </div>
+
                         <p className="text-center text-slate-500 text-sm mt-6">
-                            Already a mentor?{' '}
-                            <Link to="/login" className="text-purple-600 font-semibold hover:text-purple-700 hover:underline transition-colors">
-                                Sign in here
+                            Not a mentor yet?{' '}
+                            <Link to="/mentor/register" className="text-purple-600 font-semibold hover:text-purple-700 hover:underline transition-colors">
+                                Register here
                             </Link>
                         </p>
                     </form>

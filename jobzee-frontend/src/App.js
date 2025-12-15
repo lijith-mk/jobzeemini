@@ -64,6 +64,8 @@ import InternshipDetails from "./pages/InternshipDetails";
 import InternshipApplications from "./pages/InternshipApplications";
 import MyInternshipApplications from "./pages/MyInternshipApplications";
 import MentorRegister from "./pages/MentorRegister";
+import MentorLogin from "./pages/MentorLogin";
+import MentorDashboard from "./pages/MentorDashboard";
 
 function App() {
   // Initialize session manager and handle auto-logout
@@ -139,6 +141,8 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/mentor/register" element={<MentorRegister />} />
+            <Route path="/mentor/login" element={<MentorLogin />} />
+            <Route path="/mentor/dashboard" element={<MentorDashboard />} />
 
             {/* Employer Routes */}
             <Route path="/employer/register" element={<EmployerRegister />} />
